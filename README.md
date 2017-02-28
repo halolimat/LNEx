@@ -1,18 +1,43 @@
-# LNEx: Location Name Extractor
+# LNEx: Location Name Extractor #
 
 LNEx extracts location names from targeted text streams. 
 
+---
+
+## Citing ##
+
+If you do make use of LNEx or any of its components please cite the following publication:
+
+    @inproceedings{halolimatLNEx17,
+      title={ Location Name Extraction from Targeted Text Streams using 
+              a Gazetteer-based Statistical Language Model. },
+      author={ Al-Olimat, Hussein S. and Thirunarayan, Krishnaprasad 
+               and Shalin, Valerie and Sheth, Amit},
+      booktitle={IJCAI},
+      volume={7},
+      pages={2733--2739},
+      year={2017}
+    }
+    
+We would also be very happy if you link to our project page:
+
+    ... location name extractor tool (LNEx)\footnote{
+        \url{https://github.com/halolimat/LNEx}
+    }
+
+---
+
 Following the steps which allows you to setup and start using LNEx.
 
-### Querying OpenStreetMap Gazetteers
+## Querying OpenStreetMap Gazetteers  ##
+
 We will be using a ready to go elastic index of the whole [OpenStreetMap](http://www.osm.org) data provided by [komoot](http://www.komoot.de) as part of their [photon](https://photon.komoot.de/) open source geocoder ([project repo](https://github.com/komoot/photon)).
  - Download the full photon elastic index which is going to allow us to query OSM using a bounding box
    - wget -O - http://download1.graphhopper.com/public/photon-db-latest.tar.bz2 | bzip2 -cd | tar x
  - Now, start photon which starts the elastic index in the background
    - java -jar photon-0.2.7.jar
 
-
-### Using LNEx
+## Using LNEx ##
 
  - Clone this repository to your machine as follows:
    - clone https://github.com/halolimat/LNEx.git
