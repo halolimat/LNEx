@@ -4,29 +4,6 @@ LNEx extracts location names from targeted text streams.
 
 ---
 
-## Citing ##
-
-If you do make use of LNEx or any of its components please cite the following publication:
-
-    @inproceedings{halolimatLNEx17,
-      title={ Location Name Extraction from Targeted Text Streams using 
-              a Gazetteer-based Statistical Language Model. },
-      author={ Al-Olimat, Hussein S. and Thirunarayan, Krishnaprasad 
-               and Shalin, Valerie and Sheth, Amit},
-      booktitle={IJCAI},
-      volume={7},
-      pages={2733--2739},
-      year={2017}
-    }
-    
-We would also be very happy if you link to our project page:
-
-    ... location name extractor tool (LNEx)\footnote{
-        \url{https://github.com/halolimat/LNEx}
-    }
-
----
-
 Following the steps which allows you to setup and start using LNEx.
 
 ## Querying OpenStreetMap Gazetteers  ##
@@ -61,3 +38,25 @@ We will be using a ready to go elastic index of the whole [OpenStreetMap](http:/
     for tweet in tweets:
         extract_locations(tweet, lm)
    ```
+---
+
+## Citing ##
+
+If you do make use of LNEx or any of its components please cite the following publication:
+
+    @inproceedings{halolimatLNEx17,
+      title={ Location Name Extraction from Targeted Text Streams using 
+              a Gazetteer-based Statistical Language Model. },
+      author={ Al-Olimat, Hussein S. and Thirunarayan, Krishnaprasad 
+               and Shalin, Valerie and Sheth, Amit},
+      booktitle={IJCAI},
+      volume={7},
+      pages={2733--2739},
+      year={2017}
+    }
+    
+We would also be very happy if you link to our project page:
+
+    ... location name extractor tool (LNEx)\footnote{
+        \url{https://github.com/halolimat/LNEx}
+    }
