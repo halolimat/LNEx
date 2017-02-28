@@ -17,7 +17,7 @@ We will be using a ready to go elastic index of the whole [OpenStreetMap](http:/
 ## Using LNEx ##
 
  - Clone this repository to your machine as follows:
-   - clone https://github.com/halolimat/LNEx.git
+   - git clone https://github.com/halolimat/LNEx.git
   
  - Define your desired bounding box in main.py to allow LNEx to build the custom OSM gazetteer (e.g., for Houston, TX):
  
