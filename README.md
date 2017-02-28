@@ -35,8 +35,7 @@ Now, you can start using LNEx to spot locations in some tweets from the 2015 Che
    ```python
 
    # chennai flood bounding box
-   chennai_bb = [  12.74,80.066986084,
-                   13.2823848224,80.3464508057 ]
+   chennai_bb = [ 12.74, 80.066986084, 13.2823848224, 80.3464508057 ]
 
     # retrieve all OSM records inside the given BB then augment and filter the gazetteer
     gazetteer = build_gazetteer(chennai_bb)
