@@ -21,13 +21,27 @@ If you don't need to have the full index of OpenStreetMap then you might look fo
  - Clone this repository to your machine as follows:
    - git clone https://github.com/halolimat/LNEx.git
 
- - Define your desired bounding box in main.py to allow LNEx to build the custom OSM gazetteer (e.g., for Houston, TX):
+ - Install LNEx as follows:
+   - cd LNEx
+   - python setup.py install
+
+ - Install all the requirements and test your installation and the elasticsearch index:
+   - ./Makefile
+
+Now, you can start using LNEx to spot locations in some tweets from the 2015 Chennai Flood tweets.
+
+ - Define your desired bounding box in main.py to allow LNEx to build the custom OSM gazetteer (e.g., for Chennai, India):
 
    ```python
-    houston_bb = [29.4778611958,-95.975189209,30.1463147381,-94.8889160156]
 
-    gazetteer = build_gazetteer(houston_bb)
+   # chennai flood bounding box
+   chennai_bb = [  12.74,80.066986084,
+                   13.2823848224,80.3464508057 ]
 
+    # retrieve all OSM records inside the given BB then augment and filter the gazetteer
+    gazetteer = build_gazetteer(chennai_bb)
+
+    # build a language model from the custom gazetteer for spotting
     lm = build_lm(gazetteer)
 
    ```
