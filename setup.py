@@ -17,5 +17,5 @@ setup(
     author_email='hussein@knoesis.org',
     url='https://github.com/halolimat/LNEx',
     license=license,
-    packages=find_packages(exclude=('tests'))
+    packages=find_packages(exclude=('tests', 'sample_run'))
 )
