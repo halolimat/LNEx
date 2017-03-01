@@ -679,15 +679,14 @@ def extract(env, tweet):
 
     toponyms_in_query = filterout_overlaps(toponyms_in_query, env.gazetteer_unique_names_set, location_names_from_cartisian_product)
 
-    toponyms_in_query, final_lns = remove_non_full_mentions(env, toponyms_in_query, location_names_from_cartisian_product, query_tokens)
+    #toponyms_in_query, final_lns = remove_non_full_mentions(env, toponyms_in_query, location_names_from_cartisian_product, query_tokens)
 
-    #toponyms_in_query = list(toponyms_in_query)
+    toponyms_in_query = remove_non_full_mentions(toponyms_in_query, env.gazetteer_unique_names_set, location_names_from_cartisian_product, query_tokens)
 
-    #print toponyms_in_query
+    toponyms_in_query = [(tweet[x[0][0]:x[0][1]], (x[0][0], x[0][1])) for x in toponyms_in_query]
 
-    return final_lns, toponyms_in_query
+    return toponyms_in_query
 
-    #return toponyms_in_query
 
 def insideHashtag(offsets, hashtags):
 
@@ -794,13 +793,11 @@ def find_ngrams(input_list, n):
   return zip(*[input_list[i:] for i in range(n)])
 
 
-def remove_non_full_mentions(env, tops, location_names_from_cartisian_product, query_tokens):
+def remove_non_full_mentions(tops, gazetteer_unique_names_set, location_names_from_cartisian_product, query_tokens):
 
     original_set = set(tops)
 
     final_set = set()
-
-    final_locations = defaultdict()
 
     for x in original_set:
         tops_name = location_names_from_cartisian_product[x[0]]
@@ -808,13 +805,7 @@ def remove_non_full_mentions(env, tops, location_names_from_cartisian_product, q
         found = False
 
         for top_name in tops_name:
-            if top_name[0] in env.combined_unique_names_with_metadata:
-
-                final_locations[top_name[0]] = {
-                        "offsets": x[0],
-                        "ln": env.combined_unique_names_with_metadata[top_name[0]]
-                }
-
+            if top_name[0] in gazetteer_unique_names_set:
                 final_set.add(x)
                 found = True
                 break
@@ -833,7 +824,8 @@ def remove_non_full_mentions(env, tops, location_names_from_cartisian_product, q
 
                         # if it is a full mention then get the offsets from the
                         # query_tokens list
-                        if candidate_top in env.combined_unique_names_with_metadata:
+                        if candidate_top in gazetteer_unique_names_set:
+                            #print "candidate_top", candidate_top
 
                             # get the indecies from the original query tokens
                             for query_token in query_tokens:
@@ -846,17 +838,9 @@ def remove_non_full_mentions(env, tops, location_names_from_cartisian_product, q
                                         candidate_top == query_token[0]:
                                         #print "GOT IT", query_token, candidate_top
 
-                                        #print "candidate_top", candidate_top
-
-                                        final_locations[candidate_top] = {
-                                                "offsets": x[0],
-                                                "ln": env.combined_unique_names_with_metadata[candidate_top]
-                                        }
-
-
                                         final_set.add(((query_token[1], query_token[2]+1), 1))
 
-    return final_set, final_locations
+    return final_set
 
 
 def remove_non_frequesnt_mentions(tops, gazetteer_unique_names_set, location_names_from_cartisian_product, gazetteer_unique_names):
@@ -1189,6 +1173,16 @@ def run():
 
     ############################################################################
 
+def read_words3():
+
+    file = "data/chennai_osm_words3_extended.txt"
+
+    # read tweets from file to list
+    with open(file) as f:
+        words = f.read().splitlines()
+
+    return words
+
 def start():
 
     import osm_gazetteer
@@ -1197,15 +1191,24 @@ def start():
     chennai_bb = [  12.74,  80.066986084,
                     13.2823848224,  80.3464508057 ]
 
-    unique_names, all_names, words_3 = osm_gazetteer.build_bb_gazetteer(chennai_bb)
+    #unique_names, all_names, words_3 = osm_gazetteer.build_bb_gazetteer(chennai_bb)
 
-    env = init_env(unique_names, all_names, words_3)
+    ##############################################
 
-    tweet = "I am at New Avadi Road"
+    with open("data/chennai_language_model_osm_unique_names_augmented.json") as f:
+        unique_names = json.load(f)
 
-    lns, toponyms_in_tweet = extract(env, tweet)
+    with open("data/chennai_language_model_osm_all_names_augmented.json") as f:
 
-    print lns, toponyms_in_tweet
+        all_names = json.load(f)
+
+    env = init_env(unique_names, all_names, read_words3())
+
+    tweet = "I am at new avadi rd, chennai, mambalam"
+
+    toponyms_in_tweet = extract(env, tweet)
+
+    print toponyms_in_tweet
 
 if __name__ == "__main__":
 
