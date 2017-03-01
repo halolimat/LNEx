@@ -18,7 +18,8 @@ if __name__ == "__main__" :
                     13.2823848224,  80.3464508057 ]
 
     # retrieve all OSM records inside the given BB then augment and filter the gazetteer
-    gazetteer = lnex.build_gazetteer(chennai_bb)
+    #
+    gaz_unique_names, gaz_all_names = lnex.build_gazetteer(chennai_bb)
 
     # build a language model from the custom gazetteer for spotting
     lm = lnex.build_lm(gazetteer)
