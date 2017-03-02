@@ -27,28 +27,28 @@ Using Photon might be a good idea for some users if they have enough space (~ 72
    localhost:9201
    ```
    - You can test the index by running the following command:
-     ```javascript
+   ```
        curl -XGET 'http://localhost:9201/photon/place/_search/?size=5&pretty=1' -d '{
-          "query":{
-             "filtered":{
-                "filter":{
-                   "geo_bounding_box":{
-                      "coordinate":{
-                         "top_right":{
-                            "lat":13.7940725231,
-                            "lon":80.4034423828
-                         },
-                         "bottom_left":{
-                            "lat":12.2205755634,
-                            "lon":79.0548706055
-                         }
-                      }
+         "query": {
+           "filtered": {
+             "filter": {
+               "geo_bounding_box" : {
+                 "coordinate" : {
+                   "top_right" : {
+                     "lat" : 13.7940725231,
+                     "lon" : 80.4034423828
+                   },
+                   "bottom_left" : {
+                     "lat" : 12.2205755634,
+                     "lon" : 79.0548706055
                    }
-                }
+                 }
+               }
              }
-          }
-       }'
-      ```
+           }
+         }
+      }'
+    ```
 
 ## Using LNEx ##
 
