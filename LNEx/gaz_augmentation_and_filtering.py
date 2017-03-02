@@ -151,26 +151,26 @@ def find_ngrams(input_list, n):
   return zip(*[input_list[i:] for i in range(n)])
 
 
-def get_extended_words3_list(unique_names):
+def get_extended_longlist_stopwords(unique_names):
 
-    # words3 source: https://github.com/dwyl/english-words
-    with open("Dictionaries/words3.txt") as f:
+    # longlist_stopwords(words3) source: https://github.com/dwyl/english-words
+    with open("Dictionaries/longlist_stopwords.txt") as f:
 
-        words3 = f.read().splitlines()
-        words3 = [x.lower() for x in words3]
-        words3 = set(words3)
+        longlist_stopwords = f.read().splitlines()
+        longlist_stopwords = [x.lower() for x in longlist_stopwords]
+        longlist_stopwords = set(longlist_stopwords)
 
     # extend the list of words
     for x in unique_names:
 
         for y in x.split():
-            if y not in words3:
+            if y not in longlist_stopwords:
 
                 y = unicodedata.normalize('NFKD', y).encode('ascii','ignore')
 
-                words3.add(y)
+                longlist_stopwords.add(y)
 
-    return words3
+    return longlist_stopwords
 
 def run(raw_names):
     """
@@ -179,7 +179,7 @@ def run(raw_names):
 
     """
 
-    names_to_remove = ["", "(?)", "(100 Feet Road)", "(2362 xxxx)", "(A Comfort Stay)", "(abandoned)", "(am)", "(Big Street)", "(boat)", "(Broadway)", "(closed)", "(current)", "(East)", "(fm)", "(heritage)", "(historical)", "(L31)", "(leads)", "(M)", "(MVN)", "(north.extn)", "(North)", "(Old)", "(P)", "(partialy closed for metro)", "(planned)", "(Primary)", "(Private Road)", "(private use)", "(Pvt)", "(rural)", "(ship)", "(South)", "(tv)", "(u.s. season 2)", "(U/C)", "(West)", "3rd", "5th", "a", "ahead", "all", "chopper", "closed", "east", "entire", "free", "frm", "gulf", "helpline", "helplines", "htt", "id", "is", "live", "me", "more", "new", "north", "old", "open", "opened", "our", "ours", "people", "planned", "plans", "plz", "restore", "rt", "service", "south", "stuff", "their", "uptodate", "us", "welcome", "west", "white", "wht", "you"]
+    names_to_remove = set(["(U/C)", "(East)", "(?)", "(100 Feet Road)", "(partialy closed for metro)", "(North)", "(planned)", "(Broadway)", "(planned)", "(closed)", "(P)", "(Old)", "(M)", "(Primary)", "(West)", "(South)", "(Big Street)", "(A Comfort Stay)", "(historical)", "(Pvt)", "(L31)", "(MVN)", "(Private Road)", "(north.extn)", "(2362 xxxx)", "(current)", "(leads)", "(private use)", "(heritage)", "(rural)", "(am)", "(fm)", "(tv)", "(ship)", "(u.s. season 2)", "(boat)", "(abandoned)"])
 
     names_to_remove = set([x.lower() for x in names_to_remove])
 
@@ -218,20 +218,25 @@ def run(raw_names):
             name = name.strip()
 
             # skip empty names
-            if name == "":
+            if name == "" or name.isdigit() or name in gaz_stopwords or len(name) < 3:
                 continue
 
             all_names.append(name)
             unique_names[name]+=1
 
 
+    #names_to_remove = ["(?)", "(100 Feet Road)", "(2362 xxxx)", "(A Comfort Stay)", "(abandoned)", "(am)", "(Big Street)", "(boat)", "(Broadway)", "(closed)", "(current)", "(East)", "(fm)", "(heritage)", "(historical)", "(L31)", "(leads)", "(M)", "(MVN)", "(north.extn)", "(North)", "(Old)", "(P)", "(partialy closed for metro)", "(planned)", "(Primary)", "(Private Road)", "(private use)", "(Pvt)", "(rural)", "(ship)", "(South)", "(tv)", "(u.s. season 2)", "(U/C)", "(West)", "3rd", "5th", "a", "ahead", "all", "chopper", "closed", "east", "entire", "free", "frm", "gulf", "helpline", "helplines", "htt", "id", "is", "live", "me", "more", "new", "north", "old", "open", "opened", "our", "ours", "people", "planned", "plans", "plz", "restore", "rt", "service", "south", "stuff", "their", "uptodate", "us", "welcome", "west", "white", "wht", "you"]
+
     # step 2 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+    # TODO: join the too
+    list_tops_to_remove = ["a", "people", "closed", "planned", "me", "you", "us", "our", "ours", "their", "open", "opened", "restore", "plz", "rt", "live", "htt", "free", "chopper", "service", "entire", "west", "south", "east", "north", "frm", "wht", "old", "new", "helpline", "helplines", "welcome", "stuff", "uptodate", "more", "ahead", "5th", "id", "", "all", "is", "plans", "gulf", "white", "3rd", ""]
 
     for name in all_names:
 
         nospaces = name.replace(" ", "")
 
-        if len(nospaces) > 2 and not nospaces.isdigit():
+        if name not in list_tops_to_remove and len(nospaces) > 2 and not nospaces.isdigit():
 
             # remove all non-alphaneumeric characters
             alphanumeric_name = re.sub(r'\W+', ' ', name)
@@ -286,8 +291,11 @@ def run(raw_names):
 
             if len(nospaces) > 2 and not nospaces.isdigit():
 
+                # don't add
+                if new_name in gaz_stopwords:
+                    continue
+
                 all_names.append(new_name)
                 unique_names[new_name]+=1
 
-
-    return unique_names, all_names, get_extended_words3_list(unique_names)
+    return unique_names, all_names, get_extended_longlist_stopwords(unique_names)

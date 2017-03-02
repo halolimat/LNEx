@@ -83,6 +83,8 @@ def build_bb_gazetteer(bb):
 
     raw_names = list()
 
+    counter = 0
+
     for match in search_index(bb):
 
         for key in dir(match):
@@ -93,11 +95,12 @@ def build_bb_gazetteer(bb):
 
                     raw_names.append(text)
 
+                    counter += 1
+
                 except:
                     print "exception at record # ", count
                     print get_text(match[key])
                     raise
-
 
     return gaz_augmentation_and_filtering.run(raw_names)
 
@@ -107,9 +110,3 @@ if __name__ == "__main__":
                     13.2823848224,80.3464508057 ]
 
     unique, all, extended_words3 = build_bb_gazetteer(chennai_bb)
-
-    for x in unique:
-        print x
-
-    for x in all:
-        print x

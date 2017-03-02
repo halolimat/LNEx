@@ -17,6 +17,8 @@ from word_breaking import word_breaker
 from LanguageModels import language_model
 from tokenizer import twokenize
 
+import osm_gazetteer
+
 ################################################################################
 ################################################################################
 ################################################################################
@@ -361,7 +363,7 @@ def extract(env, tweet):
             token_edited = ''.join(ch for ch in token if ch not in exclude)
 
             # is the token is for sure misspilled
-            if token not in env.words3_extended and token_edited not in env.words3_extended:
+            if token not in env.extended_longlist_stopwords and token_edited not in env.extended_longlist_stopwords:
 
                 #print "token ???? ", token
 
@@ -949,7 +951,7 @@ def filterout_overlaps(tops, gazetteer_unique_names_set, location_names_from_car
 
 class init_env:
 
-    def __init__(self, unique_names, all_names, words_3):
+    def __init__(self, unique_names, all_names, extended_longlist_stopwords):
 
         ###################################################
         # OSM abbr dictionary
@@ -989,8 +991,8 @@ class init_env:
         # from the combined gazetteer, any word not in the list is
         # considered misspilled.
 
-        self.words3_extended = words_3
-        self.words3_extended = set(self.words3_extended)
+        self.extended_longlist_stopwords = extended_longlist_stopwords
+        self.extended_longlist_stopwords = set(self.extended_longlist_stopwords)
 
         ########################################################################
 
@@ -1009,7 +1011,7 @@ class init_env:
         #list of unigrams
         unigrams = self.lm.unigrams["words"].keys()
 
-        self.stopwords_notin_gazetteer = set(self.words3_extended) - set(unigrams)
+        self.stopwords_notin_gazetteer = set(self.extended_longlist_stopwords) - set(unigrams)
 
 ################################################################################
 ################################################################################
@@ -1173,9 +1175,9 @@ def run():
 
     ############################################################################
 
-def read_words3():
+def read_extended_longlist_stopwords():
 
-    file = "data/chennai_osm_words3_extended.txt"
+    file = "data/chennai_osm_extended_longlist_stopwords.txt"
 
     # read tweets from file to list
     with open(file) as f:
@@ -1183,9 +1185,7 @@ def read_words3():
 
     return words
 
-def start():
-
-    import osm_gazetteer
+def start_using_files():
 
     # chennai flood bounding box
     chennai_bb = [  12.74,  80.066986084,
@@ -1195,14 +1195,20 @@ def start():
 
     ##############################################
 
-    with open("data/chennai_language_model_osm_unique_names_augmented.json") as f:
+    with open("data/chennai_osm_unique_names_augmented.json") as f:
         unique_names = json.load(f)
 
-    with open("data/chennai_language_model_osm_all_names_augmented.json") as f:
+    with open("data/chennai_osm_all_names_augmented.json") as f:
 
         all_names = json.load(f)
 
-    env = init_env(unique_names, all_names, read_words3())
+    extended_longlist_stopwords = read_extended_longlist_stopwords()
+
+    print len(unique_names), len(all_names), len(extended_longlist_stopwords)
+
+    return set(unique_names)
+
+    env = init_env(unique_names, all_names, extended_longlist_stopwords)
 
     tweet = "I am at new avadi rd, chennai, mambalam"
 
@@ -1210,6 +1216,32 @@ def start():
 
     print toponyms_in_tweet
 
+
+def start_using_elastic_index():
+
+    # chennai flood bounding box
+    chennai_bb = [  12.74,  80.066986084,
+                    13.2823848224,  80.3464508057 ]
+
+    unique_names, all_names, extended_longlist_stopwords = osm_gazetteer.build_bb_gazetteer(chennai_bb)
+
+    print len(unique_names), len(all_names), len(extended_longlist_stopwords)
+
+    return set(unique_names)
+
+    env = init_env(unique_names, all_names, extended_longlist_stopwords)
+
+    tweet = "I am at new avadi rd, chennai, mambalam"
+
+    toponyms_in_tweet = extract(env, tweet)
+
+    print toponyms_in_tweet
+
+
 if __name__ == "__main__":
 
-    start()
+    f = start_using_files()
+
+    e = start_using_elastic_index()
+
+    print e - f
