@@ -8,7 +8,10 @@ Following are the steps which allows you to setup and start using LNEx.
 
 ## Querying OpenStreetMap Gazetteers  ##
 
-We will be using a ready to go elastic index of the whole [OpenStreetMap](http://www.osm.org) data provided by [komoot](http://www.komoot.de) as part of their [photon](https://photon.komoot.de/) open source geocoder ([project repo](https://github.com/komoot/photon)).
+We will be using a ready to go elastic index of the whole [OpenStreetMap](http://www.osm.org) data provided by [komoot](http://www.komoot.de) as part of their [photon](https://photon.komoot.de/) open source geocoder ([project repo](https://github.com/komoot/photon)). If you don't need to have the full index of OpenStreetMap then you might look for alternative options such as [Pelias OpenStreetMap importer](https://github.com/pelias/openstreetmap) provided by [Mapzen](https://www.mapzen.com/).
+
+Using Photon might be a good idea for some users if they have enough space (~ 72 GB) and if they want to use LNEx for many streams along the way. If that sound like something you wanna do, follow the steps below:
+
  - Download the full photon elastic index which is going to allow us to query OSM using a bounding box
    - wget -O - http://download1.graphhopper.com/public/photon-db-latest.tar.bz2 | bzip2 -cd | tar x
  - Now, start photon which starts the elastic index in the background as a service
@@ -45,8 +48,6 @@ We will be using a ready to go elastic index of the whole [OpenStreetMap](http:/
 
     }'
     ```
-
-If you don't need to have the full index of OpenStreetMap then you might look for alternative options such as [Pelias OpenStreetMap importer](https://github.com/pelias/openstreetmap) provided by [Mapzen](https://www.mapzen.com/). This might be a good idea for some users if they have enough space (~ 72 GB).
 
 ## Using LNEx ##
 
