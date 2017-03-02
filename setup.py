@@ -20,5 +20,10 @@ setup(
     author_email='hussein@knoesis.org',
     url='https://github.com/halolimat/LNEx',
     license=license,
-    packages=find_packages(exclude=('tests', 'sample_run'))
+    packages=find_packages(exclude=('tests', 'sample_run')),
+    install_requires=[
+          'elasticsearch',
+          'elasticsearch-dsl',
+          'nltk'
+      ]
 )

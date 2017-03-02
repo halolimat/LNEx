@@ -17,37 +17,38 @@ Using Photon might be a good idea for some users if they have enough space (~ 72
  - Now, start photon which starts the elastic index in the background as a service
    - wget http://photon.komoot.de/data/photon-0.2.7.jar
    - java -jar photon-0.2.7.jar
- - You should get the IP and Port information from the log of running the jar, similar to the following:
+ - You should get the Port number information from the log of running the jar, similar to the following:
    ```
-   [main] INFO org.elasticsearch.http - [Amelia Voght] bound_address {inet[/127.0.0.1:9201]}, publish_address {inet[/127.0.0.1:9201]}
+   [main] INFO org.elasticsearch.http - [Amelia Voght] bound_address {inet[/127.0.0.1:9201]},
+   publish_address {inet[/127.0.0.1:9201]}
    ```
-   - this means that elasticsearch is running correctly and listening on the localhost on the port 9201
+   - this means that elasticsearch is running correctly and listening on:
+   ```
+   localhost:9201
+   ```
    - You can test the index by running the following command:
-   ```
-   curl -XGET 'http://localhost:9201/photon/place/_search/?size=5&pretty=1' -d '
-    {
-
-      "query": {
-          "filtered": {
-            "filter": {
-              "geo_bounding_box" : {
-                "coordinate" : {
-                  "top_right" : {
-                    "lat" : 13.7940725231,
-                    "lon" : 80.4034423828
-                  },
-                  "bottom_left" : {
-                    "lat" : 12.2205755634,
-                    "lon" : 79.0548706055
-                  }
+     ```
+       curl -XGET 'http://localhost:9201/photon/place/_search/?size=5&pretty=1' -d '{
+          "query":{
+             "filtered":{
+                "filter":{
+                   "geo_bounding_box":{
+                      "coordinate":{
+                         "top_right":{
+                            "lat":13.7940725231,
+                            "lon":80.4034423828
+                         },
+                         "bottom_left":{
+                            "lat":12.2205755634,
+                            "lon":79.0548706055
+                         }
+                      }
+                   }
                 }
-              }
-            }
+             }
           }
-        }
-
-    }'
-    ```
+       }'
+      ```
 
 ## Using LNEx ##
 
@@ -57,9 +58,6 @@ Using Photon might be a good idea for some users if they have enough space (~ 72
  - Install LNEx as follows:
    - cd LNEx
    - python setup.py install
-
- - Install all the requirements and test your installation and the elasticsearch index:
-   - ./Makefile
 
 Now, you can start using LNEx to spot locations in tweets.
 
