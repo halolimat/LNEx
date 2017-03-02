@@ -10,7 +10,7 @@ from itertools import groupby
 
 import gaz_augmentation_and_filtering
 
-host_port
+host_port = ""
 
 def set_host_port(hp):
     global host_port
@@ -19,6 +19,9 @@ def set_host_port(hp):
 
 def search_index(bb):
     es = Elasticsearch()
+
+    if host_port == '':
+        raise Exception('You need to define the host and port of the elastic index!')
 
     connections.create_connection(hosts=[host_port], timeout=20)
 
