@@ -27,7 +27,7 @@ Using Photon might be a good idea for some users if they have enough space (~ 72
    localhost:9201
    ```
    - You can test the index by running the following command:
-     ```
+     ```javascript
        curl -XGET 'http://localhost:9201/photon/place/_search/?size=5&pretty=1' -d '{
           "query":{
              "filtered":{
