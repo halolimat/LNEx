@@ -10,10 +10,17 @@ from itertools import groupby
 
 import gaz_augmentation_and_filtering
 
+host_port
+
+def set_host_port(hp):
+    global host_port
+
+    host_port = hp
+
 def search_index(bb):
     es = Elasticsearch()
 
-    connections.create_connection(hosts=['130.108.85.186:9200'], timeout=20)
+    connections.create_connection(hosts=[host_port], timeout=20)
 
     phrase_search = [Q({"filtered" : {
                   "filter" : {
@@ -109,4 +116,6 @@ if __name__ == "__main__":
     chennai_bb = [  12.74,80.066986084,
                     13.2823848224,80.3464508057 ]
 
-    unique, all, extended_words3 = build_bb_gazetteer(chennai_bb)
+    host_port = '130.108.85.186:9200'
+
+    unique, all, extended_words3 = build_bb_gazetteer(chennai_bb, host_port)

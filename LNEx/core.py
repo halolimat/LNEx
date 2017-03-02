@@ -1066,6 +1066,8 @@ def start_using_elastic_index():
     chennai_bb = [  12.74,  80.066986084,
                     13.2823848224,  80.3464508057 ]
 
+
+    osm_gazetteer.set_host_port('130.108.85.186:9200')
     unique_names, all_names, extended_longlist_stopwords = osm_gazetteer.build_bb_gazetteer(chennai_bb)
 
     env = init_env(unique_names, all_names, extended_longlist_stopwords)
