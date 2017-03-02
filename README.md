@@ -11,10 +11,42 @@ Following are the steps which allows you to setup and start using LNEx.
 We will be using a ready to go elastic index of the whole [OpenStreetMap](http://www.osm.org) data provided by [komoot](http://www.komoot.de) as part of their [photon](https://photon.komoot.de/) open source geocoder ([project repo](https://github.com/komoot/photon)).
  - Download the full photon elastic index which is going to allow us to query OSM using a bounding box
    - wget -O - http://download1.graphhopper.com/public/photon-db-latest.tar.bz2 | bzip2 -cd | tar x
- - Now, start photon which starts the elastic index in the background
+ - Now, start photon which starts the elastic index in the background as a service
+   - wget http://photon.komoot.de/data/photon-0.2.7.jar
    - java -jar photon-0.2.7.jar
+ - You should get the IP and Port information from the log of running the jar, similar to the following:
+   ```
+   [main] INFO org.elasticsearch.http - [Amelia Voght] bound_address {inet[/127.0.0.1:9201]}, publish_address {inet[/127.0.0.1:9201]}
+   ```
+   - this means that elasticsearch is running correctly and listening on the localhost on the port 9201
+   - You can test the index by running the following command:
+   ```
+   curl -XGET 'http://localhost:9201/photon/place/_search/?size=5&pretty=1' -d '
+    {
 
-If you don't need to have the full index of OpenStreetMap then you might look for alternative options such as [Pelias OpenStreetMap importer](https://github.com/pelias/openstreetmap) provided by [Mapzen](https://www.mapzen.com/).
+      "query": {
+          "filtered": {
+            "filter": {
+              "geo_bounding_box" : {
+                "coordinate" : {
+                  "top_right" : {
+                    "lat" : 13.7940725231,
+                    "lon" : 80.4034423828
+                  },
+                  "bottom_left" : {
+                    "lat" : 12.2205755634,
+                    "lon" : 79.0548706055
+                  }
+                }
+              }
+            }
+          }
+        }
+
+    }'
+    ```
+
+If you don't need to have the full index of OpenStreetMap then you might look for alternative options such as [Pelias OpenStreetMap importer](https://github.com/pelias/openstreetmap) provided by [Mapzen](https://www.mapzen.com/). This might be a good idea for some users if they have enough space (~ 72 GB).
 
 ## Using LNEx ##
 
@@ -28,14 +60,14 @@ If you don't need to have the full index of OpenStreetMap then you might look fo
  - Install all the requirements and test your installation and the elasticsearch index:
    - ./Makefile
 
-Now, you can start using LNEx to spot locations in some tweets from the 2015 Chennai Flood tweets.
+Now, you can start using LNEx to spot locations in tweets.
 
  - Define your desired bounding box in main.py to allow LNEx to build the custom OSM gazetteer (e.g., for Chennai, India):
 
    ```python
 
-   # chennai flood bounding box
-   chennai_bb = [ 12.74, 80.066986084, 13.2823848224, 80.3464508057 ]
+    # chennai flood bounding box
+    chennai_bb = [ 12.74, 80.066986084, 13.2823848224, 80.3464508057 ]
 
     # retrieve all OSM records inside the given BB then augment and filter the gazetteer
     gazetteer = build_gazetteer(chennai_bb)
