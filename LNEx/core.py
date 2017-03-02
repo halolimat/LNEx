@@ -1021,159 +1021,6 @@ class init_env:
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-################################################################################
-
-def get_all_tweets_and_annotations(gaz_name):
-
-    with open(get_data_dir()+gaz_name+'_annotations.json') as f:
-        data = json.load(f)
-
-    all_tweets_and_annotations = list()
-
-    for key, x in data.iteritems():
-
-        toponyms_and_indexes = list()
-
-        text = x["text"]
-
-        for key, y in x.iteritems():
-
-            # ignore the field which has the tweet text
-            if key != "text":
-
-                start_idx = int(y["start_idx"])
-                end_idx = int(y["end_idx"])
-
-                toponyms_and_indexes.append((y["type"], (start_idx,end_idx)))
-
-        all_tweets_and_annotations.append((text, toponyms_and_indexes))
-
-    return all_tweets_and_annotations
-
-def run():
-
-    counter = 0
-
-    all_geo_points = list()
-
-    for tweet in get_all_tweets_and_annotations(gaz_name.title()):
-
-        tweet_classification, classification_name = d_classifier.classify(tweet[0])
-
-        #print tweet[0]
-        #print tweet_classification
-        #sys.exit()
-
-        counter += 1
-        print gaz_name, gaz_comb, counter
-
-        #if counter <= 500:
-        #if counter > 500:
-        #    continue
-
-        lns, toponyms_in_tweet = extract(tweet, counter, no_hashtags=False)
-
-        tweet_geo_points = set()
-
-        """
-        {
-        "features": [{
-            "geometry": {
-                "type": "Point",
-                "coordinates": [-77, 38.913188059745586]
-            }
-            }, {
-            "geometry": {
-                "type": "Point",
-                "coordinates": [-122.414, 37.776]
-            }
-            }, {
-            "geometry": {
-                "type": "Point",
-                "coordinates": [-120.414, 37.776]
-            }
-            }]
-	}
-
-        "properties": { "description": "", "icon": "marker"}
-
-
-        """
-
-
-        for ln in lns:
-
-            if ln == gaz_name:
-                continue
-
-            ln_offsets = lns[ln]['offsets']
-
-            meta_names = lns[ln]["ln"].get("main")
-
-            # if the main location names do not have the location mention then
-            # what to do??!!
-            if not meta_names:
-
-                continue
-                #meta_names = lns[ln]["ln"].get("secondary")
-
-            for sub_ln in meta_names:
-                #print ln, sub_ln["coordinate"]
-
-                lat = sub_ln["coordinate"]["lat"]
-                lon = sub_ln["coordinate"]["lon"]
-
-                tweet_geo_points.add((ln, (lat,lon)))
-
-                marked_tweet = tweet[0][:ln_offsets[0]] + "<mark>" + tweet[0][ln_offsets[0]:ln_offsets[1]] + "</mark>" + tweet[0][ln_offsets[1]:]
-
-                description = """
-                    <table>
-                        <tr>
-                            <td>
-                                <img src='"""+tweet_classification+"""' alt='"""+tweet_classification+"""' style="width:100px;height:100px;">
-                            </td>
-                            <td>
-                                """+classification_name+"""
-                            </td>
-                        </tr>
-                        <tr>
-                            <th colspan="2">"""+ln+"""</th>
-                        </tr>
-                        <tr>
-                            <td colspan="2">"""+marked_tweet+"""</td>
-                        </tr>
-                    </table>
-                """
-                marker_icon = "marker"
-
-                if tweet_classification:
-
-                    marker_icon = {
-                        "iconUrl": tweet_classification,
-                        "iconSize": [50, 50],
-                        "iconAnchor": [25, 25],
-                        "popupAnchor": [0, -25],
-                        "className": 'dot'
-                    }
-
-                #print marker_icon
-                #sys.exit()
-
-                all_geo_points.append({"type": "Feature", "geometry": {"type": "Point","coordinates": [lon, lat]}, "properties": { "description": description, "icon": marker_icon}})
-
-                #all_geo_points.append(str(lat)+","+str(lon))
-
-        #print tweet_geo_points
-
-    all_geo_points_json = {"type": "FeatureCollection", "features": all_geo_points}
-
-    with open(get_data_dir()+"Output/"+gaz_name+"_all_geo_points.json", "w") as myfile:
-        json.dump(all_geo_points_json, myfile)
-
-    print "Done!"
-
-    ############################################################################
 
 def read_extended_longlist_stopwords():
 
@@ -1204,10 +1051,6 @@ def start_using_files():
 
     extended_longlist_stopwords = read_extended_longlist_stopwords()
 
-    print len(unique_names), len(all_names), len(extended_longlist_stopwords)
-
-    return set(unique_names)
-
     env = init_env(unique_names, all_names, extended_longlist_stopwords)
 
     tweet = "I am at new avadi rd, chennai, mambalam"
@@ -1225,10 +1068,6 @@ def start_using_elastic_index():
 
     unique_names, all_names, extended_longlist_stopwords = osm_gazetteer.build_bb_gazetteer(chennai_bb)
 
-    print len(unique_names), len(all_names), len(extended_longlist_stopwords)
-
-    return set(unique_names)
-
     env = init_env(unique_names, all_names, extended_longlist_stopwords)
 
     tweet = "I am at new avadi rd, chennai, mambalam"
@@ -1240,8 +1079,6 @@ def start_using_elastic_index():
 
 if __name__ == "__main__":
 
-    f = start_using_files()
+    #start_using_files()
 
-    e = start_using_elastic_index()
-
-    print e - f
+    start_using_elastic_index()
