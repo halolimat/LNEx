@@ -18,11 +18,14 @@ Using Photon might be a good idea for some users if they have enough space (~ 72
    - wget http://photon.komoot.de/data/photon-0.2.7.jar
    - java -jar photon-0.2.7.jar
  - You should get the Port number information from the log of running the jar, similar to the following:
+
    ```
    [main] INFO org.elasticsearch.http - [Amelia Voght] bound_address {inet[/127.0.0.1:9201]},
    publish_address {inet[/127.0.0.1:9201]}
    ```
+
    - this means that elasticsearch is running correctly and listening on:
+
    ```
    localhost:9201
    ```
