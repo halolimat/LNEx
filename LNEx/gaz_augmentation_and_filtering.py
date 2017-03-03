@@ -172,12 +172,20 @@ def get_extended_longlist_stopwords(unique_names):
 
     return longlist_stopwords
 
-def run(raw_names):
+################################################################################
+
+def run(geo_locations):
+
     """
-    input>  type(raw_names): list
+    input>  type(geo_locations): defaultdict
+
+            "LocationName": [geo_info_ids]
+
     output> type(unique_names): dict , type(all_names): list
 
     """
+
+    ############################################################################
 
     names_to_remove = set(["(U/C)", "(East)", "(?)", "(100 Feet Road)", "(partialy closed for metro)", "(North)", "(planned)", "(Broadway)", "(planned)", "(closed)", "(P)", "(Old)", "(M)", "(Primary)", "(West)", "(South)", "(Big Street)", "(A Comfort Stay)", "(historical)", "(Pvt)", "(L31)", "(MVN)", "(Private Road)", "(north.extn)", "(2362 xxxx)", "(current)", "(leads)", "(private use)", "(heritage)", "(rural)", "(am)", "(fm)", "(tv)", "(ship)", "(u.s. season 2)", "(boat)", "(abandoned)"])
 
@@ -187,14 +195,15 @@ def run(raw_names):
     gaz_stopwords = "Dictionaries/gaz_stopwords_filtered.txt"
     gaz_stopwords = set([line.strip() for line in open(gaz_stopwords, 'r')])
 
-    # ==========================================================================
-    unique_names = defaultdict(int)
-    all_names = list()
-    # ==========================================================================
+    ############################################################################
+
+    new_geo_locations = defaultdict()
 
     # step 1 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-    for text in raw_names:
+    for text in geo_locations:
+
+        original_text = text
 
         text = text.replace("( ", "(").replace(" )", ")")
 
@@ -221,8 +230,9 @@ def run(raw_names):
             if name == "" or name.isdigit() or name in gaz_stopwords or len(name) < 3:
                 continue
 
-            all_names.append(name)
-            unique_names[name]+=1
+            # prevents collisions
+            if name not in new_geo_locations:
+                new_geo_locations[name] = geo_locations[original_text]
 
 
     #names_to_remove = ["(?)", "(100 Feet Road)", "(2362 xxxx)", "(A Comfort Stay)", "(abandoned)", "(am)", "(Big Street)", "(boat)", "(Broadway)", "(closed)", "(current)", "(East)", "(fm)", "(heritage)", "(historical)", "(L31)", "(leads)", "(M)", "(MVN)", "(north.extn)", "(North)", "(Old)", "(P)", "(partialy closed for metro)", "(planned)", "(Primary)", "(Private Road)", "(private use)", "(Pvt)", "(rural)", "(ship)", "(South)", "(tv)", "(u.s. season 2)", "(U/C)", "(West)", "3rd", "5th", "a", "ahead", "all", "chopper", "closed", "east", "entire", "free", "frm", "gulf", "helpline", "helplines", "htt", "id", "is", "live", "me", "more", "new", "north", "old", "open", "opened", "our", "ours", "people", "planned", "plans", "plz", "restore", "rt", "service", "south", "stuff", "their", "uptodate", "us", "welcome", "west", "white", "wht", "you"]
@@ -232,7 +242,9 @@ def run(raw_names):
     # TODO: join the too
     list_tops_to_remove = ["a", "people", "closed", "planned", "me", "you", "us", "our", "ours", "their", "open", "opened", "restore", "plz", "rt", "live", "htt", "free", "chopper", "service", "entire", "west", "south", "east", "north", "frm", "wht", "old", "new", "helpline", "helplines", "welcome", "stuff", "uptodate", "more", "ahead", "5th", "id", "", "all", "is", "plans", "gulf", "white", "3rd", ""]
 
-    for name in all_names:
+    lns = new_geo_locations.keys()
+
+    for name in lns:
 
         nospaces = name.replace(" ", "")
 
@@ -243,18 +255,18 @@ def run(raw_names):
             alphanumeric_name = alphanumeric_name.strip()
 
             if alphanumeric_name != name and alphanumeric_name not in gaz_stopwords:
-                all_names.append(alphanumeric_name)
-                unique_names[alphanumeric_name] += 1
 
-            if name not in gaz_stopwords:
-                unique_names[name] += 1
-
+                # avoids collisions
+                if alphanumeric_name not in new_geo_locations:
+                    new_geo_locations[alphanumeric_name] = new_geo_locations[name]
 
     # step 3 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
     # create skip grams
 
-    for name in set(unique_names):
+    lns = new_geo_locations.keys()
+
+    for name in lns:
         name_list = name.split()
         name_len = len(name_list)
 
@@ -295,7 +307,7 @@ def run(raw_names):
                 if new_name in gaz_stopwords:
                     continue
 
-                all_names.append(new_name)
-                unique_names[new_name]+=1
+                if new_name not in new_geo_locations:
+                    new_geo_locations[new_name] = new_geo_locations[name]
 
-    return unique_names, all_names, get_extended_longlist_stopwords(unique_names)
+    return new_geo_locations, get_extended_longlist_stopwords(new_geo_locations.keys())

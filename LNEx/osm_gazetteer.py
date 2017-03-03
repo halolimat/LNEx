@@ -9,21 +9,25 @@ from operator import itemgetter
 from itertools import groupby
 
 import gaz_augmentation_and_filtering
+import geo_calculations
 
-host_port = ""
+connection_string = ""
 
-def set_host_port(hp):
-    global host_port
+def set_connection_string(cs):
+    global connection_string
 
-    host_port = hp
+    connection_string = cs
 
 def search_index(bb):
     es = Elasticsearch()
 
-    if host_port == '':
+    if connection_string == '':
         raise Exception('You need to define the host and port of the elastic index!')
 
-    connections.create_connection(hosts=[host_port], timeout=20)
+    if not geo_calculations.is_bb_acceptable(bb) or bb[0] > bb[2] or bb[1] > bb[3]:
+        raise Exception('The chosen Bounding Box is too big, you should choose a smaller one!')
+
+    connections.create_connection(hosts=[connection_string], timeout=20)
 
     phrase_search = [Q({"filtered" : {
                   "filter" : {
@@ -91,34 +95,66 @@ def build_bb_gazetteer(bb):
     location_fields = [ "city", "country",
                         "name", "state", "street"]
 
-    raw_names = list()
+    geo_info = defaultdict()
+    geo_locations = defaultdict(list)
 
-    counter = 0
+    id = 0
 
     for match in search_index(bb):
+
+        id += 1
+
+        keys = dir(match)
+
+        geo_item = defaultdict()
+
+        if "coordinate" in keys:
+            geo_item["point"] = match["coordinate"]
+        if "extent" in keys:
+            geo_item["extent"] = match["extent"]["coordinates"]
+
+        geo_info[id] = geo_item
+
+        ########################################################################
 
         for key in dir(match):
 
             if key in location_fields:
+
                 try:
                     text = get_text(match[key])
 
-                    raw_names.append(text)
+                    if key == "name":
+                        # mapping a location name to its geo-info
+                        geo_locations[text].append(id)
 
-                    counter += 1
+                    else:
+                        geo_locations[text]
 
                 except:
                     print "exception at record # ", count
                     print get_text(match[key])
                     raise
 
-    return gaz_augmentation_and_filtering.run(raw_names)
+
+    return gaz_augmentation_and_filtering.run(geo_locations), geo_info
+
+################################################################################
 
 if __name__ == "__main__":
 
     chennai_bb = [  12.74,80.066986084,
                     13.2823848224,80.3464508057 ]
 
-    host_port = '130.108.85.186:9200'
+    connection_string = '130.108.85.186:9200'
 
-    unique, all, extended_words3 = build_bb_gazetteer(chennai_bb, host_port)
+    set_connection_string(connection_string)
+
+    tup, geo_info = build_bb_gazetteer(chennai_bb)
+
+    new_geo_locations, extended_words3 = tup
+
+    print new_geo_locations["new road"]
+    print new_geo_locations["new avadi road"]
+
+    print geo_info[1616]

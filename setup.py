@@ -24,6 +24,7 @@ setup(
     install_requires=[
           'elasticsearch',
           'elasticsearch-dsl',
-          'nltk'
+          'nltk',
+          'geopy'
       ]
 )
