@@ -17,6 +17,8 @@ from word_breaking import word_breaker
 from LanguageModels import language_model
 from tokenizer import twokenize
 
+from tabulate import tabulate
+
 import osm_gazetteer
 
 ################################################################################
@@ -629,8 +631,8 @@ def extract(env, tweet):
 
                     # 1
                     if y in env.gazetteer_unique_names_set:
-                        if max_prob_reco[1] < env.gazetteer_unique_names[y]:
-                            max_prob_reco = (y, env.gazetteer_unique_names[y])
+                        if max_prob_reco[1] < len(env.gazetteer_unique_names[y]):
+                            max_prob_reco = (y, len(env.gazetteer_unique_names[y]))
 
 
                     #print y,  "\t%.20f" % lm.np_prob(y)
@@ -683,9 +685,11 @@ def extract(env, tweet):
 
     #toponyms_in_query, final_lns = remove_non_full_mentions(env, toponyms_in_query, location_names_from_cartisian_product, query_tokens)
 
+    # set of > ((offsets), probability), full_mention)
     toponyms_in_query = remove_non_full_mentions(toponyms_in_query, env.gazetteer_unique_names_set, location_names_from_cartisian_product, query_tokens)
 
-    toponyms_in_query = [(tweet[x[0][0]:x[0][1]], (x[0][0], x[0][1])) for x in toponyms_in_query]
+    # set of > (tweet_mention, offsets, geo_location)
+    toponyms_in_query = [(tweet[x[0][0][0]:x[0][0][1]], (x[0][0][0], x[0][0][1]), x[1]) for x in toponyms_in_query]
 
     return toponyms_in_query
 
@@ -799,6 +803,8 @@ def remove_non_full_mentions(tops, gazetteer_unique_names_set, location_names_fr
 
     original_set = set(tops)
 
+    # would contain the following:
+    # ((offsets), probability), full_mention)
     final_set = set()
 
     for x in original_set:
@@ -808,7 +814,8 @@ def remove_non_full_mentions(tops, gazetteer_unique_names_set, location_names_fr
 
         for top_name in tops_name:
             if top_name[0] in gazetteer_unique_names_set:
-                final_set.add(x)
+
+                final_set.add((x, top_name[0]))
                 found = True
                 break
 
@@ -840,7 +847,11 @@ def remove_non_full_mentions(tops, gazetteer_unique_names_set, location_names_fr
                                         candidate_top == query_token[0]:
                                         #print "GOT IT", query_token, candidate_top
 
-                                        final_set.add(((query_token[1], query_token[2]+1), 1))
+                                        t = ((query_token[1], query_token[2]+1), 1)
+
+                                        t = (t, candidate_top)
+
+                                        final_set.add(t)
 
     return final_set
 
@@ -870,7 +881,7 @@ def remove_non_frequesnt_mentions(tops, gazetteer_unique_names_set, location_nam
 
         for top_name in tops_name:
             if top_name[0] in gazetteer_unique_names_set:
-                if gazetteer_unique_names[top_name[0]] > 1:
+                if len(gazetteer_unique_names[top_name[0]]) > 1:
                     final_set.add(x)
                     break
 
@@ -951,7 +962,7 @@ def filterout_overlaps(tops, gazetteer_unique_names_set, location_names_from_car
 
 class init_env:
 
-    def __init__(self, unique_names, all_names, extended_longlist_stopwords):
+    def __init__(self, geo_locations, extended_longlist_stopwords):
 
         ###################################################
         # OSM abbr dictionary
@@ -980,7 +991,7 @@ class init_env:
 
         ########################################################################
 
-        self.gazetteer_unique_names = unique_names
+        self.gazetteer_unique_names = geo_locations
 
         self.gazetteer_unique_names_set = set(self.gazetteer_unique_names.keys())
 
@@ -1004,7 +1015,7 @@ class init_env:
 
         ############################################################################
 
-        self.lm = language_model.LanguageModel(all_names)
+        self.lm = language_model.LanguageModel(geo_locations)
 
         ############################################################################
 
@@ -1021,43 +1032,38 @@ class init_env:
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-
-def read_extended_longlist_stopwords():
-
-    file = "data/chennai_osm_extended_longlist_stopwords.txt"
-
-    # read tweets from file to list
-    with open(file) as f:
-        words = f.read().splitlines()
-
-    return words
-
 def start_using_files():
 
     # chennai flood bounding box
     chennai_bb = [  12.74,  80.066986084,
                     13.2823848224,  80.3464508057 ]
 
-    #unique_names, all_names, words_3 = osm_gazetteer.build_bb_gazetteer(chennai_bb)
-
     ##############################################
 
-    with open("data/chennai_osm_unique_names_augmented.json") as f:
-        unique_names = json.load(f)
+    with open("data/chennai_geo_locations.json") as f:
+        geo_locations = json.load(f)
+    with open("data/chennai_geo_info.json") as f:
+        geo_info = json.load(f)
+    with open("data/chennai_extended_words3.json") as f:
+        extended_longlist_stopwords = json.load(f)
 
-    with open("data/chennai_osm_all_names_augmented.json") as f:
+    env = init_env(geo_locations, extended_longlist_stopwords)
 
-        all_names = json.load(f)
+    tweet = "new avadi rd, chennai, mambalam"
 
-    extended_longlist_stopwords = read_extended_longlist_stopwords()
-
-    env = init_env(unique_names, all_names, extended_longlist_stopwords)
-
-    tweet = "I am at new avadi rd, chennai, mambalam"
-
+    # set of > (tweet_mention, offsets, geo_location)
     toponyms_in_tweet = extract(env, tweet)
 
-    print toponyms_in_tweet
+    header = ["tweet_mention", "mention_offsets", "geo_location", "geo_info_id"]
+
+    rows = list()
+    for x in toponyms_in_tweet:
+        row = x[0], x[1], x[2], geo_locations[x[2]]
+        rows.append(row)
+
+    print "-" * 90
+    print tabulate(rows, headers=header)
+    print "-" * 90
 
 
 def start_using_elastic_index():
@@ -1066,17 +1072,27 @@ def start_using_elastic_index():
     chennai_bb = [  12.74,  80.066986084,
                     13.2823848224,  80.3464508057 ]
 
-
     osm_gazetteer.set_connection_string('130.108.85.186:9200')
-    unique_names, all_names, extended_longlist_stopwords = osm_gazetteer.build_bb_gazetteer(chennai_bb)
 
-    env = init_env(unique_names, all_names, extended_longlist_stopwords)
+    geo_locations, geo_info, extended_longlist_stopwords = osm_gazetteer.build_bb_gazetteer(chennai_bb)
+
+    env = init_env(geo_locations, extended_longlist_stopwords)
 
     tweet = "I am at new avadi rd, chennai, mambalam"
 
+    # set of > (tweet_mention, offsets, geo_location)
     toponyms_in_tweet = extract(env, tweet)
 
-    print toponyms_in_tweet
+    header = ["tweet_mention", "mention_offsets", "geo_location", "geo_info_id"]
+
+    rows = list()
+    for x in toponyms_in_tweet:
+        row = x[0], x[1], x[2], geo_locations[x[2]]
+        rows.append(row)
+
+    print "-" * 90
+    print tabulate(rows, headers=header)
+    print "-" * 90
 
 
 if __name__ == "__main__":

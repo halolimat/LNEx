@@ -166,11 +166,9 @@ def get_extended_longlist_stopwords(unique_names):
         for y in x.split():
             if y not in longlist_stopwords:
 
-                y = unicodedata.normalize('NFKD', y).encode('ascii','ignore')
-
                 longlist_stopwords.add(y)
 
-    return longlist_stopwords
+    return list(longlist_stopwords)
 
 ################################################################################
 
@@ -197,7 +195,7 @@ def run(geo_locations):
 
     ############################################################################
 
-    new_geo_locations = defaultdict()
+    new_geo_locations = defaultdict(set)
 
     # step 1 (Filtering) +++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -224,7 +222,8 @@ def run(geo_locations):
 
         for name in names:
 
-            name = name.strip()
+            name = unicodedata.normalize('NFKD', name).encode('ascii','ignore')
+            name = str(name.strip())
 
             # skip empty names
             if name == "" or name.isdigit() or name in gaz_stopwords or len(name) < 3:
@@ -232,7 +231,7 @@ def run(geo_locations):
 
             # prevents collisions
             if name not in new_geo_locations:
-                new_geo_locations[name] = geo_locations[original_text]
+                new_geo_locations[name]  |= set(geo_locations[original_text])
 
 
     #names_to_remove = ["(?)", "(100 Feet Road)", "(2362 xxxx)", "(A Comfort Stay)", "(abandoned)", "(am)", "(Big Street)", "(boat)", "(Broadway)", "(closed)", "(current)", "(East)", "(fm)", "(heritage)", "(historical)", "(L31)", "(leads)", "(M)", "(MVN)", "(north.extn)", "(North)", "(Old)", "(P)", "(partialy closed for metro)", "(planned)", "(Primary)", "(Private Road)", "(private use)", "(Pvt)", "(rural)", "(ship)", "(South)", "(tv)", "(u.s. season 2)", "(U/C)", "(West)", "3rd", "5th", "a", "ahead", "all", "chopper", "closed", "east", "entire", "free", "frm", "gulf", "helpline", "helplines", "htt", "id", "is", "live", "me", "more", "new", "north", "old", "open", "opened", "our", "ours", "people", "planned", "plans", "plz", "restore", "rt", "service", "south", "stuff", "their", "uptodate", "us", "welcome", "west", "white", "wht", "you"]
@@ -258,12 +257,7 @@ def run(geo_locations):
 
                 # not in the list of names before augmentation
                 if alphanumeric_name not in lns:
-                    # if the new name is not already been generated
-                    if alphanumeric_name not in new_geo_locations:
-                        new_geo_locations[alphanumeric_name] = new_geo_locations[name]
-                    else:
-                        new_geo_locations[alphanumeric_name].extend(new_geo_locations[name])
-
+                    new_geo_locations[alphanumeric_name] |= set(new_geo_locations[name])
 
     # step 3 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -316,10 +310,7 @@ def run(geo_locations):
 
                 # not in the list of names before augmentation
                 if new_name not in lns:
-                    # if new name is not there already
-                    if new_name not in new_geo_locations:
-                        new_geo_locations[new_name] = new_geo_locations[name]
-                    else:
-                        new_geo_locations[new_name].extend(new_geo_locations[name])
+                    new_geo_locations[new_name] |= set(new_geo_locations[name])
+
 
     return new_geo_locations, get_extended_longlist_stopwords(new_geo_locations.keys())

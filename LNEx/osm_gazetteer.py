@@ -127,7 +127,7 @@ def build_bb_gazetteer(bb):
                         geo_locations[text].append(id)
 
                         geo_info[id] = {    "name" : text,
-                                            "geo_item" : geo_item }
+                                            "geo_item" : list(geo_item) }
 
                     else:
                         geo_locations[text]
@@ -139,6 +139,20 @@ def build_bb_gazetteer(bb):
 
 
     new_geo_locations, extended_words3 = gaz_augmentation_and_filtering.run(geo_locations)
+
+    '''for x in new_geo_locations:
+        new_geo_locations[x] = list(new_geo_locations[x])
+
+    print new_geo_locations
+
+    with open("data/chennai_geo_locations.json", "w") as f:
+        json.dump(new_geo_locations, f)
+    with open("data/chennai_geo_info.json", "w") as f:
+        json.dump(geo_info, f)
+    with open("data/chennai_extended_words3.json", "w") as f:
+        json.dump(extended_words3, f)
+
+    exit()'''
 
     return new_geo_locations, geo_info, extended_words3
 
@@ -154,4 +168,3 @@ if __name__ == "__main__":
     set_connection_string(connection_string)
 
     geo_locations, geo_info, extended_words3 = build_bb_gazetteer(chennai_bb)
-s

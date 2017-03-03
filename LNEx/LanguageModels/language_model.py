@@ -66,7 +66,7 @@ class LanguageModel:
             return self.bigram_probabilities(terms)
 
 
-    def __init__(self, data):
+    def __init__(self, geo_locations):
 
         self.unigrams = defaultdict(int)
 
@@ -74,7 +74,23 @@ class LanguageModel:
 
         words_count = 0
 
-        for loc_name in data:
+        ########################################################################
+
+        # will contain all names in a list which preserves their frequenceis as
+        # they appear in the gazetteer. The frequenceis are going to be used in
+        # the language model.
+        all_names_text = list()
+
+        for ln in geo_locations:
+
+            number_of_mentions = len(geo_locations[ln])
+
+            new_list = [ln] * number_of_mentions
+
+            all_names_text.extend(new_list)
+        ########################################################################
+
+        for loc_name in all_names_text:
 
             loc_name = loc_name.split()
 

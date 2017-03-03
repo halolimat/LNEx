@@ -25,6 +25,7 @@ setup(
           'elasticsearch',
           'elasticsearch-dsl',
           'nltk',
-          'geopy'
+          'geopy',
+          'texttable'
       ]
 )
