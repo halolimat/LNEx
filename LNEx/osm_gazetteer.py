@@ -113,8 +113,6 @@ def build_bb_gazetteer(bb):
         if "extent" in keys:
             geo_item["extent"] = match["extent"]["coordinates"]
 
-        geo_info[id] = geo_item
-
         ########################################################################
 
         for key in dir(match):
@@ -128,6 +126,9 @@ def build_bb_gazetteer(bb):
                         # mapping a location name to its geo-info
                         geo_locations[text].append(id)
 
+                        geo_info[id] = {    "name" : text,
+                                            "geo_item" : geo_item }
+
                     else:
                         geo_locations[text]
 
@@ -137,7 +138,9 @@ def build_bb_gazetteer(bb):
                     raise
 
 
-    return gaz_augmentation_and_filtering.run(geo_locations), geo_info
+    new_geo_locations, extended_words3 = gaz_augmentation_and_filtering.run(geo_locations)
+
+    return new_geo_locations, geo_info, extended_words3
 
 ################################################################################
 
@@ -150,11 +153,5 @@ if __name__ == "__main__":
 
     set_connection_string(connection_string)
 
-    tup, geo_info = build_bb_gazetteer(chennai_bb)
-
-    new_geo_locations, extended_words3 = tup
-
-    print new_geo_locations["new road"]
-    print new_geo_locations["new avadi road"]
-
-    print geo_info[1616]
+    geo_locations, geo_info, extended_words3 = build_bb_gazetteer(chennai_bb)
+s

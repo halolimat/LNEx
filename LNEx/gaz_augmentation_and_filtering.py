@@ -199,7 +199,7 @@ def run(geo_locations):
 
     new_geo_locations = defaultdict()
 
-    # step 1 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    # step 1 (Filtering) +++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
     for text in geo_locations:
 
@@ -237,12 +237,12 @@ def run(geo_locations):
 
     #names_to_remove = ["(?)", "(100 Feet Road)", "(2362 xxxx)", "(A Comfort Stay)", "(abandoned)", "(am)", "(Big Street)", "(boat)", "(Broadway)", "(closed)", "(current)", "(East)", "(fm)", "(heritage)", "(historical)", "(L31)", "(leads)", "(M)", "(MVN)", "(north.extn)", "(North)", "(Old)", "(P)", "(partialy closed for metro)", "(planned)", "(Primary)", "(Private Road)", "(private use)", "(Pvt)", "(rural)", "(ship)", "(South)", "(tv)", "(u.s. season 2)", "(U/C)", "(West)", "3rd", "5th", "a", "ahead", "all", "chopper", "closed", "east", "entire", "free", "frm", "gulf", "helpline", "helplines", "htt", "id", "is", "live", "me", "more", "new", "north", "old", "open", "opened", "our", "ours", "people", "planned", "plans", "plz", "restore", "rt", "service", "south", "stuff", "their", "uptodate", "us", "welcome", "west", "white", "wht", "you"]
 
-    # step 2 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    # step 2 (Augmentation) ++++++++++++++++++++++++++++++++++++++++++++++++++++
 
     # TODO: join the too
     list_tops_to_remove = ["a", "people", "closed", "planned", "me", "you", "us", "our", "ours", "their", "open", "opened", "restore", "plz", "rt", "live", "htt", "free", "chopper", "service", "entire", "west", "south", "east", "north", "frm", "wht", "old", "new", "helpline", "helplines", "welcome", "stuff", "uptodate", "more", "ahead", "5th", "id", "", "all", "is", "plans", "gulf", "white", "3rd", ""]
 
-    lns = new_geo_locations.keys()
+    lns = set(new_geo_locations)
 
     for name in lns:
 
@@ -256,17 +256,24 @@ def run(geo_locations):
 
             if alphanumeric_name != name and alphanumeric_name not in gaz_stopwords:
 
-                # avoids collisions
-                if alphanumeric_name not in new_geo_locations:
-                    new_geo_locations[alphanumeric_name] = new_geo_locations[name]
+                # not in the list of names before augmentation
+                if alphanumeric_name not in lns:
+                    # if the new name is not already been generated
+                    if alphanumeric_name not in new_geo_locations:
+                        new_geo_locations[alphanumeric_name] = new_geo_locations[name]
+                    else:
+                        new_geo_locations[alphanumeric_name].extend(new_geo_locations[name])
+
 
     # step 3 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
     # create skip grams
 
-    lns = new_geo_locations.keys()
+    lns2 = set(new_geo_locations)
 
-    for name in lns:
+    show = True
+    for name in lns2:
+
         name_list = name.split()
         name_len = len(name_list)
 
@@ -307,7 +314,12 @@ def run(geo_locations):
                 if new_name in gaz_stopwords:
                     continue
 
-                if new_name not in new_geo_locations:
-                    new_geo_locations[new_name] = new_geo_locations[name]
+                # not in the list of names before augmentation
+                if new_name not in lns:
+                    # if new name is not there already
+                    if new_name not in new_geo_locations:
+                        new_geo_locations[new_name] = new_geo_locations[name]
+                    else:
+                        new_geo_locations[new_name].extend(new_geo_locations[name])
 
     return new_geo_locations, get_extended_longlist_stopwords(new_geo_locations.keys())
