@@ -13,9 +13,9 @@ exclude = set(string.punctuation)
 
 # importing local modules
 
-from word_breaking import word_breaker
+from word_breaker import Word_Breaker
 import Language_Modeling
-from tokenizer import twokenize
+from tokenizer import Twokenize
 
 from tabulate import tabulate
 
@@ -736,27 +736,6 @@ def get_hashtags(tweet_text):
 
     return hashtags
 
-
-def write_fps_to_file(fp):
-
-    if isinstance(fp, unicode):
-        fp = unicodedata.normalize('NFKD', fp).encode('ascii','ignore')
-
-    t = datetime.datetime.now().strftime("%h_%d_%H_%M")
-
-    fname = get_data_dir()+"DevData/FPs_"+gaz_name+"_"+t+".txt"
-
-    if not os.path.isfile(fname):
-        f = open(fname,'w')
-        f.write(str(fp)+"\n") # python will convert \n to os.linesep
-        f.close() # you can omit in most cases as the destructor will call it
-
-    else:
-        f = open(fname, "a+")
-        f.write(str(fp)+"\n")
-        f.close()
-
-
 def create_annotation_in_brat(tweet_text, top, counter, folder):
     fname = get_data_dir()+"Evaluation-Brat/"+ \
                 gaz_name+"/"+folder+"/"+str(counter)
@@ -968,7 +947,7 @@ class init_env:
         # OSM abbr dictionary
         ###################################################
 
-        fname = "Dictionaries/osm_abbreviations_filtered_lowercase.csv"
+        fname = "_Dictionaries/osm_abbreviations_filtered_lowercase.csv"
 
         # read lines to list
         with open(fname) as f:
@@ -1007,7 +986,7 @@ class init_env:
 
         ########################################################################
 
-        streets_suffixes_dict_file = "Dictionaries/streets_suffixes_dict.json"
+        streets_suffixes_dict_file = "_Dictionaries/streets_suffixes_dict.json"
 
         with open(streets_suffixes_dict_file) as f:
 
@@ -1041,11 +1020,11 @@ def start_using_files():
 
     ##############################################
 
-    with open("data/chennai_geo_locations.json") as f:
+    with open("_Data/chennai_geo_locations.json") as f:
         geo_locations = json.load(f)
-    with open("data/chennai_geo_info.json") as f:
+    with open("_Data/chennai_geo_info.json") as f:
         geo_info = json.load(f)
-    with open("data/chennai_extended_words3.json") as f:
+    with open("_Data/chennai_extended_words3.json") as f:
         extended_longlist_stopwords = json.load(f)
 
     env = init_env(geo_locations, extended_longlist_stopwords)
