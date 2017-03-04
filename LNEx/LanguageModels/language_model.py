@@ -1,123 +1,109 @@
-# idea source: http://www.katrinerk.com/courses/python-worksheets/language-models-in-python
-#http://stackoverflow.com/questions/21891247/how-to-append-values-to-generator-while-using-bigrams-in-conditionalfreqdist-met
+'''
+This model is inspired by the following sources:
+> http://www.katrinerk.com/courses/python-worksheets/language-models-in-python
+> http://stackoverflow.com/questions/21891247
+'''
 
+################################################################################
+import json, os
+from itertools import chain
+from collections import defaultdict
 
 import nltk
 from nltk.util import bigrams, trigrams
 from nltk.probability import ConditionalFreqDist, ConditionalProbDist
-
-import operator
-import sys, json, re, os
-from itertools import chain
-from collections import defaultdict, OrderedDict
-
+################################################################################
 
 class LanguageModel:
 
-    def split_string(self, x):
-        strings = x.split(",")
-        strings = [item.split("-") for item in strings]
+    ############################################################################
+    def bigram_probability(self, n_gram):
 
-        return strings
-
-    def bigram_probabilities(self, terms):
-
-        # p(0)
-        prob = (self.unigrams["words"][terms[0]]/
+        # p(w_0)
+        prob = (self.unigrams["words"][n_gram[0]]/
                     float(self.unigrams["words_count"]))
 
-        for x in range(1, len(terms)):
+        if len(n_gram) == 2:
 
-            t1 = terms[x-1]
-            t2 = terms[x]
+            t1 = n_gram[0]
+            t2 = n_gram[1]
 
-            prob *= self.cpd[t1].prob(t2)
+            # p(w_1 | w_0)
+            prob *= self.cpd_bigrams[t1].prob(t2)
 
         return prob
 
-    # noun phrase probability
-    def np_prob(self, np):
+    ############################################################################
+    def phrase_probability(self, phrase):
 
-        terms = np.split()
-        terms = [t.strip() for t in terms]
+        n_gram = phrase.split()
+        n_gram = [t.strip() for t in n_gram]
 
-        # tri or larger than trigrams will fall to tri to smooth it
-        if len(terms) > 2:
+        # tri or larger than trigrams will fall to tri
+        if len(n_gram) > 2:
 
-            # this will take care of p(0) * p(1|0)
-            prob = self.bigram_probabilities(terms[:2])
+            # this will take care of p(w_0) * p(w_1|w_0)
+            prob = self.bigram_probability(n_gram[:2])
 
             # p(2:0&1) ... p(last token : previous 2)
-            for x in range(2, len(terms)):
+            for __x in range(2, len(n_gram)):
 
                 # I went home > t12 = I went , t3 = home
-                t12 = " ".join(terms[x-2:x])
-                t3 = terms[x]
+                t12 = " ".join(n_gram[__x-2:__x])
+                t3 = n_gram[__x]
 
+                # p(w_i | w_i-2 w_i-1)
                 prob *= self.cpd_trigrams[t12].prob(t3)
-
-                #print t12, t3
 
             return prob
 
-        # probability of bi and unigrams
-        elif len(terms) <= 2:
+        # probability of unigrams and bigrams
+        elif len(n_gram) <= 2:
 
-            return self.bigram_probabilities(terms)
+            return self.bigram_probability(n_gram)
 
-
+    ############################################################################
     def __init__(self, geo_locations):
 
-        self.unigrams = defaultdict(int)
-
-        osm_text = list()
-
         words_count = 0
-
-        ########################################################################
 
         # will contain all names in a list which preserves their frequenceis as
         # they appear in the gazetteer. The frequenceis are going to be used in
         # the language model.
-        all_names_text = list()
+        gaz_n_grams = list()
+
+        self.unigrams = defaultdict(int)
 
         for ln in geo_locations:
 
             number_of_mentions = len(geo_locations[ln])
 
-            new_list = [ln] * number_of_mentions
+            n_gram = ln.split()
 
-            all_names_text.extend(new_list)
-        ########################################################################
+            new_list = [n_gram] * number_of_mentions
 
-        for loc_name in all_names_text:
+            gaz_n_grams.extend(new_list)
 
-            loc_name = loc_name.split()
-
-            osm_text.append(loc_name)
-
-            for token in loc_name:
+            for token in n_gram:
                 words_count += 1
                 self.unigrams[token] += 1
 
-
         self.unigrams = { "words" : self.unigrams, "words_count" : words_count}
 
-        # bigrams
-        train_bigrams = list(chain(*[bigrams(i) for i in osm_text]))
+        # bigrams ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        train_bigrams = list(chain(*[bigrams(i) for i in gaz_n_grams]))
 
-        cfd = ConditionalFreqDist()
+        cfd_bigrams = ConditionalFreqDist()
 
         for bg in train_bigrams:
-            #cfd[bg[0]].inc(bg[1])
-            cfd[bg[0]][bg[1]] += 1
+            cfd_bigrams[bg[0]][bg[1]] += 1
 
+        # bigrams MLE probabilities
+        self.cpd_bigrams = nltk.ConditionalProbDist(cfd_bigrams,
+                                        nltk.MLEProbDist)
 
-        # Or if you prefer a one-liner.
-        #cfd = ConditionalFreqDist((bg[0],bg[1]) for bg in list(chain(*[bigrams(i) for i in osm_text])))
-
-        # trigrams
-        train_trigrams = list(chain(*[trigrams(i) for i in osm_text]))
+        # trigrams +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        train_trigrams = list(chain(*[trigrams(i) for i in gaz_n_grams]))
 
         cfd_trigrams = ConditionalFreqDist()
 
@@ -125,57 +111,27 @@ class LanguageModel:
 
             bi_gr = " ".join(bg[:-1])
 
-            #print ">>", bi_gr, ">>>", bg[2]
-
             cfd_trigrams[bi_gr][bg[2]] += 1
 
+        # trigrams MLE probabilities
+        self.cpd_trigrams = nltk.ConditionalProbDist(cfd_trigrams,
+                                        nltk.MLEProbDist)
 
-        self.cpd = nltk.ConditionalProbDist(cfd, nltk.MLEProbDist)
-
-        #trigrams probabilities
-        self.cpd_trigrams = nltk.ConditionalProbDist(cfd_trigrams, nltk.MLEProbDist)
-
-
-def get_data_dir():
-
-    path = os.path.abspath(__file__)
-    dir_path = os.path.dirname(path)
-    list_dir = dir_path.split(os.path.sep)
-    idx_tmp = list_dir.index("DataProcessing")
-
-    data_dir = os.path.sep + os.path.sep.join(list_dir[1:idx_tmp]) + \
-                os.path.sep + "Data" + os.path.sep
-
-    return data_dir
-
-
+################################################################################
 if __name__ == "__main__":
 
-    data_file = get_data_dir()+"CombinedAugmentedGazetteers/chennai_language_model_osm_all_names_augmented.json"
+    data_file = os.path.abspath(os.path.join(os.path.dirname( __file__ ),
+                    '..', 'data', 'chennai_geo_locations.json'))
 
-    lm = LanguageModel(data_file)
+    with open(data_file) as f:
+        geo_locations = json.load(f)
 
-    print lm.np_prob("puram main road sabari")
+    lm = LanguageModel(geo_locations)
 
-    sys.exit()
+    print lm.phrase_probability("new")
 
-    print lm.np_prob("party of india")
-
-    print lm.np_prob("new avadi road")
-
-    print lm.np_prob("srm university")
-
-    #NOTE: using only bigram cause the following problem:
-    '''
-    in west tambaram > in west is legal | west tambaram is legal then the
-    combination is legal by the language model which is not true due to the
-    smoothing.
-
-    now. to solve this we used trigrams. and smooth for more than 3
-
-    example smoothing problem: puram main road sabari.. the full is not legal
-    but the 3grams are legal of the full text
-    '''
-
-    # problem of only 3 grams
-    print lm.np_prob("puram main road sabari")
+    lm.phrase_probability("new avadi")
+    lm.phrase_probability("new avadi road")
+    lm.phrase_probability("party of india")
+    lm.phrase_probability("srm university")
+    lm.phrase_probability("puram main road sabari")

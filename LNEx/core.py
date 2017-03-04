@@ -173,7 +173,7 @@ def build_tree(lm, q):
                 np = " ".join(final_list)
                 np = np.strip()
 
-                score = lm.np_prob(np)
+                score = lm.phrase_probability(np)
 
                 if score > 0:
                     grams_list_key = tuple(final_list) + (tuple(set(node1.tokensIndexes|secondNode.tokensIndexes)),)
@@ -351,7 +351,7 @@ def extract(env, tweet):
         for gram in all_grams:
 
             gram_txt = " ".join(gram)
-            print len(gram), gram, lm.np_prob(gram_txt)
+            print len(gram), gram, lm.phrase_probability(gram_txt)
 
         continue
         '''
@@ -414,7 +414,7 @@ def extract(env, tweet):
 
                 loc_name = sub_query_tokens[idx]
 
-                #print q[idx], "\t", "%.20f" % lm.np_prob(q[idx])
+                #print q[idx], "\t", "%.20f" % lm.phrase_probability(q[idx])
 
                 sub_query_tokens[idx] = [sub_query_tokens[idx]]
 
@@ -499,7 +499,7 @@ def extract(env, tweet):
         #print "sub_query_tokens>>>", "*"*100
 
         #print "===================>", q
-        #print lm.np_prob("saidapet flyover")
+        #print lm.phrase_probability("saidapet flyover")
         #sys.exit()
 
         # remove empty vectors in list
@@ -552,7 +552,7 @@ def extract(env, tweet):
             #print "LEN = 1"
 
             for token in sub_query_tokens[0]:
-                possible_locations[(token, (0,))] = env.lm.np_prob(token)
+                possible_locations[(token, (0,))] = env.lm.phrase_probability(token)
         else:
 
             # @dev
@@ -635,7 +635,7 @@ def extract(env, tweet):
                             max_prob_reco = (y, len(env.gazetteer_unique_names[y]))
 
 
-                    #print y,  "\t%.20f" % lm.np_prob(y)
+                    #print y,  "\t%.20f" % lm.phrase_probability(y)
 
 
                     # 2
@@ -1097,6 +1097,6 @@ def start_using_elastic_index():
 
 if __name__ == "__main__":
 
-    #start_using_files()
+    start_using_files()
 
-    start_using_elastic_index()
+    #start_using_elastic_index()
