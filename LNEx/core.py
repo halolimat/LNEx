@@ -14,7 +14,7 @@ exclude = set(string.punctuation)
 # importing local modules
 
 from word_breaking import word_breaker
-from LanguageModels import language_model
+import Language_Modeling
 from tokenizer import twokenize
 
 from tabulate import tabulate
@@ -128,7 +128,7 @@ def flatten(l):
         else:
             yield el
 
-def build_tree(lm, q):
+def build_tree(glm, q):
 
     possible_locations = defaultdict(float)
 
@@ -173,7 +173,7 @@ def build_tree(lm, q):
                 np = " ".join(final_list)
                 np = np.strip()
 
-                score = lm.phrase_probability(np)
+                score = glm.phrase_probability(np)
 
                 if score > 0:
                     grams_list_key = tuple(final_list) + (tuple(set(node1.tokensIndexes|secondNode.tokensIndexes)),)
@@ -520,7 +520,7 @@ def extract(env, tweet):
         # if the query contains more than one vector then build the tree
         if len(sub_query_tokens) > 1:
 
-            possible_locations = build_tree(env.lm, sub_query_tokens)
+            possible_locations = build_tree(env.glm, sub_query_tokens)
 
             # @dev
             #print "LEN > 1"
@@ -552,7 +552,7 @@ def extract(env, tweet):
             #print "LEN = 1"
 
             for token in sub_query_tokens[0]:
-                possible_locations[(token, (0,))] = env.lm.phrase_probability(token)
+                possible_locations[(token, (0,))] = env.glm.phrase_probability(token)
         else:
 
             # @dev
@@ -1015,12 +1015,13 @@ class init_env:
 
         ############################################################################
 
-        self.lm = language_model.LanguageModel(geo_locations)
+        # gazetteer-based language model
+        self.glm = Language_Modeling.GazBasedModel(geo_locations)
 
         ############################################################################
 
         #list of unigrams
-        unigrams = self.lm.unigrams["words"].keys()
+        unigrams = self.glm.unigrams["words"].keys()
 
         self.stopwords_notin_gazetteer = set(self.extended_longlist_stopwords) - set(unigrams)
 

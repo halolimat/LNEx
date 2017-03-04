@@ -14,10 +14,10 @@ from nltk.util import bigrams, trigrams
 from nltk.probability import ConditionalFreqDist, ConditionalProbDist
 ################################################################################
 
-class LanguageModel:
+class GazBasedModel:
 
     ############################################################################
-    def bigram_probability(self, n_gram):
+    def _bigram_probability(self, n_gram):
 
         # p(w_0)
         prob = (self.unigrams["words"][n_gram[0]]/
@@ -43,9 +43,9 @@ class LanguageModel:
         if len(n_gram) > 2:
 
             # this will take care of p(w_0) * p(w_1|w_0)
-            prob = self.bigram_probability(n_gram[:2])
+            prob = self._bigram_probability(n_gram[:2])
 
-            # p(2:0&1) ... p(last token : previous 2)
+            # calculate the probabilities where n > 3
             for __x in range(2, len(n_gram)):
 
                 # I went home > t12 = I went , t3 = home
@@ -60,7 +60,7 @@ class LanguageModel:
         # probability of unigrams and bigrams
         elif len(n_gram) <= 2:
 
-            return self.bigram_probability(n_gram)
+            return self._bigram_probability(n_gram)
 
     ############################################################################
     def __init__(self, geo_locations):
@@ -121,12 +121,12 @@ class LanguageModel:
 if __name__ == "__main__":
 
     data_file = os.path.abspath(os.path.join(os.path.dirname( __file__ ),
-                    '..', 'data', 'chennai_geo_locations.json'))
+                    'data', 'chennai_geo_locations.json'))
 
     with open(data_file) as f:
         geo_locations = json.load(f)
 
-    lm = LanguageModel(geo_locations)
+    lm = GazBasedModel(geo_locations)
 
     print lm.phrase_probability("new")
 
