@@ -13,7 +13,7 @@ exclude = set(string.punctuation)
 
 # importing local modules
 
-from word_breaker import Word_Breaker
+from wordsegment import segment
 import Language_Modeling
 from tokenizer import Twokenize
 
@@ -91,7 +91,7 @@ def preprocess_tweet(tweet):
         # ex: Troll_Cinema => TrollCinema
         token = token.translate(None, ''.join(string.punctuation))
 
-        segments = word_breaker.segment(token)
+        segments = segment(token)
         segments = ' '.join(segments)
 
         replacements[term] = segments
@@ -921,7 +921,7 @@ def start_using_files():
 
     env = init_env(geo_locations, extended_longlist_stopwords)
 
-    tweet = "new avadi rd, chennai, mambalam"
+    tweet = "I am at new avadi rd, chennai, mambalam #chennaiflood #newavadiroad"
 
     # set of > (tweet_mention, offsets, geo_location)
     toponyms_in_tweet = extract(env, tweet)
@@ -950,7 +950,7 @@ def start_using_elastic_index():
 
     env = init_env(geo_locations, extended_longlist_stopwords)
 
-    tweet = "I am at new avadi rd, chennai, mambalam"
+    tweet = "I am at new avadi rd, chennai, mambalam #chennaiflood #newavadiroad"
 
     # set of > (tweet_mention, offsets, geo_location)
     toponyms_in_tweet = extract(env, tweet)

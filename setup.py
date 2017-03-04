@@ -26,6 +26,7 @@ setup(
           'elasticsearch-dsl',
           'nltk',
           'geopy',
-          'texttable'
+          'texttable',
+          'wordsegment'
       ]
 )
