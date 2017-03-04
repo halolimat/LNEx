@@ -197,7 +197,7 @@ def build_tree(glm, q):
 def using_split2(line, _len=len):
     #words = line.split()
     #words = tknzr.tokenize(line)
-    words = twokenize.tokenize(line)
+    words = Twokenize.tokenize(line)
     index = line.index
     offsets = []
     append = offsets.append
@@ -286,7 +286,7 @@ def extract(env, tweet):
     # prune the tree of locations based on the exisitence of stop words
     # by splitting the query into multiple queries
     #query_splits = tknzr.tokenize(query)
-    query_splits = twokenize.tokenize(query)
+    query_splits = Twokenize.tokenize(query)
     stop_in_query = env.stopwords_notin_gazetteer & set(query_splits)
     #stop_in_query = stopwords_notin_gazetteer & set(query.split())
 
@@ -683,8 +683,6 @@ def extract(env, tweet):
 
     toponyms_in_query = filterout_overlaps(toponyms_in_query, env.gazetteer_unique_names_set, location_names_from_cartisian_product)
 
-    #toponyms_in_query, final_lns = remove_non_full_mentions(env, toponyms_in_query, location_names_from_cartisian_product, query_tokens)
-
     # set of > ((offsets), probability), full_mention)
     toponyms_in_query = remove_non_full_mentions(toponyms_in_query, env.gazetteer_unique_names_set, location_names_from_cartisian_product, query_tokens)
 
@@ -692,80 +690,6 @@ def extract(env, tweet):
     toponyms_in_query = [(tweet[x[0][0][0]:x[0][0][1]], (x[0][0][0], x[0][0][1]), x[1]) for x in toponyms_in_query]
 
     return toponyms_in_query
-
-
-def insideHashtag(offsets, hashtags):
-
-    for hashtag in hashtags:
-
-        if offsets[0] > hashtag[0] and offsets[1] <= hashtag[1]+1:
-            return True
-
-        # if hashtag inside location mention
-        # ex: #Mississippi river > then discard the whole top
-        elif hashtag[0]+1 >= offsets[0] and hashtag[1] <= offsets[1]:
-            return True
-
-    return False
-
-def findOccurences(s, ch):
-    return [i for i, letter in enumerate(s) if letter == ch]
-
-def get_hashtags(tweet_text):
-
-    indexes_hashtags = findOccurences(tweet_text, "#")
-    indexes_spaces = findOccurences(tweet_text, " ")
-
-    #print indexes_hashtags
-    #print indexes_spaces
-
-    hashtags = list()
-
-    for h_x in indexes_hashtags:
-
-        hashtag_at_end = True
-
-        for s_y in indexes_spaces:
-            if s_y > h_x:
-                hashtags.append([h_x, s_y])
-                hashtag_at_end = False
-                break
-
-        if hashtag_at_end:
-            hashtags.append([h_x, len(tweet_text)])
-
-    return hashtags
-
-def create_annotation_in_brat(tweet_text, top, counter, folder):
-    fname = get_data_dir()+"Evaluation-Brat/"+ \
-                gaz_name+"/"+folder+"/"+str(counter)
-
-    if not os.path.isfile(fname+".txt"):
-        f = open(fname+".txt",'w')
-        f.write(tweet_text) # python will convert \n to os.linesep
-        f.close() # you can omit in most cases as the destructor will call it
-
-    '''
-    Example:
-
-    T1	Toponym 91 98	Chennai
-    T2	Imp-Top 57 63	runway
-
-    '''
-
-    with open(fname+".ann", "a+") as annfile:
-        l = str(len(annfile.readlines()))
-
-        line = ""
-
-        if folder == "Machine":
-            line = "T"+l+"\t"+"Toponym "+str(top[0])+" "+str(top[1])+"\t"+tweet_text[top[0]:top[1]]
-
-        else:
-            line = "T"+l+"\t"+top[0]+" "+str(top[1][0])+" "+str(top[1][1])+"\t"+tweet_text[top[1][0]:top[1][1]]
-
-
-        annfile.write(line+"\n")
 
 
 def do_they_overlay(tub1, tub2):
@@ -831,38 +755,6 @@ def remove_non_full_mentions(tops, gazetteer_unique_names_set, location_names_fr
                                         t = (t, candidate_top)
 
                                         final_set.add(t)
-
-    return final_set
-
-
-def remove_non_frequesnt_mentions(tops, gazetteer_unique_names_set, location_names_from_cartisian_product, gazetteer_unique_names):
-
-    original_set = set(tops)
-
-    final_set = set()
-
-    for x in original_set:
-
-        '''
-
-        location_names_from_cartisian_product:
-
-        (0, 3): [loc1, loc2...]
-
-        ex:
-
-        (0, 3): ["Balalok Higher School" ....]
-
-
-        '''
-
-        tops_name = location_names_from_cartisian_product[x[0]]
-
-        for top_name in tops_name:
-            if top_name[0] in gazetteer_unique_names_set:
-                if len(gazetteer_unique_names[top_name[0]]) > 1:
-                    final_set.add(x)
-                    break
 
     return final_set
 
