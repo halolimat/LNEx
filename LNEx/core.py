@@ -13,9 +13,9 @@ exclude = set(string.punctuation)
 
 # importing local modules
 
-from word_breaking import word_breaker
-from LanguageModels import language_model
-from tokenizer import twokenize
+from wordsegment import segment
+import Language_Modeling
+from tokenizer import Twokenize
 
 from tabulate import tabulate
 
@@ -91,7 +91,7 @@ def preprocess_tweet(tweet):
         # ex: Troll_Cinema => TrollCinema
         token = token.translate(None, ''.join(string.punctuation))
 
-        segments = word_breaker.segment(token)
+        segments = segment(token)
         segments = ' '.join(segments)
 
         replacements[term] = segments
@@ -128,7 +128,7 @@ def flatten(l):
         else:
             yield el
 
-def build_tree(lm, q):
+def build_tree(glm, q):
 
     possible_locations = defaultdict(float)
 
@@ -173,7 +173,7 @@ def build_tree(lm, q):
                 np = " ".join(final_list)
                 np = np.strip()
 
-                score = lm.np_prob(np)
+                score = glm.phrase_probability(np)
 
                 if score > 0:
                     grams_list_key = tuple(final_list) + (tuple(set(node1.tokensIndexes|secondNode.tokensIndexes)),)
@@ -197,7 +197,7 @@ def build_tree(lm, q):
 def using_split2(line, _len=len):
     #words = line.split()
     #words = tknzr.tokenize(line)
-    words = twokenize.tokenize(line)
+    words = Twokenize.tokenize(line)
     index = line.index
     offsets = []
     append = offsets.append
@@ -286,7 +286,7 @@ def extract(env, tweet):
     # prune the tree of locations based on the exisitence of stop words
     # by splitting the query into multiple queries
     #query_splits = tknzr.tokenize(query)
-    query_splits = twokenize.tokenize(query)
+    query_splits = Twokenize.tokenize(query)
     stop_in_query = env.stopwords_notin_gazetteer & set(query_splits)
     #stop_in_query = stopwords_notin_gazetteer & set(query.split())
 
@@ -351,7 +351,7 @@ def extract(env, tweet):
         for gram in all_grams:
 
             gram_txt = " ".join(gram)
-            print len(gram), gram, lm.np_prob(gram_txt)
+            print len(gram), gram, lm.phrase_probability(gram_txt)
 
         continue
         '''
@@ -414,7 +414,7 @@ def extract(env, tweet):
 
                 loc_name = sub_query_tokens[idx]
 
-                #print q[idx], "\t", "%.20f" % lm.np_prob(q[idx])
+                #print q[idx], "\t", "%.20f" % lm.phrase_probability(q[idx])
 
                 sub_query_tokens[idx] = [sub_query_tokens[idx]]
 
@@ -499,7 +499,7 @@ def extract(env, tweet):
         #print "sub_query_tokens>>>", "*"*100
 
         #print "===================>", q
-        #print lm.np_prob("saidapet flyover")
+        #print lm.phrase_probability("saidapet flyover")
         #sys.exit()
 
         # remove empty vectors in list
@@ -520,7 +520,7 @@ def extract(env, tweet):
         # if the query contains more than one vector then build the tree
         if len(sub_query_tokens) > 1:
 
-            possible_locations = build_tree(env.lm, sub_query_tokens)
+            possible_locations = build_tree(env.glm, sub_query_tokens)
 
             # @dev
             #print "LEN > 1"
@@ -552,7 +552,7 @@ def extract(env, tweet):
             #print "LEN = 1"
 
             for token in sub_query_tokens[0]:
-                possible_locations[(token, (0,))] = env.lm.np_prob(token)
+                possible_locations[(token, (0,))] = env.glm.phrase_probability(token)
         else:
 
             # @dev
@@ -635,7 +635,7 @@ def extract(env, tweet):
                             max_prob_reco = (y, len(env.gazetteer_unique_names[y]))
 
 
-                    #print y,  "\t%.20f" % lm.np_prob(y)
+                    #print y,  "\t%.20f" % lm.phrase_probability(y)
 
 
                     # 2
@@ -683,8 +683,6 @@ def extract(env, tweet):
 
     toponyms_in_query = filterout_overlaps(toponyms_in_query, env.gazetteer_unique_names_set, location_names_from_cartisian_product)
 
-    #toponyms_in_query, final_lns = remove_non_full_mentions(env, toponyms_in_query, location_names_from_cartisian_product, query_tokens)
-
     # set of > ((offsets), probability), full_mention)
     toponyms_in_query = remove_non_full_mentions(toponyms_in_query, env.gazetteer_unique_names_set, location_names_from_cartisian_product, query_tokens)
 
@@ -692,101 +690,6 @@ def extract(env, tweet):
     toponyms_in_query = [(tweet[x[0][0][0]:x[0][0][1]], (x[0][0][0], x[0][0][1]), x[1]) for x in toponyms_in_query]
 
     return toponyms_in_query
-
-
-def insideHashtag(offsets, hashtags):
-
-    for hashtag in hashtags:
-
-        if offsets[0] > hashtag[0] and offsets[1] <= hashtag[1]+1:
-            return True
-
-        # if hashtag inside location mention
-        # ex: #Mississippi river > then discard the whole top
-        elif hashtag[0]+1 >= offsets[0] and hashtag[1] <= offsets[1]:
-            return True
-
-    return False
-
-def findOccurences(s, ch):
-    return [i for i, letter in enumerate(s) if letter == ch]
-
-def get_hashtags(tweet_text):
-
-    indexes_hashtags = findOccurences(tweet_text, "#")
-    indexes_spaces = findOccurences(tweet_text, " ")
-
-    #print indexes_hashtags
-    #print indexes_spaces
-
-    hashtags = list()
-
-    for h_x in indexes_hashtags:
-
-        hashtag_at_end = True
-
-        for s_y in indexes_spaces:
-            if s_y > h_x:
-                hashtags.append([h_x, s_y])
-                hashtag_at_end = False
-                break
-
-        if hashtag_at_end:
-            hashtags.append([h_x, len(tweet_text)])
-
-    return hashtags
-
-
-def write_fps_to_file(fp):
-
-    if isinstance(fp, unicode):
-        fp = unicodedata.normalize('NFKD', fp).encode('ascii','ignore')
-
-    t = datetime.datetime.now().strftime("%h_%d_%H_%M")
-
-    fname = get_data_dir()+"DevData/FPs_"+gaz_name+"_"+t+".txt"
-
-    if not os.path.isfile(fname):
-        f = open(fname,'w')
-        f.write(str(fp)+"\n") # python will convert \n to os.linesep
-        f.close() # you can omit in most cases as the destructor will call it
-
-    else:
-        f = open(fname, "a+")
-        f.write(str(fp)+"\n")
-        f.close()
-
-
-def create_annotation_in_brat(tweet_text, top, counter, folder):
-    fname = get_data_dir()+"Evaluation-Brat/"+ \
-                gaz_name+"/"+folder+"/"+str(counter)
-
-    if not os.path.isfile(fname+".txt"):
-        f = open(fname+".txt",'w')
-        f.write(tweet_text) # python will convert \n to os.linesep
-        f.close() # you can omit in most cases as the destructor will call it
-
-    '''
-    Example:
-
-    T1	Toponym 91 98	Chennai
-    T2	Imp-Top 57 63	runway
-
-    '''
-
-    with open(fname+".ann", "a+") as annfile:
-        l = str(len(annfile.readlines()))
-
-        line = ""
-
-        if folder == "Machine":
-            line = "T"+l+"\t"+"Toponym "+str(top[0])+" "+str(top[1])+"\t"+tweet_text[top[0]:top[1]]
-
-        else:
-            line = "T"+l+"\t"+top[0]+" "+str(top[1][0])+" "+str(top[1][1])+"\t"+tweet_text[top[1][0]:top[1][1]]
-
-
-        annfile.write(line+"\n")
 
 
 def do_they_overlay(tub1, tub2):
@@ -852,38 +755,6 @@ def remove_non_full_mentions(tops, gazetteer_unique_names_set, location_names_fr
                                         t = (t, candidate_top)
 
                                         final_set.add(t)
-
-    return final_set
-
-
-def remove_non_frequesnt_mentions(tops, gazetteer_unique_names_set, location_names_from_cartisian_product, gazetteer_unique_names):
-
-    original_set = set(tops)
-
-    final_set = set()
-
-    for x in original_set:
-
-        '''
-
-        location_names_from_cartisian_product:
-
-        (0, 3): [loc1, loc2...]
-
-        ex:
-
-        (0, 3): ["Balalok Higher School" ....]
-
-
-        '''
-
-        tops_name = location_names_from_cartisian_product[x[0]]
-
-        for top_name in tops_name:
-            if top_name[0] in gazetteer_unique_names_set:
-                if len(gazetteer_unique_names[top_name[0]]) > 1:
-                    final_set.add(x)
-                    break
 
     return final_set
 
@@ -968,7 +839,7 @@ class init_env:
         # OSM abbr dictionary
         ###################################################
 
-        fname = "Dictionaries/osm_abbreviations_filtered_lowercase.csv"
+        fname = "_Dictionaries/osm_abbreviations_filtered_lowercase.csv"
 
         # read lines to list
         with open(fname) as f:
@@ -1007,7 +878,7 @@ class init_env:
 
         ########################################################################
 
-        streets_suffixes_dict_file = "Dictionaries/streets_suffixes_dict.json"
+        streets_suffixes_dict_file = "_Dictionaries/streets_suffixes_dict.json"
 
         with open(streets_suffixes_dict_file) as f:
 
@@ -1015,12 +886,13 @@ class init_env:
 
         ############################################################################
 
-        self.lm = language_model.LanguageModel(geo_locations)
+        # gazetteer-based language model
+        self.glm = Language_Modeling.GazBasedModel(geo_locations)
 
         ############################################################################
 
         #list of unigrams
-        unigrams = self.lm.unigrams["words"].keys()
+        unigrams = self.glm.unigrams["words"].keys()
 
         self.stopwords_notin_gazetteer = set(self.extended_longlist_stopwords) - set(unigrams)
 
@@ -1075,16 +947,16 @@ def start_using_files():
 
     ##############################################
 
-    with open("data/chennai_geo_locations.json") as f:
+    with open("_Data/chennai_geo_locations.json") as f:
         geo_locations = json.load(f)
-    with open("data/chennai_geo_info.json") as f:
+    with open("_Data/chennai_geo_info.json") as f:
         geo_info = json.load(f)
-    with open("data/chennai_extended_words3.json") as f:
+    with open("_Data/chennai_extended_words3.json") as f:
         extended_longlist_stopwords = json.load(f)
 
     env = init_env(geo_locations, extended_longlist_stopwords)
 
-    tweet = "new avadi rd, chennai, mambalam"
+    tweet = "I am at new avadi rd, chennai, mambalam #chennaiflood #newavadiroad"
 
     # set of > (tweet_mention, offsets, geo_location)
     toponyms_in_tweet = extract(env, tweet)
@@ -1115,7 +987,7 @@ def start_using_elastic_index():
 
     env = init_env(geo_locations, extended_longlist_stopwords)
 
-    tweet = "I am at new avadi rd, chennai, mambalam"
+    tweet = "I am at new avadi rd, chennai, mambalam #chennaiflood #newavadiroad"
 
     # set of > (tweet_mention, offsets, geo_location)
     toponyms_in_tweet = extract(env, tweet)
