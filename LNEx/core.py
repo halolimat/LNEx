@@ -1,7 +1,7 @@
 import numpy
 import itertools
 import collections
-import unicodedata
+
 import re, string, json
 from itertools import groupby
 from operator import itemgetter
