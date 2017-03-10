@@ -46,7 +46,7 @@ for n_nbr, n in enumerate(N):
 
     length = len(n)
 
-    if length > 3:
+    if length > 4:
         continue
 
     words_count += length
@@ -82,6 +82,11 @@ for n_nbr, n in enumerate(N):
 
             z[w][n_nbr] = (c[w]/float(b[w]))/float(sum([c[w_1]/float(b[w_1]) for w_1 in n]))
 
+            '''if z[w][n_nbr] > 0:
+                z[w][n_nbr] = 1
+            else:
+                z[w][n_nbr] = 0'''
+
             c[w] = sum([z[w][p_of_w_in_n] for p_of_w_in_n in z[w]])/float(N_len)
 
             b[w] = sum([1-z[w][p_of_w_in_n] for p_of_w_in_n in z[w]])/float(words_count-N_len)
@@ -112,7 +117,7 @@ for n_nbr, n in enumerate(N):
     #######
 
     if sum(l) == 0:
-        
+
         c_idx = np.where(b_arr == b_arr.min())
 
         core = [n[i] for i in np.nditer(c_idx)]
