@@ -1,4 +1,5 @@
 import re
+import os
 import json
 import string
 import itertools
@@ -542,11 +543,24 @@ def extract(tweet):
         valid_n_grams_from_cartisian_product,
         query_tokens)
 
-    # set of > (tweet_mention, offsets, geo_location)
-    location_names_in_query = [(tweet[x[0][0][0]:x[0][0][1]],
-                          (x[0][0][0], x[0][0][1]), x[1]) for x in location_names_in_query]
+    # --------------------------------------------------------------------------
 
-    return location_names_in_query
+    # list of > (tweet_mention, offsets, geo_location, geo_info)
+    final_lns = list()
+
+    for ln in location_names_in_query:
+
+        tweet_mention = tweet[ln[0][0][0]:ln[0][0][1]]
+        mention_offsets = (ln[0][0][0], ln[0][0][1])
+        geo_location = ln[1]
+        geo_info_ids = env.gazetteer_unique_names[ln[1]]
+
+        final_lns.append((  tweet_mention,
+                            mention_offsets,
+                            geo_location,
+                            geo_info_ids))
+
+    return final_lns
 
 ################################################################################
 
@@ -702,7 +716,10 @@ class init_env:
         # OSM abbr dictionary
         ###################################################
 
-        fname = "_Dictionaries/osm_abbreviations.csv"
+        dicts_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                        "_Dictionaries/")
+
+        fname = dicts_dir + "osm_abbreviations.csv"
 
         # read lines to list
         with open(fname) as f:
@@ -741,7 +758,7 @@ class init_env:
 
         #######################################################################
 
-        streets_suffixes_dict_file = "_Dictionaries/streets_suffixes_dict.json"
+        streets_suffixes_dict_file = dicts_dir + "streets_suffixes_dict.json"
 
         with open(streets_suffixes_dict_file) as f:
 

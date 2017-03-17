@@ -2,17 +2,20 @@ import core
 import osm_gazetteer
 
 
-def init(geo_locations, extended_words3):
+def initialize_using_files(geo_locations, extended_words3):
     core.initialize(geo_locations, extended_words3)
 
-def build_gazetteer(bb):
+def initialize(bb):
 
-    osm_gazetteer.set_host_port('130.108.85.186:9200')
+    geo_locations, geo_info, extended_words3 = \
+            osm_gazetteer.build_bb_gazetteer(bb)
 
-    return osm_gazetteer.build_bb_gazetteer(bb)
+    core.initialize(geo_locations, extended_words3)
 
-def build_lm(gazetteer):
-    return gazetteer
+def extract(tweet):
 
-def extract_locations(tweet, lm):
-    return tweet, lm
+    return core.extract(tweet)
+
+def set_connection_string(conn_str):
+
+    osm_gazetteer.set_connection_string(conn_str)

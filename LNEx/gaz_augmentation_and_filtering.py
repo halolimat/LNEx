@@ -1,4 +1,4 @@
-import re
+import re, os
 import unicodedata
 from itertools import groupby
 from operator import itemgetter
@@ -156,7 +156,7 @@ def find_ngrams(input_list, n):
 def get_extended_words3(unique_names):
 
     # words3(words3) source: https://github.com/dwyl/english-words
-    with open("Dictionaries/words3.txt") as f:
+    with open(get_dicts_dir() + "words3.txt") as f:
 
         words3 = f.read().splitlines()
         words3 = [x.lower() for x in words3]
@@ -172,7 +172,11 @@ def get_extended_words3(unique_names):
 
     return list(words3)
 
-##########################################################################
+################################################################################
+
+def get_dicts_dir():
+    return os.path.join(os.path.dirname(os.path.realpath(__file__)),
+            '_Dictionaries/')
 
 
 def run(geo_locations):
@@ -185,7 +189,7 @@ def run(geo_locations):
 
     """
 
-    ##########################################################################
+    ############################################################################
 
     names_to_remove = set(["(U/C)",
                            "(East)",
@@ -228,7 +232,7 @@ def run(geo_locations):
     names_to_remove = set([x.lower() for x in names_to_remove])
 
     # will help in filtering out unigram location names
-    gaz_stopwords = "Dictionaries/gaz_stopwords.txt"
+    gaz_stopwords = get_dicts_dir() + "gaz_stopwords.txt"
     gaz_stopwords = set([line.strip() for line in open(gaz_stopwords, 'r')])
 
     ##########################################################################
