@@ -12,15 +12,23 @@ printable = set(string.printable)
 exclude = set(string.punctuation)
 
 # importing local modules
-
 import Language_Modeling
 from tokenizer import Twokenize
 
-##########################################################################
-##########################################################################
-##########################################################################
+################################################################################
 
+# LNEx global environment
+env = None
 
+def set_global_env(g_env):
+    global env
+    env = g_env
+
+################################################################################
+################################################################################
+################################################################################
+
+# Stack data structure
 class Stack:
     def __init__(self):
         self.items = []
@@ -34,29 +42,32 @@ class Stack:
     def notEmpty(self):
         return self.items != []
 
+################################################################################
 
+# Tree data structure. Used for building the bottom up tree of valid n-grams
 class Tree:
     def __init__(
             self,
             cargo,
             left=None,
             right=None,
-            isCoupled=False,
             level=1,
             tokensIndexes=set()):
+        # the data of the node. i.e., the n-gram tokens
         self.cargo = cargo
+        # left child of tree node
         self.left = left
+        # right child of tree node
         self.right = right
-        self.isCoupled = isCoupled
+        # unigrams are level 1 -> bigrams are level 2
         self.level = level
+        # n-gram tokens indexes from the original tweet text
         self.tokensIndexes = tokensIndexes
 
     def __str__(self):
         return str(self.cargo)
 
-
-##########################################################################
-##########################################################################
+################################################################################
 
 def preprocess_tweet(tweet):
 
@@ -76,7 +87,6 @@ def preprocess_tweet(tweet):
 
     # remove non-ascii characters
     tweet = filter(lambda x: x in printable, tweet)
-    #tweet = tweet.encode('ascii',errors='ignore')
 
     # additional preprocessing
     tweet = tweet.replace("\n", " ").replace(" https", "").replace("http", "")
@@ -84,30 +94,31 @@ def preprocess_tweet(tweet):
     # remove all mentions
     tweet = re.sub(r"@\w+", "", tweet)
 
-    # break hashtags +++++++++++++
+    # extract hashtags to break them -------------------------------------------
     hashtags = re.findall(r"#\w+", tweet)
 
+    # This will contain all hashtags mapped to their broken segments
+    # e.g., #ChennaiFlood : {chennai, flood}
     replacements = defaultdict()
 
-    # NOTE: #Ramapuram is being broken, we should check in the unigrams before
-    # breaking it
-    for term in hashtags:
+    for hashtag in hashtags:
 
-        token = term[1:]
+        # keep the hashtag with the # symbol
+        _h = hashtag[1:]
 
         # remove any punctuations from the hashtag and mention
         # ex: Troll_Cinema => TrollCinema
-        token = token.translate(None, ''.join(string.punctuation))
+        _h = _h.translate(None, ''.join(string.punctuation))
 
-        segments = segment(token)
+        # breaks the hashtag
+        segments = segment(_h)
+        # concatenate the tokens with spaces between them
         segments = ' '.join(segments)
 
-        replacements[term] = segments
+        replacements[hashtag] = segments
 
-        #tweet = tweet.replace(term, segments)
-
-    # fix replacement of hashtags
-    # #la #laflood >> replace the longest first
+    # replacement of hashtags in tweets
+    # e.g., if #la & #laflood in the same tweet >> replace the longest first
     for k in sorted(
             replacements,
             key=lambda k: len(
@@ -115,14 +126,14 @@ def preprocess_tweet(tweet):
             reverse=True):
         tweet = tweet.replace(k, replacements[k])
 
-    #+++++++++++++++++++++++++++++++++++++++++++
-    # padding punctuation
-    #tweet = re.sub('([.,!?()-])', r' \1 ', tweet)
+    # --------------------------------------------------------------------------
+
+    # padding punctuations
     tweet = re.sub('([,!?():])', r' \1 ', tweet)
 
-    tweet = tweet.replace(". ", " . ")
-    tweet = tweet.replace("-", " ")
+    tweet = tweet.replace(". ", " . ").replace("-", " ")
 
+    # shrink blank spaces in preprocessed tweet text to only one space
     tweet = re.sub('\s{2,}', ' ', tweet)
 
     # remove trailing spaces
@@ -130,38 +141,39 @@ def preprocess_tweet(tweet):
 
     return tweet
 
+################################################################################
 
-# based on: http://stackoverflow.com/questions/2158395
+# based on Cristian answer @ http://stackoverflow.com/questions/2158395
 def flatten(l):
     for el in l:
-        if isinstance(
-                el,
-                collections.Iterable) and not isinstance(
-                el,
-                basestring):
+        if isinstance(el, collections.Iterable) and not \
+           isinstance(el, basestring):
             for sub in flatten(el):
                 yield sub
         else:
             yield el
 
+################################################################################
 
-def build_tree(glm, q):
+# given the gazetteer langauge model (glm) and the tweet segment (ts), this
+# function is going to build a bottom up tree of valid n-grams
+def build_tree(glm, ts):
 
-    possible_locations = defaultdict(float)
+    # dictionary of valid n-grams
+    valid_n_grams = defaultdict(float)
 
+    # store tree nodes in a stack
     nodes = Stack()
 
-    # init leaf nodes
-    for index, token in enumerate(q):
+    # init leaf nodes from the unigrams
+    for index, token in enumerate(ts):
         nodes.push(
             Tree(
                 cargo=token,
                 left=None,
                 right=None,
-                isCoupled=False,
                 level=1,
-                tokensIndexes=set(
-                    [index])))
+                tokensIndexes=set([index])))
 
     node1 = None
     node2 = None
@@ -176,61 +188,63 @@ def build_tree(glm, q):
             node1 = node2
             node2 = nodes.pop()
 
+        # process nodes of similar n-gram degree/level
         if node1.level == node2.level:
 
-            grams_list = list()
-
-            secondNode = node2
+            _node2 = node2
 
             # if there is a common child take only the right child
             if node1.right == node2.left and node1.right is not None:
-                secondNode = node2.right
+                _node2 = node2.right
 
-            for i in itertools.product(node1.cargo, secondNode.cargo):
+            tokens_list = list()
 
-                # flatten the list
+            # find valid n-grams from the cartisian product of two tree nodes
+            for i in itertools.product(node1.cargo, _node2.cargo):
+
+                # flatten the list of lists
                 flattened = list(flatten(i))
 
                 # remove consecutive duplicates
                 final_list = map(itemgetter(0), groupby(flattened))
 
                 # prune based on the probability from the language model
-                np = " ".join(final_list)
-                np = np.strip()
+                p = " ".join(final_list)
+                p = p.strip()
 
-                score = glm.phrase_probability(np)
+                # the probability of a phrase p calculated by the language model
+                score = glm.phrase_probability(p)
 
+                # if an n-gram is valid then add it to the dictionary
                 if score > 0:
-                    grams_list_key = tuple(
-                        final_list) + (tuple(set(node1.tokensIndexes | secondNode.tokensIndexes)),)
 
-                    # print grams_list_key
+                    # e.g., ('avadi', 'rd', (4, 5))
+                    valid_n_gram = tuple(final_list) + \
+                                    (tuple(set(node1.tokensIndexes | \
+                                    _node2.tokensIndexes)),)
 
-                    possible_locations[grams_list_key] = score
+                    # e.g., ('avadi', 'rd', (4, 5)) 5.67800416892e-05
+                    valid_n_grams[valid_n_gram] = score
 
-                    grams_list.append(final_list)
+                    # the cargo of the node
+                    tokens_list.append(final_list)
 
+            # create higher level nodes and store them in the stack
             nodes.push(
                 Tree(
-                    grams_list,
+                    tokens_list,
                     node1,
                     node2,
-                    False,
                     (node1.level + node2.level),
                     (node1.tokensIndexes | node2.tokensIndexes)))
 
-    return possible_locations
+    return valid_n_grams
 
-##########################################################################
-##########################################################################
-##########################################################################
+################################################################################
 
-# source: http://stackoverflow.com/questions/9518806/
-
-
+# based on aquavitae answer @ http://stackoverflow.com/questions/9518806/
+# tokenize the tweet and retain the offsets of each token
 def using_split2(line, _len=len):
-    #words = line.split()
-    #words = tknzr.tokenize(line)
     words = Twokenize.tokenize(line)
     index = line.index
     offsets = []
@@ -243,7 +257,9 @@ def using_split2(line, _len=len):
         append((word, word_offset, running_offset - 1))
     return offsets
 
+################################################################################
 
+# based on AkiRoss answer @ http://stackoverflow.com/questions/4664850
 def findall(p, s):
     '''Yields all the positions of
     the pattern p in the string s.'''
@@ -252,20 +268,20 @@ def findall(p, s):
         yield i
         i = s.find(p, i + 1)
 
-# a is the raw string
-# b is the preprocessed string
+################################################################################
 
-
-def align_and_split(a, b):
+# This function will align the offsets of the preprocessed string with the
+# raw string to retain original offsets when outputing spotted location names
+def align_and_split(raw_string, preprocessed_string):
 
     tokens = list()
 
     last_index = 0
 
-    for token in using_split2(b):
+    for token in using_split2(preprocessed_string):
 
-        matches = [(a[i:len(token[0]) + i], i, len(token[0]) + i - 1)
-                   for i in findall(token[0], a)]
+        matches = [(raw_string[i:len(token[0]) + i], i, len(token[0]) + i - 1)
+                   for i in findall(token[0], raw_string)]
 
         for match in matches:
             if match[1] >= last_index:
@@ -275,61 +291,56 @@ def align_and_split(a, b):
 
     return tokens
 
-#$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-#$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-#$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-#$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-#$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-#$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-#$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+################################################################################
+################################################################################
 
+# given a tweet, this function will extract all location names from it
+'''
+    returns a list of the following 4 items tuple:
+        tweet_mention, mention_offsets, geo_location, geo_info_id
 
-def extract(env, tweet):
-    '''
-    will contain for example:
+        tweet_mention:   is the location mention in the tweet
+                         (substring retrieved from the mention offsets)
 
-    defaultdict(<type 'list'>, {(0, 11): [(u'new avadi road', 3)], (0, 8): [(u'new avadi', 2)], (4, 11): [(u'avadi rd', 2), (u'avvai road', 2), (u'avadi road', 2)]})
+        mention_offsets: a tuple of the start and end offsets of the LN
 
-    '''
+        geo_location:    the matched location name from the gazetteer.
+                         e.g., new avadi rd > New Avadi Road
+
+        geo_info_id:     contains the attached metadata of all the matched
+                         location names from the gazetteer
+'''
+def extract(tweet):
+
+    # check if environment was correctly initialized
+    if env == None:
+        print "\n##################################################"
+        print "Global ERROR: LNEx environment must be initialized"
+        print "##################################################\n"
+        exit()
+
+    # --------------------------------------------------------------------------
+
+    #will contain for example: (0, 11): [(u'new avadi road', 3)]
     location_names_from_cartisian_product = defaultdict(list)
 
-    query = tweet
-
-    str(query)
-
-    # print "original_query =>>> ", original_query
-    # print
-
-    query = str(query.lower())
-
-    # remove the keywords used to crawl from tweet text
-    #query = query.translate(None, ''.join(kw))
+    # we will call a tweet from now onwards a query
+    query = str(tweet.lower())
 
     preprocessed_query = preprocess_tweet(query)
-    # volunteer/offer > volunteer offer
-    #preprocessed_query = preprocessed_query.replace("/", "")
 
     query_tokens = align_and_split(query, preprocessed_query)
 
-    # @dev
-    # print "QQQQ> query_tokens >>> ", query_tokens
-
-    #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
     toponyms_in_query = list()
 
-    ##########################################################################
+    # --------------------------------------------------------------------------
     # prune the tree of locations based on the exisitence of stop words
     # by splitting the query into multiple queries
-    #query_splits = tknzr.tokenize(query)
     query_splits = Twokenize.tokenize(query)
     stop_in_query = env.stopwords_notin_gazetteer & set(query_splits)
-    #stop_in_query = stopwords_notin_gazetteer & set(query.split())
 
     # if tweet contains the following then remove them from the tweet and
-    # split based on their presence: ["[", "]",".", ",", "(", ")", "!", "?"]
+    # split based on their presence:
     stop_in_query = stop_in_query | set(
         ["[", "]", ".", ",", "(", ")", "!", "?", ":", "<", ">", "newline"])
 
@@ -338,12 +349,12 @@ def extract(env, tweet):
         if token[0] in stop_in_query:
             query_tokens[index] = ()
 
-    # combine consecutive tokens in query as possible toponym name
+    # combine consecutive tokens in a query as possible location names
     query_filtered = list()
     candidate_location = {"tokens": list(), "offsets": list()}
 
     for index, token in enumerate(query_tokens):
-        # print token
+
         if len(token) > 0:
             candidate_location["tokens"].append(token[0].strip())
             candidate_location["offsets"].append((token[1], token[2]))
@@ -358,14 +369,7 @@ def extract(env, tweet):
         if index == len(query_tokens) - 1:
             query_filtered.append(candidate_location)
 
-    # print query_filtered
-
-    # sys.exit()
-
     ##########################################################################
-    # contains the token in query to the correct toponym
-    # ex > new avad rd > new avadi road
-    #query_toponyms = defaultdict()
 
     # build vectors for each token in each subquery
     for sub_query in query_filtered:
@@ -373,51 +377,14 @@ def extract(env, tweet):
         sub_query_tokens = sub_query["tokens"]
         sub_query_offsets = sub_query["offsets"]
 
-        # print "sub_query_tokens >>> ", sub_query_tokens
-
-        " ".join(sub_query_tokens)
-
-        '''
-        # generate all-grams of q
-        all_grams = list()
-        for i in reversed(range(len(q))):
-            i_grams = ngrams(q, i+1)
-            for grams in i_grams:
-                all_grams.append(grams)
-
-
-        # check scores of all grams
-        for gram in all_grams:
-
-            gram_txt = " ".join(gram)
-            print len(gram), gram, lm.phrase_probability(gram_txt)
-
-        continue
-        '''
-
         # expand tokens in sub_query_tokens to vectors
-        for idx, token in enumerate(sub_query_tokens):
-
-            # @dev
-            # print "````````) ", token
+        for idx, token in enumerate(sub_query_tokens): # ---------------- for II
 
             token_edited = ''.join(ch for ch in token if ch not in exclude)
 
-            # is the token is for sure misspilled
-            if token not in env.extended_words3 and token_edited not in env.extended_words3:
-
-                # print "token ???? ", token
-
-                # TODO: unigrams_set make it indexed on the first letter instead of searching all unigrams,, them search only unigrams with same first letter.
-                #matches = [(x, difflib.SequenceMatcher(None, x, token).ratio()) for x in unigrams]
-
-                #matches = [(x, difflib.SequenceMatcher(None, x, token).ratio()) for x in unigrams_set_indexed_first_letter[token[0]]]
-                #matches = filter(lambda x: x[1]>0.65, matches)
-                # NOTE: the vector of matched locations should be sorted with descending order of similarity. This will be helpful when matching unigrams and break whenever we have a full name match instead of looping all list
-                #matches = sorted(matches, key=lambda x: x[1], reverse=True)
-
-                # only return the terms without scores
-                #sub_query_tokens[idx] = [x[0] for x in matches]
+            # if the token is for sure misspilled
+            if  token not in env.extended_words3 and \
+                token_edited not in env.extended_words3:
 
                 sub_query_tokens[idx] = [token]
 
@@ -427,34 +394,10 @@ def extract(env, tweet):
                 if token_exp and token_exp not in sub_query_tokens[idx]:
                     sub_query_tokens[idx].append(token_exp)
 
-                '''# expand list of alternatvies in the wordvec with the geo abbreviation
-
-                addition = list()
-
-                for word in sub_query_tokens[idx]:
-                    word = pattern.sub('', word)
-
-                    geo_abbrevs = geo_abbreviations_fixed.get(word)
-
-                    if geo_abbrevs:
-                        #print "geo_abbrevs",geo_abbrevs
-
-                        for ab in geo_abbrevs:
-                            if not ab == "":
-                                addition.append(ab)
-
-                if len(addition) > 0:
-                    sub_query_tokens[idx] = sub_query_tokens[idx] + addition'''
-
-            # do not expand the word if it is inside the extended version of
-            # words3
+            # do not expand the word if it is not misspilled
             else:
 
-                # print "ELSE"
-
                 loc_name = sub_query_tokens[idx]
-
-                # print q[idx], "\t", "%.20f" % lm.phrase_probability(q[idx])
 
                 sub_query_tokens[idx] = [sub_query_tokens[idx]]
 
@@ -464,66 +407,11 @@ def extract(env, tweet):
                 if token_exp and token_exp not in sub_query_tokens[idx]:
                     sub_query_tokens[idx].append(token_exp)
 
-                # get matches from the unigrams to be able to get
-                # records like > Tamilnadu
-                #matches = [(x, difflib.SequenceMatcher(None, x, loc_name).ratio()) for x in inverted_index_unigrams_to_unique_names]
-                #matches = filter(lambda x: x[1]>0.9, matches)
-                #sub_query_tokens[idx] = sub_query_tokens[idx] + [x[0] for x in matches]
-
                 sub_query_tokens[idx] = list(set(sub_query_tokens[idx]))
 
-                # >>>
 
-                #list_full_names = list()
-                # for x in sub_query_tokens[idx]:
-                #    list_full_names = list_full_names + inverted_index_unigrams_to_unique_names[x]
+            # ------------------------------------------------------------------
 
-                # TODO: fix bottleneck here
-                '''
-                ################################################################
-                # if exisits in the gazetteer but also there is
-                # another record in the gazetteer with high score
-                # add it also as a candidate. Ex-> Tamilnadu & Tamil Nadu
-                #>>>> solved using gazetteer_unique_names_set , but slow
-
-                # get matches from the unique names> to be able to get more than unigrams. Ex: Tamil Nadu
-                matches = [(x, difflib.SequenceMatcher(None, x, loc_name).ratio()) for x in unique_names_by_first_letter[loc_name[0]]]
-                matches = filter(lambda x: x[1]>0.9, matches)
-
-                # this make sure that the first letter of the
-                # name is the same as the first letter in the
-                # matched name
-                matches = filter(lambda x: x[0][0] == loc_name[0], matches)
-
-                sub_query_tokens[idx] = sub_query_tokens[idx] + [x[0] for x in matches]
-                sub_query_tokens[idx] = list(set(sub_query_tokens[idx]))
-                ################################################################
-                '''
-
-                '''# expand list of alternatvies in the wordvec with the geo abbreviation
-
-                addition = list()
-
-                for word in sub_query_tokens[idx]:
-                    word = pattern.sub('', word)
-
-                    geo_abbrevs = geo_abbreviations_fixed.get(word)
-
-                    if geo_abbrevs:
-                        #print "geo_abbrevs",geo_abbrevs
-
-                        for ab in geo_abbrevs:
-                            if not ab == "":
-                                addition.append(ab)
-
-                if len(addition) > 0:
-                    sub_query_tokens[idx] = sub_query_tokens[idx] + addition'''
-
-            # NOTE: does it make sense if we remove all matches which does not
-            #       have the first charcter in common with the original token
-
-            # 00000000000000000000000000000000000000000000000000000000000000
-            # 00000000000000000000000000000000000000000000000000000000000000
             # Expand a token to its abbreviation and visa versa
             exp_words = list()
             for x in sub_query_tokens[idx]:
@@ -533,26 +421,7 @@ def extract(env, tweet):
 
             sub_query_tokens[idx] += exp_words
 
-            # print "###############", sub_query_tokens[idx]
-
-        # @dev
-        # print sub_query_tokens
-        # print "sub_query_tokens>>>", "*"*100
-
-        # print "===================>", q
-        # print lm.phrase_probability("saidapet flyover")
-
-
-        # remove empty vectors in list
-        # NOTE: if we want to do that we should retain the original index
-        #       of each token to later be correctly mapped to the original token
-        #       ex:> ""0, "xxx"1, "yyy"2 > "xxx"1, "yyy"2
-        #sub_query_tokens = [v for v in sub_query_tokens if len(v)>0]
-
-        # NOTE: eb offices > in gazetteer > eb office > multiple records
-        # in the next step offices would mean all the records of eb office
-        # also: xxx mosque | yyy mosque > "all mosques" should be reduced to all xxx and yyy
-        # print sub_query_tokens
+        # ----------------------------------------------------------- End for II
 
         possible_locations = defaultdict(float)
 
@@ -562,12 +431,6 @@ def extract(env, tweet):
         if len(sub_query_tokens) > 1:
 
             possible_locations = build_tree(env.glm, sub_query_tokens)
-
-            # @dev
-            # print "LEN > 1"
-            # print
-            # print "#######>", possible_locations
-            # print
 
             # imporoving recall by adding unigram location names ++++++++++++++
 
@@ -895,7 +758,6 @@ def filterout_overlaps(tops, gazetteer_unique_names_set,
 ##########################################################################
 ##########################################################################
 
-
 class init_env:
 
     def __init__(self, geo_locations, extended_words3):
@@ -961,3 +823,11 @@ class init_env:
 
         self.stopwords_notin_gazetteer = set(
             self.extended_words3) - set(unigrams)
+
+
+def initialize(geo_locations, extended_words3):
+
+    print "Initializing LNEx ..."
+    g_env = init_env(geo_locations, extended_words3)
+    set_global_env(g_env)
+    print "Done Initialization ..."

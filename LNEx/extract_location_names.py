@@ -1,5 +1,6 @@
-import LNEx as lnex
-
+import core
+import json
+from tabulate import tabulate
 
 def read_tweets():
 
@@ -14,25 +15,21 @@ def read_tweets():
 
 def start_using_files():
 
-    # chennai flood bounding box
-    chennai_bb = [12.74, 80.066986084,
-                  13.2823848224, 80.3464508057]
-
-    ##############################################
-
     with open("_Data/chennai_geo_locations.json") as f:
         geo_locations = json.load(f)
+
     # with open("_Data/chennai_geo_info.json") as f:
     #    json.load(f)
-    with open("_Data/chennai_extended_english_words.json") as f:
-        extended_longlist_stopwords = json.load(f)
 
-    env = init_env(geo_locations, extended_longlist_stopwords)
+    with open("_Data/chennai_extended_english_words.json") as f:
+        extended_words3 = json.load(f)
+
+    core.initialize(geo_locations, extended_words3)
 
     tweet = "I am at new avadi rd, chennai, mambalam #chennaiflood #newavadiroad"
 
     # set of > (tweet_mention, offsets, geo_location)
-    toponyms_in_tweet = extract(env, tweet)
+    toponyms_in_tweet = core.extract(tweet)
 
     header = [
         "tweet_mention",
@@ -49,8 +46,6 @@ def start_using_files():
     print tabulate(rows, headers=header)
     print "-" * 90
 
-    print getsize(env)
-
 
 def start_using_elastic_index():
 
@@ -63,7 +58,7 @@ def start_using_elastic_index():
     geo_locations, geo_info, extended_longlist_stopwords = osm_gazetteer.build_bb_gazetteer(
         chennai_bb)
 
-    env = init_env(geo_locations, extended_longlist_stopwords)
+    env = core.init_env(geo_locations, extended_longlist_stopwords)
 
     tweet = "I am at new avadi rd, chennai, mambalam #chennaiflood #newavadiroad"
 
@@ -87,6 +82,10 @@ def start_using_elastic_index():
 
 
 if __name__ == "__main__":
+
+    start_using_files()
+
+    exit()
 
     # chennai flood bounding box
     chennai_bb = [12.74, 80.066986084,

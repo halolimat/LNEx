@@ -1,8 +1,9 @@
+import core
 import osm_gazetteer
 
 
-def init():
-    return "initalized"
+def init(geo_locations, extended_words3):
+    core.initialize(geo_locations, extended_words3)
 
 def build_gazetteer(bb):
 
