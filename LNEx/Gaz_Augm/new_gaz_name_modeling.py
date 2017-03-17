@@ -18,7 +18,20 @@ lns = [ln.strip() for ln in lns]
 lns = [x for x in lns if ln != ""]
 
 ################################################################################
+'''counter = 0
+for ln in lns:
+    for w1 in ln.split():
+        w1 = set(w1) - set(lists.combined)
 
+        for w2 in ln.split():
+            w2 = set(w2) - set(lists.combined)
+
+            if len(w1 & w2) > 1:
+
+
+exit()
+'''
+################################################################################
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 tokenize = lambda doc: doc.lower().split(" ")
