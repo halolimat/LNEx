@@ -56,7 +56,7 @@ def search_index(bb):
     try:
         res = e_search.scan()
     except:
-        pass
+        raise
 
     return res
 
