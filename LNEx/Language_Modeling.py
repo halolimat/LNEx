@@ -4,8 +4,7 @@ This model is inspired by the following sources:
 > http://stackoverflow.com/questions/21891247
 '''
 
-################################################################################
-import json, os
+##########################################################################
 from itertools import chain
 from collections import defaultdict
 
@@ -13,16 +12,17 @@ import nltk
 from nltk.util import bigrams, trigrams
 from nltk.probability import ConditionalFreqDist
 from nltk.probability import ConditionalProbDist
-################################################################################
+##########################################################################
+
 
 class GazBasedModel:
 
-    ############################################################################
+    ##########################################################################
     def _bigram_probability(self, n_gram):
 
         # p(w_0)
-        prob = (self.unigrams["words"][n_gram[0]]/
-                    float(self.unigrams["words_count"]))
+        prob = (self.unigrams["words"][n_gram[0]] /
+                float(self.unigrams["words_count"]))
 
         if len(n_gram) == 2:
 
@@ -34,7 +34,7 @@ class GazBasedModel:
 
         return prob
 
-    ############################################################################
+    ##########################################################################
     def phrase_probability(self, phrase):
 
         n_gram = phrase.split()
@@ -50,7 +50,7 @@ class GazBasedModel:
             for __x in range(2, len(n_gram)):
 
                 # I went home > t12 = I went , t3 = home
-                t12 = " ".join(n_gram[__x-2:__x])
+                t12 = " ".join(n_gram[__x - 2:__x])
                 t3 = n_gram[__x]
 
                 # p(w_i | w_i-2 w_i-1)
@@ -63,7 +63,7 @@ class GazBasedModel:
 
             return self._bigram_probability(n_gram)
 
-    ############################################################################
+    ##########################################################################
     def __init__(self, geo_locations):
 
         words_count = 0
@@ -89,9 +89,9 @@ class GazBasedModel:
                 words_count += 1
                 self.unigrams[token] += 1
 
-        self.unigrams = { "words" : self.unigrams, "words_count" : words_count}
+        self.unigrams = {"words": self.unigrams, "words_count": words_count}
 
-        # bigrams ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        # bigrams +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         train_bigrams = list(chain(*[bigrams(i) for i in gaz_n_grams]))
 
         cfd_bigrams = ConditionalFreqDist()
@@ -101,9 +101,9 @@ class GazBasedModel:
 
         # bigrams MLE probabilities
         self.cpd_bigrams = nltk.ConditionalProbDist(cfd_bigrams,
-                                        nltk.MLEProbDist)
+                                                    nltk.MLEProbDist)
 
-        # trigrams +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        # trigrams ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         train_trigrams = list(chain(*[trigrams(i) for i in gaz_n_grams]))
 
         cfd_trigrams = ConditionalFreqDist()
@@ -116,13 +116,20 @@ class GazBasedModel:
 
         # trigrams MLE probabilities
         self.cpd_trigrams = nltk.ConditionalProbDist(cfd_trigrams,
-                                        nltk.MLEProbDist)
+                                                     nltk.MLEProbDist)
 
-################################################################################
+
+##########################################################################
 if __name__ == "__main__":
 
-    data_file = os.path.abspath(os.path.join(os.path.dirname( __file__ ),
-                    'data', 'chennai_geo_locations.json'))
+    import os
+    import json
+
+    data_file = os.path.abspath(
+        os.path.join(
+            os.path.dirname(__file__),
+            'data',
+            'chennai_geo_locations.json'))
 
     with open(data_file) as f:
         geo_locations = json.load(f)

@@ -1,4 +1,4 @@
-                       english_words.txt : https://github.com/dwyl/english-words/blob/master/words3.txt
+                              words3.txt : https://github.com/dwyl/english-words/blob/master/words3.txt
                        gaz_stopwords.txt : http://www.ranks.nl/stopwords + additional words and phrases
               streets_suffixes_dict.json : http://pe.usps.gov/text/pub28/28apc_002.htm
-osm_abbreviations_filtered_lowercase.csv : http://wiki.openstreetmap.org/wiki/Name_finder:Abbreviations#English
+osm_abbreviations.csv : http://wiki.openstreetmap.org/wiki/Name_finder:Abbreviations#English

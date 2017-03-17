@@ -1,11 +1,11 @@
 import re
+import unicodedata
 from itertools import groupby
 from operator import itemgetter
 from collections import defaultdict
-import unicodedata
 
 
-#TODO: refactor this crappy code
+# TODO: refactor this crappy code
 def extract_all_bracketed_names(loc_name):
 
     final_list = list()
@@ -19,7 +19,7 @@ def extract_all_bracketed_names(loc_name):
     while True:
 
         try:
-            start_idx = sub_loc_name.index("(")+1
+            start_idx = sub_loc_name.index("(") + 1
             end_idx = sub_loc_name.rfind(")")
 
             sub_loc_name = sub_loc_name[start_idx:end_idx]
@@ -28,7 +28,7 @@ def extract_all_bracketed_names(loc_name):
 
             final_list.append(sub_loc_name)
 
-        except:
+        except BaseException:
             break
 
     bracketed_names = sorted(bracketed_names, key=len)
@@ -45,13 +45,15 @@ def extract_all_bracketed_names(loc_name):
     for i in range(len(final_list)):
         for j in range(i, len(final_list)):
 
-            sub_bracketed_name = "("+final_list[i]+")"
+            sub_bracketed_name = "(" + final_list[i] + ")"
 
             if sub_bracketed_name in final_list[j]:
-                final_list.append(final_list[j].replace(sub_bracketed_name, ""))
+                final_list.append(
+                    final_list[j].replace(
+                        sub_bracketed_name, ""))
 
     for i in range(len(final_list)):
-        final_list[i] = final_list[i].replace("(", "").replace(")","")
+        final_list[i] = final_list[i].replace("(", "").replace(")", "")
         final_list[i] = re.sub('\s{2,}', ' ', final_list[i])
         final_list[i] = final_list[i].strip()
 
@@ -59,18 +61,19 @@ def extract_all_bracketed_names(loc_name):
 
     return final_list
 
+
 class Stack:
-     def __init__(self):
-         self.items = []
+    def __init__(self):
+        self.items = []
 
-     def push(self, item):
-         self.items.append(item)
+    def push(self, item):
+        self.items.append(item)
 
-     def pop(self):
-         return self.items.pop()
+    def pop(self):
+        return self.items.pop()
 
-     def isEmpty(self):
-         return self.items == []
+    def isEmpty(self):
+        return self.items == []
 
 
 def preprocess_name(loc_name):
@@ -103,7 +106,7 @@ def preprocess_name(loc_name):
             for sep in separators:
                 broken = name_to_break.split(sep)
 
-                both_pieces = name_to_break.replace(sep,"")
+                both_pieces = name_to_break.replace(sep, "")
 
                 to_break.push(both_pieces)
 
@@ -116,7 +119,7 @@ def preprocess_name(loc_name):
             if sep in name_to_break:
                 broken = name_to_break.split(sep)
 
-                both_pieces = name_to_break.replace(sep," ")
+                both_pieces = name_to_break.replace(sep, " ")
 
                 to_break.push(both_pieces)
 
@@ -126,7 +129,6 @@ def preprocess_name(loc_name):
             else:
                 final_list.append(name_to_break)
 
-
     for i in range(len(final_list)):
 
         # to remove all punctuations from the tweet later
@@ -135,7 +137,7 @@ def preprocess_name(loc_name):
         # then both terms connected will be considered as a
         # unigram which is not true.
         if "-" in final_list[i]:
-            final_list[i] = final_list[i].replace("-"," ")
+            final_list[i] = final_list[i].replace("-", " ")
 
         final_list[i] = re.sub('\s{2,}', ' ', final_list[i])
         final_list[i] = final_list[i].strip()
@@ -145,34 +147,35 @@ def preprocess_name(loc_name):
     return final_list
 
 
-#source: http://locallyoptimal.com/blog/2013/01/20/elegant-n-gram-generation-in-python/
+# source:
+# http://locallyoptimal.com/blog/2013/01/20/elegant-n-gram-generation-in-python/
 def find_ngrams(input_list, n):
-  return zip(*[input_list[i:] for i in range(n)])
+    return zip(*[input_list[i:] for i in range(n)])
 
 
-def get_extended_english_words(unique_names):
+def get_extended_words3(unique_names):
 
-    # english_words(words3) source: https://github.com/dwyl/english-words
-    with open("Dictionaries/english_words.txt") as f:
+    # words3(words3) source: https://github.com/dwyl/english-words
+    with open("Dictionaries/words3.txt") as f:
 
-        english_words = f.read().splitlines()
-        english_words = [x.lower() for x in english_words]
-        english_words = set(english_words)
+        words3 = f.read().splitlines()
+        words3 = [x.lower() for x in words3]
+        words3 = set(words3)
 
     # extend the list of words
     for x in unique_names:
 
         for y in x.split():
-            if y not in english_words:
+            if y not in words3:
 
-                english_words.add(y)
+                words3.add(y)
 
-    return list(english_words)
+    return list(words3)
 
-################################################################################
+##########################################################################
+
 
 def run(geo_locations):
-
     """
     input>  type(geo_locations): defaultdict
 
@@ -182,9 +185,45 @@ def run(geo_locations):
 
     """
 
-    ############################################################################
+    ##########################################################################
 
-    names_to_remove = set(["(U/C)", "(East)", "(?)", "(100 Feet Road)", "(partialy closed for metro)", "(North)", "(planned)", "(Broadway)", "(planned)", "(closed)", "(P)", "(Old)", "(M)", "(Primary)", "(West)", "(South)", "(Big Street)", "(A Comfort Stay)", "(historical)", "(Pvt)", "(L31)", "(MVN)", "(Private Road)", "(north.extn)", "(2362 xxxx)", "(current)", "(leads)", "(private use)", "(heritage)", "(rural)", "(am)", "(fm)", "(tv)", "(ship)", "(u.s. season 2)", "(boat)", "(abandoned)"])
+    names_to_remove = set(["(U/C)",
+                           "(East)",
+                           "(?)",
+                           "(100 Feet Road)",
+                           "(partialy closed for metro)",
+                           "(North)",
+                           "(planned)",
+                           "(Broadway)",
+                           "(planned)",
+                           "(closed)",
+                           "(P)",
+                           "(Old)",
+                           "(M)",
+                           "(Primary)",
+                           "(West)",
+                           "(South)",
+                           "(Big Street)",
+                           "(A Comfort Stay)",
+                           "(historical)",
+                           "(Pvt)",
+                           "(L31)",
+                           "(MVN)",
+                           "(Private Road)",
+                           "(north.extn)",
+                           "(2362 xxxx)",
+                           "(current)",
+                           "(leads)",
+                           "(private use)",
+                           "(heritage)",
+                           "(rural)",
+                           "(am)",
+                           "(fm)",
+                           "(tv)",
+                           "(ship)",
+                           "(u.s. season 2)",
+                           "(boat)",
+                           "(abandoned)"])
 
     names_to_remove = set([x.lower() for x in names_to_remove])
 
@@ -192,11 +231,11 @@ def run(geo_locations):
     gaz_stopwords = "Dictionaries/gaz_stopwords.txt"
     gaz_stopwords = set([line.strip() for line in open(gaz_stopwords, 'r')])
 
-    ############################################################################
+    ##########################################################################
 
     new_geo_locations = defaultdict(set)
 
-    # step 1 (Filtering) +++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    # step 1 (Filtering) +++++++++++++++++++++++++++++++++++++++++++++++++++++
 
     for text in geo_locations:
 
@@ -221,7 +260,9 @@ def run(geo_locations):
 
         for name in names:
 
-            name = unicodedata.normalize('NFKD', name).encode('ascii','ignore')
+            name = unicodedata.normalize(
+                'NFKD', name).encode(
+                'ascii', 'ignore')
             name = str(name.strip())
 
             # skip empty names
@@ -230,15 +271,60 @@ def run(geo_locations):
 
             # prevents collisions
             if name not in new_geo_locations:
-                new_geo_locations[name]  |= set(geo_locations[original_text])
-
+                new_geo_locations[name] |= set(geo_locations[original_text])
 
     #names_to_remove = ["(?)", "(100 Feet Road)", "(2362 xxxx)", "(A Comfort Stay)", "(abandoned)", "(am)", "(Big Street)", "(boat)", "(Broadway)", "(closed)", "(current)", "(East)", "(fm)", "(heritage)", "(historical)", "(L31)", "(leads)", "(M)", "(MVN)", "(north.extn)", "(North)", "(Old)", "(P)", "(partialy closed for metro)", "(planned)", "(Primary)", "(Private Road)", "(private use)", "(Pvt)", "(rural)", "(ship)", "(South)", "(tv)", "(u.s. season 2)", "(U/C)", "(West)", "3rd", "5th", "a", "ahead", "all", "chopper", "closed", "east", "entire", "free", "frm", "gulf", "helpline", "helplines", "htt", "id", "is", "live", "me", "more", "new", "north", "old", "open", "opened", "our", "ours", "people", "planned", "plans", "plz", "restore", "rt", "service", "south", "stuff", "their", "uptodate", "us", "welcome", "west", "white", "wht", "you"]
 
-    # step 2 (Augmentation) ++++++++++++++++++++++++++++++++++++++++++++++++++++
+    # step 2 (Augmentation) ++++++++++++++++++++++++++++++++++++++++++++++++++
 
     # TODO: join the too
-    list_tops_to_remove = ["a", "people", "closed", "planned", "me", "you", "us", "our", "ours", "their", "open", "opened", "restore", "plz", "rt", "live", "htt", "free", "chopper", "service", "entire", "west", "south", "east", "north", "frm", "wht", "old", "new", "helpline", "helplines", "welcome", "stuff", "uptodate", "more", "ahead", "5th", "id", "", "all", "is", "plans", "gulf", "white", "3rd", ""]
+    list_tops_to_remove = [
+        "a",
+        "people",
+        "closed",
+        "planned",
+        "me",
+        "you",
+        "us",
+        "our",
+        "ours",
+        "their",
+        "open",
+        "opened",
+        "restore",
+        "plz",
+        "rt",
+        "live",
+        "htt",
+        "free",
+        "chopper",
+        "service",
+        "entire",
+        "west",
+        "south",
+        "east",
+        "north",
+        "frm",
+        "wht",
+        "old",
+        "new",
+        "helpline",
+        "helplines",
+        "welcome",
+        "stuff",
+        "uptodate",
+        "more",
+        "ahead",
+        "5th",
+        "id",
+        "",
+        "all",
+        "is",
+        "plans",
+        "gulf",
+        "white",
+        "3rd",
+        ""]
 
     lns = set(new_geo_locations)
 
@@ -246,7 +332,8 @@ def run(geo_locations):
 
         nospaces = name.replace(" ", "")
 
-        if name not in list_tops_to_remove and len(nospaces) > 2 and not nospaces.isdigit():
+        if name not in list_tops_to_remove and len(
+                nospaces) > 2 and not nospaces.isdigit():
 
             # remove all non-alphaneumeric characters
             alphanumeric_name = re.sub(r'\W+', ' ', name)
@@ -256,9 +343,10 @@ def run(geo_locations):
 
                 # not in the list of names before augmentation
                 if alphanumeric_name not in lns:
-                    new_geo_locations[alphanumeric_name] |= set(new_geo_locations[name])
+                    new_geo_locations[alphanumeric_name] |= set(
+                        new_geo_locations[name])
 
-    # step 3 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    # step 3 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
     # create skip grams
 
@@ -272,7 +360,7 @@ def run(geo_locations):
         flexi_grams = list()
 
         if name_len > 2:
-            flexi_gram = [name_list[0], name_list[name_len-1]]
+            flexi_gram = [name_list[0], name_list[name_len - 1]]
 
             # add grams with filling of size 0
             flexi_grams.append(" ".join(flexi_gram))
@@ -295,7 +383,6 @@ def run(geo_locations):
 
                     flexi_grams.append(" ".join(base_name))
 
-
         for new_name in set(flexi_grams):
 
             nospaces = new_name.replace(" ", "")
@@ -310,5 +397,5 @@ def run(geo_locations):
                 if new_name not in lns:
                     new_geo_locations[new_name] |= set(new_geo_locations[name])
 
-
-    return new_geo_locations, get_extended_english_words(new_geo_locations.keys())
+    return new_geo_locations, get_extended_words3(
+        new_geo_locations.keys())

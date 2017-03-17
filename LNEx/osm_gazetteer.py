@@ -3,48 +3,52 @@ from collections import defaultdict
 from elasticsearch import Elasticsearch
 from elasticsearch_dsl import Search, Q
 from elasticsearch_dsl.connections import connections
-from itertools import groupby
 
-import gaz_augmentation_and_filtering
 import geo_calculations
+import gaz_augmentation_and_filtering
 
 connection_string = ""
+
 
 def set_connection_string(cs):
     global connection_string
 
     connection_string = cs
 
+
 def search_index(bb):
     Elasticsearch()
 
     if connection_string == '':
-        raise Exception('You need to define the host and port of the elastic index!')
+        raise Exception(
+            'You need to define the host and port of the elastic index!')
 
-    if not geo_calculations.is_bb_acceptable(bb) or bb[0] > bb[2] or bb[1] > bb[3]:
-        raise Exception('The chosen Bounding Box is too big, you should choose a smaller one!')
+    if not geo_calculations.is_bb_acceptable(
+            bb) or bb[0] > bb[2] or bb[1] > bb[3]:
+        raise Exception(
+            'The chosen Bounding Box is too big, you should choose a smaller one!')
 
     connections.create_connection(hosts=[connection_string], timeout=20)
 
-    phrase_search = [Q({"filtered" : {
-                  "filter" : {
-                    "geo_bounding_box" : {
-                      "coordinate" : {
-                        "bottom_left" : {
-                          "lat" : bb[0],
-                          "lon" : bb[1]
-                        },
-                        "top_right" : {
-                          "lat" : bb[2],
-                          "lon" : bb[3]
+    phrase_search = [Q({"filtered": {
+        "filter": {
+            "geo_bounding_box": {
+                        "coordinate": {
+                            "bottom_left": {
+                                "lat": bb[0],
+                                "lon": bb[1]
+                            },
+                            "top_right": {
+                                "lat": bb[2],
+                                "lon": bb[3]
+                            }
                         }
-                      }
-                    }
-                  },
-                  "query": {
-                    "match_all": {}
-                    }
-                  }
+                        }
+        },
+        "query": {
+            "match_all": {}
+        }
+    }
     })]
 
     # to search with a scroll
@@ -52,7 +56,7 @@ def search_index(bb):
 
     try:
         res = e_search.scan()
-    except:
+    except BaseException:
         raise
 
     return res
@@ -83,14 +87,15 @@ def get_text(obj):
         else:
             try:
                 return obj[keys[0]]
-            except:
+            except BaseException:
                 return obj
+
 
 def build_bb_gazetteer(bb):
 
     # accepted fields as location names
-    location_fields = [ "city", "country",
-                        "name", "state", "street"]
+    location_fields = ["city", "country",
+                       "name", "state", "street"]
 
     geo_info = defaultdict()
     geo_locations = defaultdict(list)
@@ -110,7 +115,7 @@ def build_bb_gazetteer(bb):
         if "extent" in keys:
             geo_item["extent"] = match["extent"]["coordinates"]
 
-        ########################################################################
+        #######################################################################
 
         for key in dir(match):
 
@@ -123,42 +128,29 @@ def build_bb_gazetteer(bb):
                         # mapping a location name to its geo-info
                         geo_locations[text].append(id)
 
-                        geo_info[id] = {    "name" : text,
-                                            "geo_item" : list(geo_item) }
+                        geo_info[id] = {"name": text,
+                                        "geo_item": list(geo_item)}
 
                     else:
                         geo_locations[text]
 
-                except:
+                except BaseException:
                     print "exception at record # ", count
                     print get_text(match[key])
                     raise
 
-
-    new_geo_locations, extended_words3 = gaz_augmentation_and_filtering.run(geo_locations)
-
-    '''for x in new_geo_locations:
-        new_geo_locations[x] = list(new_geo_locations[x])
-
-    print new_geo_locations
-
-    with open("data/chennai_geo_locations.json", "w") as f:
-        json.dump(new_geo_locations, f)
-    with open("data/chennai_geo_info.json", "w") as f:
-        json.dump(geo_info, f)
-    with open("data/chennai_extended_words3.json", "w") as f:
-        json.dump(extended_words3, f)
-
-    exit()'''
+    new_geo_locations, extended_words3 = gaz_augmentation_and_filtering.run(
+        geo_locations)
 
     return new_geo_locations, geo_info, extended_words3
 
-################################################################################
+##########################################################################
+
 
 if __name__ == "__main__":
 
-    chennai_bb = [  12.74,80.066986084,
-                    13.2823848224,80.3464508057 ]
+    chennai_bb = [12.74, 80.066986084,
+                  13.2823848224, 80.3464508057]
 
     connection_string = '130.108.85.186:9200'
 
