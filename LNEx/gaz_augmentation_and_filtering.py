@@ -151,24 +151,24 @@ def find_ngrams(input_list, n):
   return zip(*[input_list[i:] for i in range(n)])
 
 
-def get_extended_longlist_stopwords(unique_names):
+def get_extended_english_words(unique_names):
 
-    # longlist_stopwords(words3) source: https://github.com/dwyl/english-words
-    with open("Dictionaries/longlist_stopwords.txt") as f:
+    # english_words(words3) source: https://github.com/dwyl/english-words
+    with open("Dictionaries/english_words.txt") as f:
 
-        longlist_stopwords = f.read().splitlines()
-        longlist_stopwords = [x.lower() for x in longlist_stopwords]
-        longlist_stopwords = set(longlist_stopwords)
+        english_words = f.read().splitlines()
+        english_words = [x.lower() for x in english_words]
+        english_words = set(english_words)
 
     # extend the list of words
     for x in unique_names:
 
         for y in x.split():
-            if y not in longlist_stopwords:
+            if y not in english_words:
 
-                longlist_stopwords.add(y)
+                english_words.add(y)
 
-    return list(longlist_stopwords)
+    return list(english_words)
 
 ################################################################################
 
@@ -190,7 +190,7 @@ def run(geo_locations):
     names_to_remove = set([x.lower() for x in names_to_remove])
 
     # will help in filtering out unigram location names
-    gaz_stopwords = "Dictionaries/gaz_stopwords_filtered.txt"
+    gaz_stopwords = "Dictionaries/gaz_stopwords.txt"
     gaz_stopwords = set([line.strip() for line in open(gaz_stopwords, 'r')])
 
     ############################################################################
@@ -313,4 +313,4 @@ def run(geo_locations):
                     new_geo_locations[new_name] |= set(new_geo_locations[name])
 
 
-    return new_geo_locations, get_extended_longlist_stopwords(new_geo_locations.keys())
+    return new_geo_locations, get_extended_english_words(new_geo_locations.keys())

@@ -365,7 +365,7 @@ def extract(env, tweet):
             token_edited = ''.join(ch for ch in token if ch not in exclude)
 
             # is the token is for sure misspilled
-            if token not in env.extended_longlist_stopwords and token_edited not in env.extended_longlist_stopwords:
+            if token not in env.extended_english_words and token_edited not in env.extended_english_words:
 
                 #print "token ???? ", token
 
@@ -833,7 +833,7 @@ def filterout_overlaps(tops, gazetteer_unique_names_set, location_names_from_car
 
 class init_env:
 
-    def __init__(self, geo_locations, extended_longlist_stopwords):
+    def __init__(self, geo_locations, extended_english_words):
 
         ###################################################
         # OSM abbr dictionary
@@ -873,8 +873,8 @@ class init_env:
         # from the combined gazetteer, any word not in the list is
         # considered misspilled.
 
-        self.extended_longlist_stopwords = extended_longlist_stopwords
-        self.extended_longlist_stopwords = set(self.extended_longlist_stopwords)
+        self.extended_english_words = extended_english_words
+        self.extended_english_words = set(self.extended_english_words)
 
         ########################################################################
 
@@ -894,4 +894,4 @@ class init_env:
         #list of unigrams
         unigrams = self.glm.unigrams["words"].keys()
 
-        self.stopwords_notin_gazetteer = set(self.extended_longlist_stopwords) - set(unigrams)
+        self.stopwords_notin_gazetteer = set(self.extended_english_words) - set(unigrams)

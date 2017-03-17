@@ -23,7 +23,7 @@ def start_using_files():
         geo_locations = json.load(f)
     with open("_Data/chennai_geo_info.json") as f:
         geo_info = json.load(f)
-    with open("_Data/chennai_extended_words3.json") as f:
+    with open("_Data/chennai_extended_english_words.json") as f:
         extended_longlist_stopwords = json.load(f)
 
     env = init_env(geo_locations, extended_longlist_stopwords)
