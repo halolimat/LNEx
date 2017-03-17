@@ -322,7 +322,7 @@ def extract(tweet):
     # --------------------------------------------------------------------------
 
     #will contain for example: (0, 11): [(u'new avadi road', 3)]
-    location_names_from_cartisian_product = defaultdict(list)
+    valid_n_grams_from_cartisian_product = defaultdict(list)
 
     # we will call a tweet from now onwards a query
     query = str(tweet.lower())
@@ -331,7 +331,7 @@ def extract(tweet):
 
     query_tokens = align_and_split(query, preprocessed_query)
 
-    toponyms_in_query = list()
+    location_names_in_query = list()
 
     # --------------------------------------------------------------------------
     # prune the tree of locations based on the exisitence of stop words
@@ -371,8 +371,8 @@ def extract(tweet):
 
     ##########################################################################
 
-    # build vectors for each token in each subquery
-    for sub_query in query_filtered:
+    # start the core extraction procedure using the bottom up trees
+    for sub_query in query_filtered: # ----------------------------------- for I
 
         sub_query_tokens = sub_query["tokens"]
         sub_query_offsets = sub_query["offsets"]
@@ -417,27 +417,25 @@ def extract(tweet):
             for x in sub_query_tokens[idx]:
                 if x in set(env.osm_abbreviations):
                     exp_words += env.osm_abbreviations[x]
-                    # print "env.osm_abbreviations>>>", x
 
             sub_query_tokens[idx] += exp_words
 
         # ----------------------------------------------------------- End for II
 
-        possible_locations = defaultdict(float)
+        valid_n_grams = defaultdict(float)
 
-        # this would build a tree of candidate location names from
-        # bottom up as in the build_tree_example function
+        # this would build the bottom up tree of valid n-grams
         # if the query contains more than one vector then build the tree
         if len(sub_query_tokens) > 1:
 
-            possible_locations = build_tree(env.glm, sub_query_tokens)
+            valid_n_grams = build_tree(env.glm, sub_query_tokens)
 
             # imporoving recall by adding unigram location names ++++++++++++++
 
             already_assigned_locations_tokens = list()
 
-            for x in possible_locations:
-                for token_index in x[-1]:
+            for valid_n_gram in valid_n_grams:
+                for token_index in valid_n_gram[-1]:
                     already_assigned_locations_tokens.append(token_index)
 
             for x in range(len(sub_query_tokens)):
@@ -446,116 +444,65 @@ def extract(tweet):
                     for token_match in sub_query_tokens[x]:
 
                         if token_match in env.gazetteer_unique_names_set:
-                            possible_locations[(token_match, (x,))] = 1
+                            valid_n_grams[(token_match, (x,))] = 1
 
-            # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
+        # when the size of the subquery is only one token
         elif len(sub_query_tokens) == 1:
 
-            # @dev
-            # print "LEN = 1"
-
             for token in sub_query_tokens[0]:
-                possible_locations[(token, (0,))
-                                   ] = env.glm.phrase_probability(token)
-        else:
+                valid_n_grams[(token, (0,))] = env.glm.phrase_probability(token)
 
-            # @dev
-            # print "<no match with any unigram from the gazetteer>"
+        # ----------------------------------------------------------------------
 
-            pass
+        for valid_n_gram in valid_n_grams:
 
-        #&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-
-        for possible_location in possible_locations:
-
-            #possible_location = ("token", "token", (index-1, index-2))
-            offsets = sorted([sub_query_offsets[token_idx]
-                              for token_idx in possible_location[-1]])
-
-            # TODO: fix the sortings in previous code
             # sort the offsets
+            # e.g., valid_n_gram = ("token", "token", (index-1, index-2))
+            offsets = sorted([sub_query_offsets[token_idx]
+                              for token_idx in valid_n_gram[-1]])
 
             # the start index of the first token
             start_idx = offsets[0][0]
             # the end index of the last token
             end_idx = offsets[-1][1]
 
-            # NOTE: this will contain the matched/corrected name
-            #           needed for the disambiguation part
-
-            # contains the fuzzy matched location name fro cartisian product
-            fuzzy_mached_top = " ".join(possible_location[:-1])
+            # contains the matched location name from cartisian product
+            mached_ln = " ".join(valid_n_gram[:-1])
 
             index_tub = (start_idx, end_idx + 1)
 
-            number_of_tokens = len(possible_location[:-1])
+            number_of_tokens = len(valid_n_gram[:-1])
 
-            location_names_from_cartisian_product[index_tub].append(
-                (fuzzy_mached_top, number_of_tokens))
+            valid_n_grams_from_cartisian_product[index_tub].append(
+                (mached_ln, number_of_tokens))
+
+            #tub = ((start_idx, end_idx + 1),
+            #       valid_n_grams[valid_n_gram])
 
             tub = ((start_idx, end_idx + 1),
-                   possible_locations[possible_location])
+                   ">>>")
 
-            # @dev
-            # print "tub >>>>>>>", fuzzy_mached_top
+            location_names_in_query.append(tub)
 
-            # TODO: here we can check if the fuzzy matched is a full mention
-            # or partial mention and if not full to check if its sub parts
-            # are full mentions> example: adyar chennai
-
-            toponyms_in_query.append(tub)
-
-        '''#TODO: figure out a way to map sub-query tokens to original tokens
-        # down should be fixed too
-        query_token = original_subquery.split()[index]
-        extracted_top = max_prob_reco[0]
-        query_toponyms[query_token] = extracted_top'''
-
-        #&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+        # ----------------------------------------------------------------------
 
         # if length is zero means no more than unigrams were found in the query
-        # TODO: should also loop through the list to get the unigrams that are
-        # not part of any n-gram matches. >> this should be implemented inside
-        # building the tree removing the unigram that is part of a longer gram
-        # and keep the unigrams that are not part of anything.
-        if len(possible_locations) == 0:
-
-            # @dev
-            # print "+"*50, "No Results"
-
-            # if only unigrams were found then get the best ones among them based:
-            # 1- if the unigram is an actual full location name
-            # 2- if the unigram is part of a location name of less than length
-            # of threshold-grams
-
-            # since flexi_grams are used now, we should not use more than 2
-            pass
+        if len(valid_n_grams) == 0:
 
             for index, value in enumerate(sub_query_tokens):
 
                 max_prob_reco = ("", 0)
 
-                for y in value:
+                for y in value: # ----------------------------------------------
 
-                    # 1
+                    # if the unigram is an actual full location name
                     if y in env.gazetteer_unique_names_set:
                         if max_prob_reco[1] < len(
                                 env.gazetteer_unique_names[y]):
                             max_prob_reco = (
                                 y, len(env.gazetteer_unique_names[y]))
 
-                    # print y,  "\t%.20f" % lm.phrase_probability(y)
-
-                    # 2
-                    # this should be used to expand implicit ones
-                    # ex. airport > chennai airport
-                    '''if y in inverted_index_unigrams_to_unique_names:
-                        print "----------", y
-
-                        for xxx in inverted_index_unigrams_to_unique_names[y]:
-                            if len(xxx.split()) < threshold and y != "road":
-                                print xxx'''
+                # --------------------------------------------------------------
 
                 # this is the solution for only one grams found in the sentence
                 if max_prob_reco[1] > 0:
@@ -566,66 +513,59 @@ def extract(tweet):
                     tub_2 = sub_query_offsets[index][1] + 1
 
                     # tuble would have: ((start_idx,end_idx),prob)
-                    tub = ((tub_1, tub_2), max_prob_reco[1])
+                    tub = ((tub_1, tub_2), ">>>>")
 
-                    toponyms_in_query.append(tub)
-
-                    ####################
-                    # NOTE: here add fuzzy matched name
-
-                    # NOTE: this will contain the matched/corrected name
-                    # needed for the disambiguation part
-
-                    # contains the fuzzy matched location name fro cartisian
-                    # product
+                    location_names_in_query.append(tub)
 
                     tub = (tub_1, tub_2)
 
-                    fuzzy_mached_top = max_prob_reco[0]
+                    mached_ln = max_prob_reco[0]
 
-                    number_of_tokens = fuzzy_mached_top.count(" ") + 1
+                    number_of_tokens = mached_ln.count(" ") + 1
 
-                    location_names_from_cartisian_product[tub].append(
-                        (fuzzy_mached_top, number_of_tokens))
+                    valid_n_grams_from_cartisian_product[tub].append(
+                        (mached_ln, number_of_tokens))
 
-    toponyms_in_query = list(set(toponyms_in_query))
+    # ---------------------------------------------------------------- end for I
 
-    toponyms_in_query = filterout_overlaps(
-        toponyms_in_query,
+    location_names_in_query = list(set(location_names_in_query))
+
+    location_names_in_query = filterout_overlaps(
+        location_names_in_query,
         env.gazetteer_unique_names_set,
-        location_names_from_cartisian_product)
+        valid_n_grams_from_cartisian_product)
 
-    # set of > ((offsets), probability), full_mention)
-    toponyms_in_query = remove_non_full_mentions(
-        toponyms_in_query,
+    # set of: ((offsets), probability), full_mention)
+    location_names_in_query = remove_non_full_mentions(
+        location_names_in_query,
         env.gazetteer_unique_names_set,
-        location_names_from_cartisian_product,
+        valid_n_grams_from_cartisian_product,
         query_tokens)
 
     # set of > (tweet_mention, offsets, geo_location)
-    toponyms_in_query = [(tweet[x[0][0][0]:x[0][0][1]],
-                          (x[0][0][0], x[0][0][1]), x[1]) for x in toponyms_in_query]
+    location_names_in_query = [(tweet[x[0][0][0]:x[0][0][1]],
+                          (x[0][0][0], x[0][0][1]), x[1]) for x in location_names_in_query]
 
-    return toponyms_in_query
+    return location_names_in_query
 
+################################################################################
 
 def do_they_overlay(tub1, tub2):
 
     if tub2[1] >= tub1[0] and tub1[1] >= tub2[0]:
         return True
 
-# as in
-# http://locallyoptimal.com/blog/2013/01/20/elegant-n-gram-generation-in-python/
-
+################################################################################
 
 def find_ngrams(input_list, n):
     return zip(*[input_list[i:] for i in range(n)])
 
+################################################################################
 
 def remove_non_full_mentions(
         tops,
         gazetteer_unique_names_set,
-        location_names_from_cartisian_product,
+        valid_n_grams_from_cartisian_product,
         query_tokens):
 
     original_set = set(tops)
@@ -635,7 +575,7 @@ def remove_non_full_mentions(
     final_set = set()
 
     for x in original_set:
-        tops_name = location_names_from_cartisian_product[x[0]]
+        tops_name = valid_n_grams_from_cartisian_product[x[0]]
 
         found = False
 
@@ -685,9 +625,10 @@ def remove_non_full_mentions(
 
     return final_set
 
+################################################################################
 
 def filterout_overlaps(tops, gazetteer_unique_names_set,
-                       location_names_from_cartisian_product):
+                       valid_n_grams_from_cartisian_product):
     '''
     Evangeline Parish Sheriff
 
@@ -701,7 +642,7 @@ def filterout_overlaps(tops, gazetteer_unique_names_set,
     lengths = list()
 
     for x in original_set:
-        tops_name = location_names_from_cartisian_product[x[0]]
+        tops_name = valid_n_grams_from_cartisian_product[x[0]]
 
         for top_name in tops_name:
             if top_name[0] in gazetteer_unique_names_set:
@@ -750,11 +691,6 @@ def filterout_overlaps(tops, gazetteer_unique_names_set,
 
     return final_set
 
-#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ##########################################################################
 ##########################################################################
 
