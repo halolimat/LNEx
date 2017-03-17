@@ -1,5 +1,4 @@
-import json, sys, os, re
-from json import JSONEncoder
+import re
 from itertools import groupby
 from operator import itemgetter
 from collections import defaultdict
@@ -265,7 +264,6 @@ def run(geo_locations):
 
     lns2 = set(new_geo_locations)
 
-    show = True
     for name in lns2:
 
         name_list = name.split()

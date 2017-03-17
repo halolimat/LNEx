@@ -11,7 +11,8 @@ from collections import defaultdict
 
 import nltk
 from nltk.util import bigrams, trigrams
-from nltk.probability import ConditionalFreqDist, ConditionalProbDist
+from nltk.probability import ConditionalFreqDist
+from nltk.probability import ConditionalProbDist
 ################################################################################
 
 class GazBasedModel:

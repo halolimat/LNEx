@@ -1,11 +1,8 @@
-import json, sys, os, re
 from collections import defaultdict
-from json import JSONEncoder
 
 from elasticsearch import Elasticsearch
 from elasticsearch_dsl import Search, Q
 from elasticsearch_dsl.connections import connections
-from operator import itemgetter
 from itertools import groupby
 
 import gaz_augmentation_and_filtering
@@ -19,7 +16,7 @@ def set_connection_string(cs):
     connection_string = cs
 
 def search_index(bb):
-    es = Elasticsearch()
+    Elasticsearch()
 
     if connection_string == '':
         raise Exception('You need to define the host and port of the elastic index!')
