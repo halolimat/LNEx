@@ -28,7 +28,8 @@ setup(
     author_email='hussein@knoesis.org',
     url='https://github.com/halolimat/LNEx',
     license=license,
-    packages=find_packages(exclude=('tests', 'sample_run')),
+    packages=find_packages(exclude=('_Data')),
+    package_data={'LNEx': ['_Dictionaries/*.txt']},
     install_requires=[
           'elasticsearch',
           'elasticsearch-dsl',
