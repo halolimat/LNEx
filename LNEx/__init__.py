@@ -24,6 +24,6 @@ def extract(tweet):
 
     return core.extract(tweet)
 
-def set_connection_string(conn_str):
+def elasticindex(conn_string, index_name):
 
-    osm_gazetteer.set_connection_string(conn_str)
+    osm_gazetteer.set_elasticindex_conn(conn_string, index_name)

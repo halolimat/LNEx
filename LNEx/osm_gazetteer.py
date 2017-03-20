@@ -16,25 +16,34 @@ import geo_calculations
 import gaz_augmentation_and_filtering
 
 connection_string = ""
+index_name = ""
 
 
-def set_connection_string(cs):
+def set_elasticindex_conn(cs, inn):
     global connection_string
+    global index_name
 
     connection_string = cs
+    index_name = inn
 
 
 def search_index(bb):
     Elasticsearch()
 
-    if connection_string == '':
-        raise Exception(
-            'You need to define the host and port of the elastic index!')
+    if connection_string == '' or index_name == '':
+
+        print "\n###########################################################"
+        print "Global ERROR: Elastic host and port or index name not defined"
+        print "#############################################################\n"
+        exit()
 
     if not geo_calculations.is_bb_acceptable(
             bb) or bb[0] > bb[2] or bb[1] > bb[3]:
-        raise Exception(
-            'The chosen Bounding Box is too big, you should choose a smaller one!')
+
+        print "\n##########################################################"
+        print "Global ERROR: Bounding Box is too big, choose a smaller one!"
+        print "############################################################\n"
+        exit()
 
     connections.create_connection(hosts=[connection_string], timeout=20)
 
@@ -60,7 +69,7 @@ def search_index(bb):
     })]
 
     # to search with a scroll
-    e_search = Search(index="photon_v1").query(Q('bool', must=phrase_search))
+    e_search = Search(index=index_name).query(Q('bool', must=phrase_search))
 
     try:
         res = e_search.scan()
@@ -161,7 +170,8 @@ if __name__ == "__main__":
                   13.2823848224, 80.3464508057]
 
     connection_string = '130.108.85.186:9200'
+    index_name = "photon_v1"
 
-    set_connection_string(connection_string)
+    set_elasticindex_conn(connection_string, index_name)
 
     geo_locations, geo_info, extended_words3 = build_bb_gazetteer(chennai_bb)

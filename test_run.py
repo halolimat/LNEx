@@ -59,7 +59,7 @@ def run_test_using_files():
 
 def run_text_using_elasticindex():
 
-    lnex.set_connection_string('130.108.85.186:9200')
+    lnex.elasticindex(conn_string='130.108.85.186:9200', index_name="photon_v1")
 
     # chennai flood bounding box
     chennai_bb = [12.74, 80.066986084, 13.2823848224, 80.3464508057]
