@@ -1,9 +1,9 @@
-"""
+"""#############################################################################
 Copyright 2017 Hussein S. Al-Olimat, hussein@knoesis.org
 
 This software is released under the GNU Affero General Public License (AGPL)
 v3.0 License.
-"""
+#############################################################################"""
 
 Dictionaries in this folder are taken from different sources. Some of them were
 preprocessed, edited, filtered, and/or augmented.

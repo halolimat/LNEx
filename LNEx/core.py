@@ -1,10 +1,9 @@
-"""
+"""#############################################################################
 Copyright 2017 Hussein S. Al-Olimat, hussein@knoesis.org
 
 This software is released under the GNU Affero General Public License (AGPL)
 v3.0 License.
-"""
-
+#############################################################################"""
 
 import re
 import os
@@ -17,14 +16,15 @@ from wordsegment import segment
 from operator import itemgetter
 from collections import defaultdict
 
-printable = set(string.printable)
-exclude = set(string.punctuation)
-
 # importing local modules
 import Language_Modeling
 from tokenizer import Twokenize
 
 ################################################################################
+################################################################################
+
+printable = set(string.printable)
+exclude = set(string.punctuation)
 
 # LNEx global environment
 env = None
@@ -33,8 +33,6 @@ def set_global_env(g_env):
     global env
     env = g_env
 
-################################################################################
-################################################################################
 ################################################################################
 
 # Stack data structure

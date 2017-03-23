@@ -1,10 +1,9 @@
-"""
+"""#############################################################################
 Copyright 2017 Hussein S. Al-Olimat, hussein@knoesis.org
 
 This software is released under the GNU Affero General Public License (AGPL)
 v3.0 License.
-"""
-
+#############################################################################"""
 
 #!/usr/bin/env python
 """
@@ -21,8 +20,8 @@ with open('LICENSE') as f:
 
 setup(
     name='LNEx',
-    version='1',
-    description='Location Name Extractor tool (LNEx): extracts location names from targeted text streams',
+    version='1.1',
+    description='Location Name Extractor (LNEx): extracts location names from targeted text streams',
     long_description=readme,
     author='Hussein S. Al-Olimat',
     author_email='hussein@knoesis.org',

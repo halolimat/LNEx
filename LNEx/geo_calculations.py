@@ -1,13 +1,13 @@
-"""
+"""#############################################################################
 Copyright 2017 Hussein S. Al-Olimat, hussein@knoesis.org
 
 This software is released under the GNU Affero General Public License (AGPL)
 v3.0 License.
-"""
-
+#############################################################################"""
 
 from geopy.distance import vincenty
 
+################################################################################
 
 def get_distance_between_latlon_points(x1, x2):
     '''     ---------------
@@ -19,6 +19,7 @@ def get_distance_between_latlon_points(x1, x2):
 
     return vincenty(x1, x2).km
 
+################################################################################
 
 def is_bb_acceptable(bb):
 
@@ -40,6 +41,7 @@ def is_bb_acceptable(bb):
     else:
         return True
 
+################################################################################
 
 if __name__ == "__main__":
 

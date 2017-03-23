@@ -1,10 +1,9 @@
-"""
+"""#############################################################################
 Copyright 2017 Hussein S. Al-Olimat, hussein@knoesis.org
 
 This software is released under the GNU Affero General Public License (AGPL)
 v3.0 License.
-"""
-
+#############################################################################"""
 
 from collections import defaultdict
 
@@ -15,9 +14,13 @@ from elasticsearch_dsl.connections import connections
 import geo_calculations
 import gaz_augmentation_and_filtering
 
+################################################################################
+################################################################################
+
 connection_string = ""
 index_name = ""
 
+################################################################################
 
 def set_elasticindex_conn(cs, inn):
     global connection_string
@@ -26,8 +29,10 @@ def set_elasticindex_conn(cs, inn):
     connection_string = cs
     index_name = inn
 
+################################################################################
 
 def search_index(bb):
+
     Elasticsearch()
 
     if connection_string == '' or index_name == '':
@@ -78,6 +83,7 @@ def search_index(bb):
 
     return res
 
+################################################################################
 
 def get_text(obj):
 
@@ -107,6 +113,7 @@ def get_text(obj):
             except BaseException:
                 return obj
 
+################################################################################
 
 def build_bb_gazetteer(bb, augment):
 
@@ -169,8 +176,7 @@ def build_bb_gazetteer(bb, augment):
 
     return new_geo_locations, geo_info, extended_words3
 
-##########################################################################
-
+################################################################################
 
 if __name__ == "__main__":
 

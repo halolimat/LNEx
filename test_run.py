@@ -1,17 +1,18 @@
-"""
+"""#############################################################################
 Copyright 2017 Hussein S. Al-Olimat, hussein@knoesis.org
 
 This software is released under the GNU Affero General Public License (AGPL)
 v3.0 License.
-"""
-
+#############################################################################"""
 
 import sys
+import json
+from tabulate import tabulate
 
 import LNEx as lnex
 
-import json
-from tabulate import tabulate
+################################################################################
+################################################################################
 
 def read_tweets():
 
@@ -23,6 +24,7 @@ def read_tweets():
 
     return tweets
 
+################################################################################
 
 def run_test_using_files():
 
@@ -56,6 +58,7 @@ def run_test_using_files():
         print tabulate(rows, headers=header)
         print "-" * 90
 
+################################################################################
 
 def run_text_using_elasticindex():
 
@@ -85,6 +88,7 @@ def run_text_using_elasticindex():
         print tabulate(rows, headers=header)
         print "-" * 90
 
+################################################################################
 
 if __name__ == "__main__":
 

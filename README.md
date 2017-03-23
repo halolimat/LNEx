@@ -1,3 +1,10 @@
+<!-- ###########################################################################
+Copyright 2017 Hussein S. Al-Olimat, hussein@knoesis.org
+
+This software is released under the GNU Affero General Public License (AGPL)
+v3.0 License.
+#############################################################################-->
+
 # LNEx: Location Name Extractor #
 
 LNEx extracts location names from targeted text streams.

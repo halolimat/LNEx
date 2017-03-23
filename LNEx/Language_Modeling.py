@@ -1,18 +1,18 @@
-"""
+"""#############################################################################
 Copyright 2017 Hussein S. Al-Olimat, hussein@knoesis.org
 
 This software is released under the GNU Affero General Public License (AGPL)
 v3.0 License.
-"""
-
+#############################################################################"""
 
 '''
-This model is inspired by the following sources:
+This model was inspired by the following sources:
 > http://www.katrinerk.com/courses/python-worksheets/language-models-in-python
 > http://stackoverflow.com/questions/21891247
 '''
 
-##########################################################################
+################################################################################
+
 from itertools import chain
 from collections import defaultdict
 
@@ -20,12 +20,12 @@ import nltk
 from nltk.util import bigrams, trigrams
 from nltk.probability import ConditionalFreqDist
 from nltk.probability import ConditionalProbDist
-##########################################################################
 
+################################################################################
+################################################################################
 
 class GazBasedModel:
 
-    ##########################################################################
     def _bigram_probability(self, n_gram):
 
         # p(w_0)
@@ -42,7 +42,8 @@ class GazBasedModel:
 
         return prob
 
-    ##########################################################################
+    ############################################################################
+
     def phrase_probability(self, phrase):
 
         n_gram = phrase.split()
@@ -71,7 +72,8 @@ class GazBasedModel:
 
             return self._bigram_probability(n_gram)
 
-    ##########################################################################
+    ############################################################################
+
     def __init__(self, geo_locations):
 
         words_count = 0
@@ -126,8 +128,8 @@ class GazBasedModel:
         self.cpd_trigrams = nltk.ConditionalProbDist(cfd_trigrams,
                                                      nltk.MLEProbDist)
 
+################################################################################
 
-##########################################################################
 if __name__ == "__main__":
 
     import os

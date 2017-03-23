@@ -1,10 +1,9 @@
-"""
+"""#############################################################################
 Copyright 2017 Hussein S. Al-Olimat, hussein@knoesis.org
 
 This software is released under the GNU Affero General Public License (AGPL)
 v3.0 License.
-"""
-
+#############################################################################"""
 
 import re, os
 import unicodedata
@@ -17,6 +16,7 @@ from collections import defaultdict
 
 def get_dicts_dir():
     return os.path.join(os.path.dirname(os.path.realpath(__file__)),'_Dictionaries/')
+
 ################################################################################
 
 # will help in filtering out unigram location names
@@ -81,6 +81,7 @@ def extract_all_bracketed_names(loc_name):
 
     return final_list
 
+################################################################################
 
 class Stack:
     def __init__(self):
@@ -95,6 +96,7 @@ class Stack:
     def isEmpty(self):
         return self.items == []
 
+################################################################################
 
 def preprocess_name(loc_name):
 
@@ -166,16 +168,17 @@ def preprocess_name(loc_name):
 
     return final_list
 
+################################################################################
 
-# source:
-# http://locallyoptimal.com/blog/2013/01/20/elegant-n-gram-generation-in-python/
+# source: http://link.hussein.space/elegae50d
 def find_ngrams(input_list, n):
     return zip(*[input_list[i:] for i in range(n)])
 
+################################################################################
 
 def get_extended_words3(unique_names):
 
-    # words3(words3) source: https://github.com/dwyl/english-words
+    # words3 source: https://github.com/dwyl/english-words
     with open(get_dicts_dir() + "words3.txt") as f:
 
         words3 = f.read().splitlines()
@@ -247,7 +250,7 @@ def filter(geo_locations):
 
     names_to_remove = set([x.lower() for x in names_to_remove])
 
-    ##########################################################################
+    ############################################################################
 
     new_geo_locations = defaultdict(set)
 
@@ -300,7 +303,7 @@ def augment(geo_locations):
 
     #names_to_remove = ["(?)", "(100 Feet Road)", "(2362 xxxx)", "(A Comfort Stay)", "(abandoned)", "(am)", "(Big Street)", "(boat)", "(Broadway)", "(closed)", "(current)", "(East)", "(fm)", "(heritage)", "(historical)", "(L31)", "(leads)", "(M)", "(MVN)", "(north.extn)", "(North)", "(Old)", "(P)", "(partialy closed for metro)", "(planned)", "(Primary)", "(Private Road)", "(private use)", "(Pvt)", "(rural)", "(ship)", "(South)", "(tv)", "(u.s. season 2)", "(U/C)", "(West)", "3rd", "5th", "a", "ahead", "all", "chopper", "closed", "east", "entire", "free", "frm", "gulf", "helpline", "helplines", "htt", "id", "is", "live", "me", "more", "new", "north", "old", "open", "opened", "our", "ours", "people", "planned", "plans", "plz", "restore", "rt", "service", "south", "stuff", "their", "uptodate", "us", "welcome", "west", "white", "wht", "you"]
 
-    # step 2 (Augmentation) ++++++++++++++++++++++++++++++++++++++++++++++++++
+    # step 2 (Augmentation) ++++++++++++++++++++++++++++++++++++++++++++++++++++
 
     # TODO: join the too
     list_tops_to_remove = [
@@ -371,7 +374,7 @@ def augment(geo_locations):
                     new_geo_locations[alphanumeric_name] |= set(
                         new_geo_locations[name])
 
-    # step 3 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    # step 3 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
     # create skip grams
 
