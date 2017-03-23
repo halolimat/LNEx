@@ -12,8 +12,20 @@ from itertools import groupby
 from operator import itemgetter
 from collections import defaultdict
 
+################################################################################
+################################################################################
 
-# TODO: refactor this crappy code
+def get_dicts_dir():
+    return os.path.join(os.path.dirname(os.path.realpath(__file__)),'_Dictionaries/')
+################################################################################
+
+# will help in filtering out unigram location names
+gaz_stopwords = get_dicts_dir() + "gaz_stopwords.txt"
+gaz_stopwords = set([line.strip() for line in open(gaz_stopwords, 'r')])
+
+################################################################################
+
+# NOTE: This code does the job, developed while research. You know what I mean!
 def extract_all_bracketed_names(loc_name):
 
     final_list = list()
@@ -182,12 +194,8 @@ def get_extended_words3(unique_names):
 
 ################################################################################
 
-def get_dicts_dir():
-    return os.path.join(os.path.dirname(os.path.realpath(__file__)),
-            '_Dictionaries/')
+def filter(geo_locations):
 
-
-def run(geo_locations):
     """
     input>  type(geo_locations): defaultdict
 
@@ -239,10 +247,6 @@ def run(geo_locations):
 
     names_to_remove = set([x.lower() for x in names_to_remove])
 
-    # will help in filtering out unigram location names
-    gaz_stopwords = get_dicts_dir() + "gaz_stopwords.txt"
-    gaz_stopwords = set([line.strip() for line in open(gaz_stopwords, 'r')])
-
     ##########################################################################
 
     new_geo_locations = defaultdict(set)
@@ -284,6 +288,15 @@ def run(geo_locations):
             # prevents collisions
             if name not in new_geo_locations:
                 new_geo_locations[name] |= set(geo_locations[original_text])
+
+    return new_geo_locations
+
+################################################################################
+
+def augment(geo_locations):
+
+    # augmentation includes filtering
+    new_geo_locations = filter(geo_locations)
 
     #names_to_remove = ["(?)", "(100 Feet Road)", "(2362 xxxx)", "(A Comfort Stay)", "(abandoned)", "(am)", "(Big Street)", "(boat)", "(Broadway)", "(closed)", "(current)", "(East)", "(fm)", "(heritage)", "(historical)", "(L31)", "(leads)", "(M)", "(MVN)", "(north.extn)", "(North)", "(Old)", "(P)", "(partialy closed for metro)", "(planned)", "(Primary)", "(Private Road)", "(private use)", "(Pvt)", "(rural)", "(ship)", "(South)", "(tv)", "(u.s. season 2)", "(U/C)", "(West)", "3rd", "5th", "a", "ahead", "all", "chopper", "closed", "east", "entire", "free", "frm", "gulf", "helpline", "helplines", "htt", "id", "is", "live", "me", "more", "new", "north", "old", "open", "opened", "our", "ours", "people", "planned", "plans", "plz", "restore", "rt", "service", "south", "stuff", "their", "uptodate", "us", "welcome", "west", "white", "wht", "you"]
 
@@ -409,5 +422,4 @@ def run(geo_locations):
                 if new_name not in lns:
                     new_geo_locations[new_name] |= set(new_geo_locations[name])
 
-    return new_geo_locations, get_extended_words3(
-        new_geo_locations.keys())
+    return new_geo_locations, get_extended_words3(new_geo_locations.keys())

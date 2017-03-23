@@ -108,7 +108,7 @@ def get_text(obj):
                 return obj
 
 
-def build_bb_gazetteer(bb):
+def build_bb_gazetteer(bb, augment):
 
     # accepted fields as location names
     location_fields = ["city", "country",
@@ -156,8 +156,16 @@ def build_bb_gazetteer(bb):
                     print get_text(match[key])
                     raise
 
-    new_geo_locations, extended_words3 = gaz_augmentation_and_filtering.run(
-        geo_locations)
+    if augment:
+        # 'pullapuram road': set([493])
+        new_geo_locations, extended_words3 = \
+            gaz_augmentation_and_filtering.augment(geo_locations)
+
+    else:
+        new_geo_locations = gaz_augmentation_and_filtering.filter(geo_locations)
+        extended_words3 = \
+            gaz_augmentation_and_filtering.get_extended_words3(
+                new_geo_locations.keys())
 
     return new_geo_locations, geo_info, extended_words3
 

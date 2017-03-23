@@ -13,10 +13,10 @@ import osm_gazetteer
 def initialize_using_files(geo_locations, extended_words3):
     core.initialize(geo_locations, extended_words3)
 
-def initialize(bb):
+def initialize(bb, augment=True):
 
     geo_locations, geo_info, extended_words3 = \
-            osm_gazetteer.build_bb_gazetteer(bb)
+            osm_gazetteer.build_bb_gazetteer(bb, augment)
 
     core.initialize(geo_locations, extended_words3)
 

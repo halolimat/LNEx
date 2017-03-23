@@ -64,7 +64,7 @@ def run_text_using_elasticindex():
     # chennai flood bounding box
     chennai_bb = [12.74, 80.066986084, 13.2823848224, 80.3464508057]
 
-    lnex.initialize(chennai_bb)
+    lnex.initialize(chennai_bb, augment=True)
 
     header = [
     "tweet_mention",
