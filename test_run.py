@@ -26,7 +26,7 @@ def read_tweets():
 
 ################################################################################
 
-def run_test_using_files():
+def init_using_files():
 
     with open("_Data/chennai_geo_locations.json") as f:
         geo_locations = json.load(f)
@@ -39,35 +39,23 @@ def run_test_using_files():
 
     lnex.initialize_using_files(geo_locations, extended_words3)
 
-    header = [
-    "tweet_mention",
-    "mention_offsets",
-    "geo_location",
-    "geo_info_id"]
-
-    for tweet in read_tweets():
-
-        print tweet
-
-        rows = list()
-        for x in lnex.extract(tweet):
-            row = x[0], x[1], x[2], x[3]
-            rows.append(row)
-
-        print "-" * 90
-        print tabulate(rows, headers=header)
-        print "-" * 90
-
 ################################################################################
 
-def run_text_using_elasticindex():
+def init_using_elasticindex():
 
     lnex.elasticindex(conn_string='130.108.85.186:9200', index_name="photon_v1")
 
     # chennai flood bounding box
     chennai_bb = [12.74, 80.066986084, 13.2823848224, 80.3464508057]
 
-    lnex.initialize(chennai_bb, augment=True)
+    lnex.initialize(chennai_bb, augment=False)
+
+################################################################################
+
+if __name__ == "__main__":
+
+    #init_using_files()
+    init_using_elasticindex()
 
     header = [
     "tweet_mention",
@@ -87,10 +75,3 @@ def run_text_using_elasticindex():
         print "-" * 90
         print tabulate(rows, headers=header)
         print "-" * 90
-
-################################################################################
-
-if __name__ == "__main__":
-
-    #run_test_using_files()
-    run_text_using_elasticindex()
