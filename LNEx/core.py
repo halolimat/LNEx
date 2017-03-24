@@ -486,8 +486,7 @@ def extract(tweet):
             #tub = ((start_idx, end_idx + 1),
             #       valid_n_grams[valid_n_gram])
 
-            tub = ((start_idx, end_idx + 1),
-                   ">>>")
+            tub = ((start_idx, end_idx + 1), ">>>")
 
             location_names_in_query.append(tub)
 

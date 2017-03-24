@@ -153,7 +153,7 @@ def build_bb_gazetteer(bb, augment):
                         geo_locations[text].append(id)
 
                         geo_info[id] = {"name": text,
-                                        "geo_item": list(geo_item)}
+                                        "geo_item": geo_item}
 
                     else:
                         geo_locations[text]
