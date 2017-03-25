@@ -57,7 +57,7 @@ def set_global_env(g_env):
 
 ################################################################################
 
-class Stack:
+class Stack(object):
     '''Stack data structure'''
 
     def __init__(self):
@@ -74,26 +74,21 @@ class Stack:
 
 ################################################################################
 
-class Tree:
+class Tree(object):
     '''Tree data structure used for building the bottom up tree of n-grams'''
 
-    def __init__(
-            self,
-            cargo,
-            left=None,
-            right=None,
-            level=1,
-            tokensIndexes=set()):
+    def __init__(self, cargo, tokensIndexes, left=None, right=None, level=1):
+
         # the data of the node. i.e., the n-gram tokens
         self.cargo = cargo
+        # n-gram tokens indexes from the original tweet text
+        self.tokensIndexes = tokensIndexes
         # left child of tree node
         self.left = left
         # right child of tree node
         self.right = right
         # unigrams are level 1 -> bigrams are level 2
         self.level = level
-        # n-gram tokens indexes from the original tweet text
-        self.tokensIndexes = tokensIndexes
 
     def __str__(self):
         return str(self.cargo)
@@ -118,7 +113,7 @@ def preprocess_tweet(tweet):
         tweet)
 
     # remove non-ascii characters
-    tweet = filter(lambda x: x in printable, tweet)
+    tweet = "".join([x for x in tweet if x in printable])
 
     # additional preprocessing
     tweet = tweet.replace("\n", " ").replace(" https", "").replace("http", "")
@@ -202,12 +197,11 @@ def build_tree(glm, ts):
     # init leaf nodes from the unigrams
     for index, token in enumerate(ts):
         nodes.push(
-            Tree(
-                cargo=token,
-                left=None,
-                right=None,
-                level=1,
-                tokensIndexes=set([index])))
+            Tree( cargo=token,
+                  tokensIndexes=set([index]),
+                  left=None,
+                  right=None,
+                  level=1))
 
     node1 = None
     node2 = None
@@ -267,10 +261,10 @@ def build_tree(glm, ts):
             nodes.push(
                 Tree(
                     tokens_list,
+                    (node1.tokensIndexes | node2.tokensIndexes),
                     node1,
                     node2,
-                    (node1.level + node2.level),
-                    (node1.tokensIndexes | node2.tokensIndexes)))
+                    (node1.level + node2.level)))
 
     return valid_n_grams
 
@@ -472,13 +466,13 @@ def extract(tweet):
                 for token_index in valid_n_gram[-1]:
                     already_assigned_locations_tokens.append(token_index)
 
-            for x in range(len(sub_query_tokens)):
-                if x not in already_assigned_locations_tokens:
+            for idx, item in enumerate(sub_query_tokens):
+                if idx not in already_assigned_locations_tokens:
 
-                    for token_match in sub_query_tokens[x]:
+                    for token_match in item:
 
                         if token_match in env.gazetteer_unique_names_set:
-                            valid_n_grams[(token_match, (x,))] = 1
+                            valid_n_grams[(token_match, (idx,))] = 1
 
         # when the size of the subquery is only one token
         elif len(sub_query_tokens) == 1:
@@ -610,23 +604,23 @@ def filterout_overlaps(valid_ngrams):
 
     original_set = set(valid_ngrams.keys())
 
-    for x in range(len(full_location_names)):
-        for y in range(x + 1, len(full_location_names)):
+    for idx, item in enumerate(full_location_names):
+        for y in range(idx + 1, len(full_location_names)):
 
-            offsets_1 = full_location_names[x]
+            offsets_1 = item
             offsets_2 = full_location_names[y]
 
             try:
                 # if they overlap then the shorter is removed
                 if do_they_overlap(offsets_1, offsets_2):
 
-                    if lengths[x] > lengths[y]:
+                    if lengths[idx] > lengths[y]:
                         original_set.remove(full_location_names[y])
 
                     # NOTE: this was changed since the IJCAI submission to leave
                     #       the ones of equal length
-                    elif lengths[x] < lengths[y]:
-                        original_set.remove(full_location_names[x])
+                    elif lengths[idx] < lengths[y]:
+                        original_set.remove(item)
 
             except BaseException:
                 pass
@@ -726,7 +720,7 @@ def remove_non_full_mentions(filtered_n_grams, valid_ngrams, query_tokens):
 
 ################################################################################
 
-class init_Env:
+class init_Env(object):
     '''Where all the gazetteer data, dictionaries and language model resides'''
 
     def __init__(self, geo_locations, extended_words3):

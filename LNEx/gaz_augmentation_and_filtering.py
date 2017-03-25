@@ -78,20 +78,20 @@ def extract_all_bracketed_names(loc_name):
 
     final_list = list(set(final_list))
 
-    for i in range(len(final_list)):
-        for j in range(i, len(final_list)):
+    for idx, item  in enumerate(final_list):
+        for j in range(idx, len(final_list)):
 
-            sub_bracketed_name = "(" + final_list[i] + ")"
+            sub_bracketed_name = "(" + item + ")"
 
             if sub_bracketed_name in final_list[j]:
                 final_list.append(
                     final_list[j].replace(
                         sub_bracketed_name, ""))
 
-    for i in range(len(final_list)):
-        final_list[i] = final_list[i].replace("(", "").replace(")", "")
-        final_list[i] = re.sub('\s{2,}', ' ', final_list[i])
-        final_list[i] = final_list[i].strip()
+    for idx, item in enumerate(final_list):
+        item = item.replace("(", "").replace(")", "")
+        item = re.sub('\s{2,}', ' ', item)
+        item = item.strip()
 
     final_list = list(set(final_list))
 
@@ -99,7 +99,7 @@ def extract_all_bracketed_names(loc_name):
 
 ################################################################################
 
-class Stack:
+class Stack(object):
     '''Stack data structure'''
 
     def __init__(self):
@@ -220,7 +220,7 @@ def get_extended_words3(unique_names):
 
 ################################################################################
 
-def filter(geo_locations):
+def filter_geo_locations(geo_locations):
     ''' Filters out the gazetteer location names.
 
     input>  type(geo_locations): defaultdict
@@ -319,7 +319,7 @@ def augment(geo_locations):
     '''Augments the location names using skip grams'''
 
     # augmentation includes filtering
-    new_geo_locations = filter(geo_locations)
+    new_geo_locations = filter_geo_locations(geo_locations)
 
     # step 2 (Augmentation) ++++++++++++++++++++++++++++++++++++++++++++++++++++
 

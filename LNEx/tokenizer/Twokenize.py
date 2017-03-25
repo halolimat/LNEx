@@ -38,9 +38,9 @@ UrlStart2 = r'[a-z0-9\.-]+?' + r'\.' + CommonTLDs + pos_lookahead(r'[/ \W\b]')
 UrlBody = r'[^ \t\r\n<>]*?'  # * not + for case of:  "go to bla.com." -- don't want period
 UrlExtraCrapBeforeEnd = '%s+?' % regex_or(PunctChars, Entity)
 UrlEnd = regex_or( r'\.\.+', r'[<>]', r'\s', '$')
-Url = (r'\b' + 
-    regex_or(UrlStart1, UrlStart2) + 
-    UrlBody + 
+Url = (r'\b' +
+    regex_or(UrlStart1, UrlStart2) +
+    UrlBody +
     pos_lookahead( optional(UrlExtraCrapBeforeEnd) + UrlEnd))
 
 Url_RE = re.compile("(%s)" % Url, re.U|re.I)
@@ -62,7 +62,6 @@ aa1 = r'''([A-Za-z]\.){2,}''' + pos_lookahead(BoundaryNotDot)
 aa2 = r'''([A-Za-z]\.){1,}[A-Za-z]''' + pos_lookahead(BoundaryNotDot)
 ArbitraryAbbrev = regex_or(aa1,aa2)
 
-assert '-' != '―'
 Separators = regex_or('--+', '―')
 Decorations = r' [  ♫   ]+ '.replace(' ','')
 
@@ -95,14 +94,11 @@ class Tokenization(list):
     new.alignments = [self.alignments[i] for i in tok_inds]
     new.text = self.text
     return new
-  def assert_consistent(t):
-    assert len(t) == len(t.alignments)
-    assert [t.text[t.alignments[i] : (t.alignments[i]+len(t[i]))] for i in range(len(t))] == list(t)
 
 def align(toks, orig):
   s_i = 0
   alignments = [None]*len(toks)
-  for tok_i in range(len(toks)):
+  for tok_i, __ in enumerate(toks):
     while True:
       L = len(toks[tok_i])
       if orig[s_i:(s_i+L)] == toks[tok_i]:
@@ -150,7 +146,6 @@ def simple_tokenize(text):
     goods.append( (m.end(), len(s)) )
   else:
     goods = [ (0, len(s)) ]
-  assert len(bads)+1 == len(goods)
 
   goods = [s[i:j] for i,j in goods]
   bads  = [s[i:j] for i,j in bads]
@@ -158,7 +153,7 @@ def simple_tokenize(text):
   #print bads
   goods = [unprotected_tokenize(x) for x in goods]
   res = []
-  for i in range(len(bads)):
+  for i, __ in enumerate(bads):
     res += goods[i]
     res.append(bads[i])
   res += goods[-1]
@@ -203,7 +198,7 @@ def unprotected_tokenize(s):
   return s.split()
 
 if __name__=='__main__':
-    print (tokenize("RT @im_ursbro: #ChennaiFloods #'Saidapet', food available for 700-people;no.4,pilliyarkoil street,Jones road subway.call Dinesh Thomas @ 04"))  
+    print (tokenize("RT @im_ursbro: #ChennaiFloods #'Saidapet', food available for 700-people;no.4,pilliyarkoil street,Jones road subway.call Dinesh Thomas @ 04"))
 
 #for line in sys.stdin:
   #  print u" ".join(tokenize(line[:-1])).encode('utf-8')
@@ -211,4 +206,3 @@ if __name__=='__main__':
     #print "WS\t" + " ".join(line[:-1].split())
     #print ansi.color(line.strip(),'red')
     #print ansi.color(" ".join(tokenize(line.strip())),'blue','bold')
-
