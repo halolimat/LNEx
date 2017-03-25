@@ -81,7 +81,7 @@ Using Photon might be a good idea for some users if they have enough space (~ 72
     python setup.py install
     ```
 
-Now, you can start using LNEx to spot locations in tweets.
+ - Now, you can start using LNEx to spot locations in tweets.
    ```python
 
    # Import LNEx inside your python script:   
@@ -90,7 +90,7 @@ Now, you can start using LNEx to spot locations in tweets.
    # Define the elastic index connection string and index name
    lnex.elasticindex(conn_string='localhost:9200', index_name="photon")
 
-   # Define your desired bounding box to allow LNEx to build the custom OSM gazetteer (e.g., for Chennai, India):
+   # Build the custom OSM gazetteer using your desired bounding box (e.g., for Chennai, India):
    chennai_bb = [12.74, 80.066986084, 13.2823848224, 80.3464508057]
 
    # Initialize LNEx using the defined bounding box. You can also choose to augment the gazetteer.
@@ -99,23 +99,23 @@ Now, you can start using LNEx to spot locations in tweets.
    # Now, we are ready to extract location names from the tweet
    lnex.extract("New avadi rd is closed #ChennaiFloods.")
 
-   '''the output is going to be a list of tuples of the following items:
-
-        (Spotted_Location, Location_Offsets, Geo_Location, Geo_Info_IDs) where:
-
-              Spotted_Location > is a substring of the tweet
-              Location_Offsets > are the start and end offsets of the Spotted_Location
-              Geo_Location > is the matched location name from the gazetteer
-              Geo_Info_IDs > are the ids of the geo information of the matched Geo_Locations '''
-
-   [  ('Chennai', (24, 31), 'chennai', [6568]),
-      ('New avadi rd', (0, 12), u'new avadi road', [9568, 5060, 7238, 5063, 1896, 12722, 2820, 9375])]
-
    ```
 
-You can also use the pre-written test run module 'test_run.py' to test LNEx. You can use LNEx by initializing it using the cached files in the '_Data' folder or you can initialize it using the photon index after running it in the background.
+ - The output is going to be a list of tuples of the following items:
+    - Spotted_Location: is a substring of the tweet
+    - Location_Offsets: are the start and end offsets of the Spotted_Location
+    - Geo_Location: is the matched location name from the gazetteer
+    - Geo_Info_IDs: are the ids of the geo information of the matched Geo_Locations
 
-Finally, LNEx is lightening fast and capable of tagging streams of texts, you can incorporate the [following code](https://github.com/tweepy/tweepy/blob/master/examples/streaming.py) to start streaming from Twitter (taking into consideration the spatial context) then define the bounding box that matches the spatial context established by your stream and start tagging the tweets.
+   ```python
+   # output of the above code
+   [  ('Chennai', (24, 31), 'chennai', [6568]),
+      ('New avadi rd', (0, 12), u'new avadi road', [9568, 5060, 7238, 5063, 1896, 12722, 2820, 9375])]
+   ```
+
+ - You can also use the pre-written test run module 'test_run.py' to test LNEx. You can use LNEx by initializing it using the cached files in the '\_Data' folder or you can initialize it using the photon index after running it in the background.
+
+ - Finally, LNEx is lightening fast and capable of tagging streams of texts, you can incorporate the [following code](https://github.com/tweepy/tweepy/blob/master/examples/streaming.py) to start streaming from Twitter (taking into consideration the spatial context) then define the bounding box that matches the spatial context established by your stream and start tagging the tweets.
 
 ## Citing ##
 
