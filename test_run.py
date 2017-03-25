@@ -24,17 +24,6 @@ def strip_non_ascii(s):
 
 ################################################################################
 
-def save_to_files(geo_locations, geo_info, extended_words3):
-
-    with open("_Data/chennai_geo_locations.json", "w") as f:
-        json.dump(geo_locations, f)
-    with open("_Data/chennai_geo_info.json", "w") as f:
-        json.dump(geo_info, f)
-    with open("_Data/chennai_extended_words3.json", "w") as f:
-        json.dump(extended_words3, f)
-
-################################################################################
-
 def read_tweets():
 
     tweets_file = "_Data/sample_tweets.txt"
@@ -78,11 +67,7 @@ def init_using_elasticindex():
 if __name__ == "__main__":
 
     #geo_info = init_using_files()
-    geo_locations, geo_info, extended_words3 = init_using_elasticindex()
-
-    save_to_files(geo_locations, geo_info, extended_words3)
-
-    exit()
+    geo_info = init_using_elasticindex()
 
     header = [
         "tweet_mention",
