@@ -21,13 +21,13 @@ Using Photon might be a good idea for some users if they have enough space (~ 72
 
  - Download the full photon elastic index which is going to allow us to query OSM using a bounding box
 
-   ```
+   ```sh
    wget -O - http://download1.graphhopper.com/public/photon-db-latest.tar.bz2 | bzip2 -cd | tar x
    ```
 
  - Now, start photon which starts the elastic index in the background as a service
 
-   ```
+   ```sh
    wget http://photon.komoot.de/data/photon-0.2.7.jar
    java -jar photon-0.2.7.jar
    ```
@@ -45,7 +45,7 @@ Using Photon might be a good idea for some users if they have enough space (~ 72
    localhost:9201
    ```
    - You can test the index by running the following command:
-   ```
+   ```sh
        curl -XGET 'http://localhost:9201/photon/place/_search/?size=5&pretty=1' -d '{
          "query": {
            "filtered": {
@@ -71,12 +71,12 @@ Using Photon might be a good idea for some users if they have enough space (~ 72
 ## Using LNEx ##
 
  - Clone this repository to your machine as follows:
-    ```
+    ```sh
     git clone https://github.com/halolimat/LNEx.git
     ```
 
  - Install LNEx as follows:
-    ```
+    ```sh
     cd LNEx
     python setup.py install
     ```
