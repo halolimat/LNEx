@@ -70,11 +70,11 @@ if __name__ == "__main__":
     #geo_info = init_using_elasticindex()
 
     header = [
-        "tweet_mention",
-        "mention_offsets",
-        "geo_location",
-        "geo_info_id",
-        "geo_point"]
+        "Spotted_Location", 
+        "Location_Offsets",
+        "Geo_Location",
+        "Geo_Info_IDs"
+        "Geo_Point"]
 
     for tweet in read_tweets():
 
@@ -82,6 +82,11 @@ if __name__ == "__main__":
         tweet = strip_non_ascii(tweet)
 
         print tweet
+
+        tweet = "New avadi rd is closed #ChennaiFloods."
+
+        print lnex.extract(tweet)
+        exit()
 
         rows = list()
         for x in lnex.extract(tweet):

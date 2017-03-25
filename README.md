@@ -20,10 +20,18 @@ We will be using a ready to go elastic index of the whole [OpenStreetMap](http:/
 Using Photon might be a good idea for some users if they have enough space (~ 72 GB) and if they want to use LNEx for many streams along the way. If that sound like something you wanna do, follow the steps below:
 
  - Download the full photon elastic index which is going to allow us to query OSM using a bounding box
-   - wget -O - http://download1.graphhopper.com/public/photon-db-latest.tar.bz2 | bzip2 -cd | tar x
+
+   ```
+   wget -O - http://download1.graphhopper.com/public/photon-db-latest.tar.bz2 | bzip2 -cd | tar x
+   ```
+
  - Now, start photon which starts the elastic index in the background as a service
-   - wget http://photon.komoot.de/data/photon-0.2.7.jar
-   - java -jar photon-0.2.7.jar
+
+   ```
+   wget http://photon.komoot.de/data/photon-0.2.7.jar
+   java -jar photon-0.2.7.jar
+   ```
+
  - You should get the Port number information from the log of running the jar, similar to the following:
 
    ```
@@ -63,38 +71,51 @@ Using Photon might be a good idea for some users if they have enough space (~ 72
 ## Using LNEx ##
 
  - Clone this repository to your machine as follows:
-   - git clone https://github.com/halolimat/LNEx.git
+    ```
+    git clone https://github.com/halolimat/LNEx.git
+    ```
 
  - Install LNEx as follows:
-   - cd LNEx
-   - python setup.py install
+    ```
+    cd LNEx
+    python setup.py install
+    ```
 
 Now, you can start using LNEx to spot locations in tweets.
-
- - Define your desired bounding box in main.py to allow LNEx to build the custom OSM gazetteer (e.g., for Chennai, India):
-
    ```python
 
-    # chennai flood bounding box
-    chennai_bb = [ 12.74, 80.066986084, 13.2823848224, 80.3464508057 ]
+   # Import LNEx inside your python script:   
+   import LNEx as lnex
 
-    # retrieve all OSM records inside the given BB then augment and filter the gazetteer
-    gazetteer = build_gazetteer(chennai_bb)
+   # Define the elastic index connection string and index name
+   lnex.elasticindex(conn_string='localhost:9200', index_name="photon")
 
-    # build a language model from the custom gazetteer for spotting
-    lm = build_lm(gazetteer)
+   # Define your desired bounding box to allow LNEx to build the custom OSM gazetteer (e.g., for Chennai, India):
+   chennai_bb = [12.74, 80.066986084, 13.2823848224, 80.3464508057]
+
+   # Initialize LNEx using the defined bounding box. You can also choose to augment the gazetteer.
+   lnex.initialize(chennai_bb, augment=True)
+
+   # Now, we are ready to extract location names from the tweet
+   lnex.extract("New avadi rd is closed #ChennaiFloods.")
+
+   '''the output is going to be a list of tuples of the following items:
+
+        (Spotted_Location, Location_Offsets, Geo_Location, Geo_Info_IDs) where:
+
+              Spotted_Location > is a substring of the tweet
+              Location_Offsets > are the start and end offsets of the Spotted_Location
+              Geo_Location > is the matched location name from the gazetteer
+              Geo_Info_IDs > are the ids of the geo information of the matched Geo_Locations '''
+
+   [  ('Chennai', (24, 31), 'chennai', [6568]),
+      ('New avadi rd', (0, 12), u'new avadi road', [9568, 5060, 7238, 5063, 1896, 12722, 2820, 9375])]
 
    ```
- - Now, we need to pass the tweets to LNEx to start extracting locations from them. LNEx is lightening fast and capable of tagging streams of data (you can incorporate the [following code](https://github.com/tweepy/tweepy/blob/master/examples/streaming.py) into LNEx). Following is a simple example of reading from a file and passing the tweets to LNEx for tagging:
-   ```python
-    # read tweets from file to list
-    with open(filename) as f:
-        tweets = f.read().splitlines()
 
-    for tweet in tweets:
-        extract_locations(tweet, lm)
-   ```
----
+You can also use the pre-written test run module 'test_run.py' to test LNEx. You can use LNEx by initializing it using the cached files in the '_Data' folder or you can initialize it using the photon index after running it in the background.
+
+Finally, LNEx is lightening fast and capable of tagging streams of texts, you can incorporate the [following code](https://github.com/tweepy/tweepy/blob/master/examples/streaming.py) to start streaming from Twitter (taking into consideration the spatial context) then define the bounding box that matches the spatial context established by your stream and start tagging the tweets.
 
 ## Citing ##
 
