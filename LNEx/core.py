@@ -1,9 +1,9 @@
-"""#############################################################################
+'''#############################################################################
 Copyright 2017 Hussein S. Al-Olimat, hussein@knoesis.org
 
 This software is released under the GNU Affero General Public License (AGPL)
 v3.0 License.
-#############################################################################"""
+#############################################################################'''
 
 import re
 import os
@@ -23,6 +23,25 @@ from tokenizer import Twokenize
 ################################################################################
 ################################################################################
 
+__all__ = [ 'set_global_env',
+            'Stack',
+            'Tree',
+            'preprocess_tweet',
+            'flatten',
+            'build_tree',
+            'using_split2',
+            'findall',
+            'align_and_split',
+            'extract',
+            'do_they_overlap',
+            'filterout_overlaps',
+            'find_ngrams',
+            'remove_non_full_mentions',
+            'init_Env',
+            'initialize']
+
+################################################################################
+
 printable = set(string.printable)
 exclude = set(string.punctuation)
 
@@ -30,13 +49,17 @@ exclude = set(string.punctuation)
 env = None
 
 def set_global_env(g_env):
+    '''Sets the global environment at the time of initialization to be used
+    module-wide'''
+
     global env
     env = g_env
 
 ################################################################################
 
-# Stack data structure
 class Stack:
+    '''Stack data structure'''
+
     def __init__(self):
         self.items = []
 
@@ -51,8 +74,9 @@ class Stack:
 
 ################################################################################
 
-# Tree data structure. Used for building the bottom up tree of valid n-grams
 class Tree:
+    '''Tree data structure used for building the bottom up tree of n-grams'''
+
     def __init__(
             self,
             cargo,
@@ -77,6 +101,7 @@ class Tree:
 ################################################################################
 
 def preprocess_tweet(tweet):
+    '''Preprocesses the tweet text and break the hashtags'''
 
     # remove retweet handler
     if tweet[:2] == "rt":
@@ -150,8 +175,10 @@ def preprocess_tweet(tweet):
 
 ################################################################################
 
-# based on Cristian answer @ http://stackoverflow.com/questions/2158395
 def flatten(l):
+    '''Flattens a list of lists to a list.
+    Based on Cristian answer @ http://stackoverflow.com/questions/2158395'''
+
     for el in l:
         if isinstance(el, collections.Iterable) and not \
            isinstance(el, basestring):
@@ -162,9 +189,9 @@ def flatten(l):
 
 ################################################################################
 
-# given the gazetteer langauge model (glm) and the tweet segment (ts), this
-# function is going to build a bottom up tree of valid n-grams
 def build_tree(glm, ts):
+    ''' Build a bottom-up tree of valid ngrams using the gazetteer langauge
+    model (glm) and the tweet segment (ts)'''
 
     # dictionary of valid n-grams
     valid_n_grams = defaultdict(float)
@@ -249,9 +276,10 @@ def build_tree(glm, ts):
 
 ################################################################################
 
-# based on aquavitae answer @ http://stackoverflow.com/questions/9518806/
-# tokenize the tweet and retain the offsets of each token
 def using_split2(line, _len=len):
+    '''Tokenizes the tweet and retain the offsets of each token
+    Based on aquavitae answer @ http://stackoverflow.com/questions/9518806/'''
+
     words = Twokenize.tokenize(line)
     index = line.index
     offsets = []
@@ -266,10 +294,11 @@ def using_split2(line, _len=len):
 
 ################################################################################
 
-# based on AkiRoss answer @ http://stackoverflow.com/questions/4664850
+#
 def findall(p, s):
-    '''Yields all the positions of
-    the pattern p in the string s.'''
+    '''Yields all the positions of the pattern p in the string s.
+    Based on AkiRoss answer @ http://stackoverflow.com/questions/4664850'''
+
     i = s.find(p)
     while i != -1:
         yield i
@@ -277,9 +306,9 @@ def findall(p, s):
 
 ################################################################################
 
-# This function will align the offsets of the preprocessed string with the
-# raw string to retain original offsets when outputing spotted location names
 def align_and_split(raw_string, preprocessed_string):
+    '''Aligns the offsets of the preprocessed tweet with the raw tweet to retain
+    original offsets when outputing spotted location names'''
 
     tokens = list()
 
@@ -301,24 +330,24 @@ def align_and_split(raw_string, preprocessed_string):
 ################################################################################
 ################################################################################
 
-# given a tweet, this function will extract all location names from it
-'''
-    returns a list of the following 4 items tuple:
-        tweet_mention, mention_offsets, geo_location, geo_info_id
-
-        tweet_mention:   is the location mention in the tweet
-                         (substring retrieved from the mention offsets)
-
-        mention_offsets: a tuple of the start and end offsets of the LN
-
-        geo_location:    the matched location name from the gazetteer.
-                         e.g., new avadi rd > New Avadi Road
-
-        geo_info_id:     contains the attached metadata of all the matched
-                         location names from the gazetteer
-'''
 def extract(tweet):
+    '''Extracts all location names from a tweet.
 
+        returns a list of the following 4 items tuple:
+            tweet_mention, mention_offsets, geo_location, geo_info_id
+
+            tweet_mention:   is the location mention in the tweet
+                             (substring retrieved from the mention offsets)
+
+            mention_offsets: a tuple of the start and end offsets of the LN
+
+            geo_location:    the matched location name from the gazetteer.
+                             e.g., new avadi rd > New Avadi Road
+
+            geo_info_id:     contains the attached metadata of all the matched
+                             location names from the gazetteer '''
+
+    # --------------------------------------------------------------------------
     # check if environment was correctly initialized
     if env == None:
         print "\n##################################################"
@@ -551,6 +580,8 @@ def extract(tweet):
 ################################################################################
 
 def do_they_overlap(tub1, tub2):
+    '''Checks whether two substrings of the tweet overlaps based on their start
+    and end offsets.'''
 
     if tub2[1] >= tub1[0] and tub1[1] >= tub2[0]:
         return True
@@ -558,11 +589,7 @@ def do_they_overlap(tub1, tub2):
 ################################################################################
 
 def filterout_overlaps(valid_ngrams):
-    '''
-    Evangeline Parish Sheriff
-
-    Evangeline Parish is being chosen eventhough the full should be taken
-    '''
+    '''Filters the overlapping ngrams from the tree of valid ngrams'''
 
     full_location_names = list()
     lengths = list()
@@ -631,14 +658,15 @@ def filterout_overlaps(valid_ngrams):
 ################################################################################
 
 def find_ngrams(input_list, n):
+    '''Generates grams of length (n) from the list of unigrams (input_list)'''
+
     return zip(*[input_list[i:] for i in range(n)])
 
 ################################################################################
 
-def remove_non_full_mentions(
-        filtered_n_grams,
-        valid_ngrams,
-        query_tokens):
+def remove_non_full_mentions(filtered_n_grams, valid_ngrams, query_tokens):
+    '''Removes all valid ngrams but non full mention location names as the final
+    step in this system'''
 
     final_set = set()
 
@@ -698,9 +726,12 @@ def remove_non_full_mentions(
 
 ################################################################################
 
-class init_env:
+class init_Env:
+    '''Where all the gazetteer data, dictionaries and language model resides'''
 
     def __init__(self, geo_locations, extended_words3):
+        '''Initialized the system using the location names and list of english
+        words (words3)'''
 
         ###################################################
         # OSM abbr dictionary
@@ -770,8 +801,9 @@ class init_env:
 ################################################################################
 
 def initialize(geo_locations, extended_words3):
+    '''Initializing the system here'''
 
     print "Initializing LNEx ..."
-    g_env = init_env(geo_locations, extended_words3)
+    g_env = init_Env(geo_locations, extended_words3)
     set_global_env(g_env)
     print "Done Initialization ..."

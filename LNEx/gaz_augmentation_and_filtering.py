@@ -14,6 +14,17 @@ from collections import defaultdict
 ################################################################################
 ################################################################################
 
+__all__ = [ 'get_dicts_dir',
+            'extract_all_bracketed_names',
+            'Stack',
+            'preprocess_name',
+            'find_ngrams',
+            'get_extended_words3',
+            'filter',
+            'augment']
+
+################################################################################
+
 def get_dicts_dir():
     return os.path.join(os.path.dirname(os.path.realpath(__file__)),'_Dictionaries/')
 

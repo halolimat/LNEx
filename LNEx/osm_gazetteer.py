@@ -17,6 +17,14 @@ import gaz_augmentation_and_filtering
 ################################################################################
 ################################################################################
 
+__all__ = [ 'set_elasticindex_conn',
+            'search_index',
+            'get_text',
+            'build_bb_gazetteer']
+
+################################################################################
+
+Elasticsearch()
 connection_string = ""
 index_name = ""
 
@@ -32,8 +40,6 @@ def set_elasticindex_conn(cs, inn):
 ################################################################################
 
 def search_index(bb):
-
-    Elasticsearch()
 
     if connection_string == '' or index_name == '':
 
@@ -85,7 +91,7 @@ def search_index(bb):
 
 ################################################################################
 
-def get_text(obj):
+def extract_text(obj):
 
     keys = dir(obj)
 
@@ -146,7 +152,7 @@ def build_bb_gazetteer(bb, augment):
             if key in location_fields:
 
                 try:
-                    text = get_text(match[key])
+                    text = extract_text(match[key])
 
                     if key == "name":
                         # mapping a location name to its geo-info
@@ -160,7 +166,7 @@ def build_bb_gazetteer(bb, augment):
 
                 except BaseException:
                     print "exception at record # ", count
-                    print get_text(match[key])
+                    print extract_text(match[key])
                     raise
 
     if augment:
