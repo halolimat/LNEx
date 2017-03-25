@@ -4,7 +4,7 @@ Copyright 2017 Hussein S. Al-Olimat, hussein@knoesis.org
 This software is released under the GNU Affero General Public License (AGPL)
 v3.0 License.
 #############################################################################-->
-[![Build Status](https://travis-ci.com/halolimat/LNEx.svg?token=Gg8N5fqoMjLGd4ehzd72&branch=master)](https://travis-ci.com/halolimat/LNEx)
+[![AUR](https://img.shields.io/badge/license-AGPL-blue.svg)]() [![GitHub release](https://img.shields.io/badge/release-V1.1-orange.svg)]() [![Build Status](https://travis-ci.com/halolimat/LNEx.svg?token=Gg8N5fqoMjLGd4ehzd72&branch=master)](https://travis-ci.com/halolimat/LNEx)
 # LNEx: Location Name Extractor #
 
 LNEx extracts location names from targeted text streams.
