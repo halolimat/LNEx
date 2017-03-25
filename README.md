@@ -114,7 +114,7 @@ Using Photon might be a good idea for some users if they have enough space (~ 72
     ('New avadi rd', (0, 12), u'new avadi road', [9568, 5060, 7238, 5063, 1896, 12722, 2820, 9375])]
    ```
 
- - You can also use the pre-written test run module 'test_run.py' to test LNEx. You can use LNEx by initializing it using the cached files in the '\_Data' folder or you can initialize it using the photon index after running it in the background.
+ - You can also use the pre-written test run module 'pytest.py' to test LNEx. You can use LNEx by initializing it using the cached files in the '\_Data' folder or you can initialize it using the photon index after running it in the background.
 
  - Finally, LNEx is lightening fast and capable of tagging streams of texts, you can incorporate the [following code](https://github.com/tweepy/tweepy/blob/master/examples/streaming.py) to start streaming from Twitter (taking into consideration the spatial context) then define the bounding box that matches the spatial context established by your stream and start tagging the tweets.
 
