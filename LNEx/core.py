@@ -329,7 +329,7 @@ def extract(tweet):
     # --------------------------------------------------------------------------
 
     #will contain for example: (0, 11): [(u'new avadi road', 3)]
-    valid_n_grams_from_cartisian_product = defaultdict(list)
+    valid_ngrams = defaultdict(list)
 
     # we will call a tweet from now onwards a query
     query = str(tweet.lower())
@@ -337,8 +337,6 @@ def extract(tweet):
     preprocessed_query = preprocess_tweet(query)
 
     query_tokens = align_and_split(query, preprocessed_query)
-
-    location_names_in_query = list()
 
     # --------------------------------------------------------------------------
     # prune the tree of locations based on the exisitence of stop words
@@ -480,15 +478,8 @@ def extract(tweet):
 
             number_of_tokens = len(valid_n_gram[:-1])
 
-            valid_n_grams_from_cartisian_product[index_tub].append(
+            valid_ngrams[index_tub].append(
                 (mached_ln, number_of_tokens))
-
-            #tub = ((start_idx, end_idx + 1),
-            #       valid_n_grams[valid_n_gram])
-
-            tub = ((start_idx, end_idx + 1), ">>>")
-
-            location_names_in_query.append(tub)
 
         # ----------------------------------------------------------------------
 
@@ -519,9 +510,6 @@ def extract(tweet):
                     tub_2 = sub_query_offsets[index][1] + 1
 
                     # tuble would have: ((start_idx,end_idx),prob)
-                    tub = ((tub_1, tub_2), ">>>>")
-
-                    location_names_in_query.append(tub)
 
                     tub = (tub_1, tub_2)
 
@@ -529,50 +517,116 @@ def extract(tweet):
 
                     number_of_tokens = mached_ln.count(" ") + 1
 
-                    valid_n_grams_from_cartisian_product[tub].append(
+                    valid_ngrams[tub].append(
                         (mached_ln, number_of_tokens))
 
     # ---------------------------------------------------------------- end for I
 
-    location_names_in_query = list(set(location_names_in_query))
-
-    location_names_in_query = filterout_overlaps(
-        location_names_in_query,
-        env.gazetteer_unique_names_set,
-        valid_n_grams_from_cartisian_product)
+    filtered_n_grams = filterout_overlaps(valid_ngrams)
 
     # set of: ((offsets), probability), full_mention)
-    location_names_in_query = remove_non_full_mentions(
-        location_names_in_query,
-        env.gazetteer_unique_names_set,
-        valid_n_grams_from_cartisian_product,
-        query_tokens)
+    location_names_in_query = remove_non_full_mentions( filtered_n_grams,
+                                                        valid_ngrams,
+                                                        query_tokens)
 
     # --------------------------------------------------------------------------
 
-    # list of > (tweet_mention, offsets, geo_location, geo_info)
-    final_lns = list()
+    result = list()
 
     for ln in location_names_in_query:
 
-        tweet_mention = tweet[ln[0][0][0]:ln[0][0][1]]
-        mention_offsets = (ln[0][0][0], ln[0][0][1])
+        mention_offsets = (ln[0][0], ln[0][1])
+
+        tweet_mention = tweet[mention_offsets[0]:mention_offsets[1]]
         geo_location = ln[1]
         geo_info_ids = env.gazetteer_unique_names[ln[1]]
 
-        final_lns.append((  tweet_mention,
-                            mention_offsets,
-                            geo_location,
-                            geo_info_ids))
+        result.append(( tweet_mention,
+                        mention_offsets,
+                        geo_location,
+                        geo_info_ids))
 
-    return final_lns
+    return result
 
 ################################################################################
 
-def do_they_overlay(tub1, tub2):
+def do_they_overlap(tub1, tub2):
 
     if tub2[1] >= tub1[0] and tub1[1] >= tub2[0]:
         return True
+
+################################################################################
+
+def filterout_overlaps(valid_ngrams):
+    '''
+    Evangeline Parish Sheriff
+
+    Evangeline Parish is being chosen eventhough the full should be taken
+    '''
+
+    full_location_names = list()
+    lengths = list()
+
+    # this will keep a list of full location names and their lengths
+    for ngram_offsets in valid_ngrams:
+        ngram = valid_ngrams[ngram_offsets]
+
+        for ngram_tuple in ngram:
+            if ngram_tuple[0] in env.gazetteer_unique_names_set:
+                full_location_names.append(ngram_offsets)
+                lengths.append(ngram_tuple[1])
+                break
+
+    ############################################################################
+    # remove the overlapping full location names preferring the longest and
+    #   will keep both if they have the same length
+
+    original_set = set(valid_ngrams.keys())
+
+    for x in range(len(full_location_names)):
+        for y in range(x + 1, len(full_location_names)):
+
+            offsets_1 = full_location_names[x]
+            offsets_2 = full_location_names[y]
+
+            try:
+                # if they overlap then the shorter is removed
+                if do_they_overlap(offsets_1, offsets_2):
+
+                    if lengths[x] > lengths[y]:
+                        original_set.remove(full_location_names[y])
+
+                    # NOTE: this was changed since the IJCAI submission to leave
+                    #       the ones of equal length
+                    elif lengths[x] < lengths[y]:
+                        original_set.remove(full_location_names[x])
+
+            except BaseException:
+                pass
+
+    ############################################################################
+    # Now, we will remove all the ngrams that overlaps with the longest location
+    #   names and leaving the rest to be decided in the next step of extracting
+    #   only full location names from non-overlapping ngrams (including the
+    #   ones we already know are full location names).
+
+    longest_full_location_names = original_set & set(full_location_names)
+
+    final_set = set(original_set)
+
+    for ln in longest_full_location_names:
+        for ngram in original_set:
+
+            if ln != ngram:
+
+                if do_they_overlap(ln, ngram):
+
+                    try:
+                        final_set.remove(ngram)
+                    except BaseException:
+                        pass
+
+    return final_set
 
 ################################################################################
 
@@ -582,136 +636,67 @@ def find_ngrams(input_list, n):
 ################################################################################
 
 def remove_non_full_mentions(
-        tops,
-        gazetteer_unique_names_set,
-        valid_n_grams_from_cartisian_product,
+        filtered_n_grams,
+        valid_ngrams,
         query_tokens):
 
-    original_set = set(tops)
-
-    # would contain the following:
-    # ((offsets), probability), full_mention)
     final_set = set()
 
-    for x in original_set:
-        tops_name = valid_n_grams_from_cartisian_product[x[0]]
+    for ngram_offsets in filtered_n_grams:
+        ngram = valid_ngrams[ngram_offsets]
 
-        found = False
+        # add ngrams to the final set of location names if they are full
+        # location names.
+        full_ln = False
 
-        for top_name in tops_name:
-            if top_name[0] in gazetteer_unique_names_set:
-
-                final_set.add((x, top_name[0]))
-                found = True
+        for ngram_tuple in ngram:
+            if ngram_tuple[0] in env.gazetteer_unique_names_set:
+                final_set.add((ngram_offsets, ngram_tuple[0]))
+                full_ln = True
                 break
 
-        # if not found then try to find a full name inside the non full name
-        # search for full mentions inside those non full mentions. Ex. The
-        # Louisiana > Louisiana | Louisiana and > Louisiana
-        if not found:
-            # ex: the louisiana => (49, 62)
-            for top in tops_name:
+        # if the ngram is not a full location name then search inside it for
+        # a full location name. e.g., The Louisiana > Louisiana
+        if not full_ln:
 
-                top_tokens = top[0].split()
+            # keep track of the token offsets
+            ngram_min_range = ngram_offsets[0]
+            ngram_max_range = (ngram_offsets[1]) - 1
 
-                for gram_len in range(len(top_tokens) - 1, -1, -1):
-                    for gram in find_ngrams(top_tokens, gram_len + 1):
-                        candidate_top = " ".join(gram)
+            for ngram_tuple in ngram:
+
+                unigrams = ngram_tuple[0].split()
+
+                # generate all possible grams from the list of unigrams
+                for new_ngram_len in range(len(unigrams) - 1, -1, -1):
+
+                    # search the new ngram for a possible full location name
+                    for new_ngram in find_ngrams(unigrams, new_ngram_len + 1):
+
+                        candidate_ln = " ".join(new_ngram)
 
                         # if it is a full mention then get the offsets from the
                         # query_tokens list
-                        if candidate_top in gazetteer_unique_names_set:
-                            # print "candidate_top", candidate_top
+                        if candidate_ln in env.gazetteer_unique_names_set:
 
                             # get the indecies from the original query tokens
                             for query_token in query_tokens:
-                                if query_token:
-                                    token_min_range = x[0][0]
-                                    token_max_range = (x[0][1]) - 1
 
-                                    if token_min_range <= query_token[1] and \
-                                            token_max_range >= query_token[2] and \
-                                            candidate_top == query_token[0]:
-                                        # print "GOT IT", query_token,
-                                        # candidate_top
+                                # NOTE: apparently at the time of development
+                                # and testing I had a good reason for having the                                 # first two conditions. They can be removed
+                                # in the future.
+                                if ngram_min_range <= query_token[1] and \
+                                   ngram_max_range >= query_token[2] and \
+                                   candidate_ln == query_token[0]:
 
-                                        t = (
-                                            (query_token[1], query_token[2] + 1), 1)
+                                    t = ((query_token[1], query_token[2]+1),
+                                        candidate_ln)
 
-                                        t = (t, candidate_top)
-
-                                        final_set.add(t)
+                                    final_set.add(t)
 
     return final_set
 
 ################################################################################
-
-def filterout_overlaps(tops, gazetteer_unique_names_set,
-                       valid_n_grams_from_cartisian_product):
-    '''
-    Evangeline Parish Sheriff
-
-    Evangeline Parish is being chosen eventhough the full should be taken
-
-    '''
-
-    original_set = set(tops)
-
-    full_location_names = list()
-    lengths = list()
-
-    for x in original_set:
-        tops_name = valid_n_grams_from_cartisian_product[x[0]]
-
-        for top_name in tops_name:
-            if top_name[0] in gazetteer_unique_names_set:
-                full_location_names.append(x)
-                lengths.append(top_name[1])
-                break
-
-    # remove the overlap between full location mentions:
-    # >> preferring the longest
-    # NOTE: for now will try to keep both if they have same length
-    for x in range(len(full_location_names)):
-        for y in range(x + 1, len(full_location_names)):
-
-            ranges_1 = full_location_names[x][0]
-            ranges_2 = full_location_names[y][0]
-
-            try:
-
-                if do_they_overlay(ranges_1, ranges_2):
-                    if lengths[x] > lengths[y]:
-                        original_set.remove(full_location_names[y])
-                    else:
-                        original_set.remove(full_location_names[x])
-
-            except BaseException:
-                pass
-
-    # remove all that overlap with this mention and leave the rest
-
-    longest_full_location_names = original_set & set(full_location_names)
-    # print "intersection: > ", longest_full_location_names
-
-    final_set = set(original_set)
-
-    for lon_top in longest_full_location_names:
-        for top in original_set:
-
-            if lon_top != top:
-
-                if do_they_overlay(lon_top[0], top[0]):
-
-                    try:
-                        final_set.remove(top)
-                    except BaseException:
-                        pass
-
-    return final_set
-
-##########################################################################
-##########################################################################
 
 class init_env:
 
@@ -745,12 +730,12 @@ class init_env:
             # apts. > apartments
             self.osm_abbreviations[line[1] + "."].append(line[0])
 
-        #######################################################################
+        ########################################################################
 
         self.gazetteer_unique_names = geo_locations
 
-        self.gazetteer_unique_names_set = set(
-            self.gazetteer_unique_names.keys())
+        self.gazetteer_unique_names_set = \
+                    set(self.gazetteer_unique_names.keys())
 
         # NOTE BLACKLIST CODE GOES HERE
 
@@ -761,7 +746,7 @@ class init_env:
         self.extended_words3 = extended_words3
         self.extended_words3 = set(self.extended_words3)
 
-        #######################################################################
+        ########################################################################
 
         streets_suffixes_dict_file = dicts_dir + "streets_suffixes_dict.json"
 
@@ -769,12 +754,12 @@ class init_env:
 
             self.streets_suffixes_dict = json.load(f)
 
-        #######################################################################
+        ########################################################################
 
         # gazetteer-based language model
         self.glm = Language_Modeling.GazBasedModel(geo_locations)
 
-        #######################################################################
+        ########################################################################
 
         # list of unigrams
         unigrams = self.glm.unigrams["words"].keys()
@@ -782,6 +767,7 @@ class init_env:
         self.stopwords_notin_gazetteer = set(
             self.extended_words3) - set(unigrams)
 
+################################################################################
 
 def initialize(geo_locations, extended_words3):
 

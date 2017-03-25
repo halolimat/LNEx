@@ -7,12 +7,20 @@ v3.0 License.
 
 import sys
 import json
+import unicodedata
 from tabulate import tabulate
 
 import LNEx as lnex
 
 ################################################################################
 ################################################################################
+
+def strip_non_ascii(s):
+    if type(s) == unicode:
+        nfkd = unicodedata.normalize('NFKD', s)
+        return str(nfkd.encode('ASCII', 'ignore').decode('ASCII'))
+    else:
+        return s
 
 def read_tweets():
 
@@ -31,7 +39,7 @@ def init_using_files():
     with open("_Data/chennai_geo_locations.json") as f:
         geo_locations = json.load(f)
 
-     with open("_Data/chennai_geo_info.json") as f:
+    with open("_Data/chennai_geo_info.json") as f:
         geo_info = json.load(f)
 
     with open("_Data/chennai_extended_english_words.json") as f:
@@ -60,12 +68,16 @@ if __name__ == "__main__":
     geo_info = init_using_elasticindex()
 
     header = [
-    "tweet_mention",
-    "mention_offsets",
-    "geo_location",
-    "geo_info_id"]
+        "tweet_mention",
+        "mention_offsets",
+        "geo_location",
+        "geo_info_id",
+        "geo_point"]
 
     for tweet in read_tweets():
+
+        # remove non-ascii characters
+        tweet = strip_non_ascii(tweet)
 
         print tweet
 
