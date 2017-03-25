@@ -107,10 +107,11 @@ Using Photon might be a good idea for some users if they have enough space (~ 72
     - Geo_Location: is the matched location name from the gazetteer
     - Geo_Info_IDs: are the ids of the geo information of the matched Geo_Locations
 
+
    ```python
    # output of the above code
-   [  ('Chennai', (24, 31), 'chennai', [6568]),
-      ('New avadi rd', (0, 12), u'new avadi road', [9568, 5060, 7238, 5063, 1896, 12722, 2820, 9375])]
+   [('Chennai', (24, 31), 'chennai', [6568]),
+    ('New avadi rd', (0, 12), u'new avadi road', [9568, 5060, 7238, 5063, 1896, 12722, 2820, 9375])]
    ```
 
  - You can also use the pre-written test run module 'test_run.py' to test LNEx. You can use LNEx by initializing it using the cached files in the '\_Data' folder or you can initialize it using the photon index after running it in the background.
