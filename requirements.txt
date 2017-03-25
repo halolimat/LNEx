@@ -4,3 +4,4 @@ nltk
 geopy
 texttable
 wordsegment
+tabulate
