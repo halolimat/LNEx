@@ -6,6 +6,7 @@ v3.0 License.
 #############################################################################-->
 
 # LNEx: Location Name Extractor #
+[![Build Status](https://travis-ci.com/halolimat/LNEx.svg?token=Gg8N5fqoMjLGd4ehzd72&branch=master)](https://travis-ci.com/halolimat/LNEx)
 
 LNEx extracts location names from targeted text streams.
 
