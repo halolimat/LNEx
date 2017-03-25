@@ -20,7 +20,7 @@ __all__ = [ 'get_dicts_dir',
             'preprocess_name',
             'find_ngrams',
             'get_extended_words3',
-            'filter',
+            'filter_geo_locations',
             'augment']
 
 ################################################################################
@@ -171,18 +171,18 @@ def preprocess_name(loc_name):
             else:
                 final_list.append(name_to_break)
 
-    for i in range(len(final_list)):
+    for __, item in enumerate(final_list):
 
         # to remove all punctuations from the tweet later
         # and since it is not important if it is there or not
         # for matching, so we just remove it. If not removed
         # then both terms connected will be considered as a
         # unigram which is not true.
-        if "-" in final_list[i]:
-            final_list[i] = final_list[i].replace("-", " ")
+        if "-" in item:
+            item = fitem.replace("-", " ")
 
-        final_list[i] = re.sub('\s{2,}', ' ', final_list[i])
-        final_list[i] = final_list[i].strip()
+        item = re.sub('\s{2,}', ' ', item)
+        item = item.strip()
 
     final_list = list(set(final_list))
 
