@@ -1,0 +1,6 @@
+elasticsearch
+elasticsearch-dsl
+nltk
+geopy
+texttable
+wordsegment
