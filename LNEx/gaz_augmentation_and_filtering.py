@@ -26,7 +26,10 @@ __all__ = [ 'get_dicts_dir',
 ################################################################################
 
 def get_dicts_dir():
-    return os.path.join(os.path.dirname(os.path.realpath(__file__)),'_Dictionaries/')
+    '''Returns the directory where the to be used dictionaries resides'''
+
+    return os.path.join(os.path.dirname(os.path.realpath(__file__)),
+            '_Dictionaries/')
 
 ################################################################################
 
@@ -36,8 +39,10 @@ gaz_stopwords = set([line.strip() for line in open(gaz_stopwords, 'r')])
 
 ################################################################################
 
-# NOTE: This code does the job, developed while research. You know what I mean!
 def extract_all_bracketed_names(loc_name):
+    '''Extracts the text inside brackets, with all the accompanied complexities
+    The function does the job, developed while researching the problem...
+    You know what I mean!'''
 
     final_list = list()
     final_list.append(loc_name)
@@ -95,6 +100,8 @@ def extract_all_bracketed_names(loc_name):
 ################################################################################
 
 class Stack:
+    '''Stack data structure'''
+
     def __init__(self):
         self.items = []
 
@@ -110,6 +117,8 @@ class Stack:
 ################################################################################
 
 def preprocess_name(loc_name):
+    '''Preprocesses and normalizes the raw location names. Including the
+    implementation of the hand crafted rules of breaking'''
 
     loc_name = loc_name.lower()
 
@@ -181,15 +190,18 @@ def preprocess_name(loc_name):
 
 ################################################################################
 
-# source: http://link.hussein.space/elegae50d
-def find_ngrams(input_list, n):
-    return zip(*[input_list[i:] for i in range(n)])
+def find_ngrams(unigrams, n):
+    '''Created ngrams of length n from the unigrams list'''
+
+    return zip(*[unigrams[i:] for i in range(n)])
 
 ################################################################################
 
 def get_extended_words3(unique_names):
+    '''Reads the list of english words (words3).
+    words3 source: https://github.com/dwyl/english-words
+    '''
 
-    # words3 source: https://github.com/dwyl/english-words
     with open(get_dicts_dir() + "words3.txt") as f:
 
         words3 = f.read().splitlines()
@@ -209,17 +221,13 @@ def get_extended_words3(unique_names):
 ################################################################################
 
 def filter(geo_locations):
+    ''' Filters out the gazetteer location names.
 
-    """
     input>  type(geo_locations): defaultdict
-
             "LocationName": [geo_info_ids]
 
-    output> type(unique_names): dict , type(all_names): list
+    output> type(unique_names): dict , type(all_names): list'''
 
-    """
-
-    ############################################################################
 
     names_to_remove = set(["(U/C)",
                            "(East)",
@@ -308,11 +316,10 @@ def filter(geo_locations):
 ################################################################################
 
 def augment(geo_locations):
+    '''Augments the location names using skip grams'''
 
     # augmentation includes filtering
     new_geo_locations = filter(geo_locations)
-
-    #names_to_remove = ["(?)", "(100 Feet Road)", "(2362 xxxx)", "(A Comfort Stay)", "(abandoned)", "(am)", "(Big Street)", "(boat)", "(Broadway)", "(closed)", "(current)", "(East)", "(fm)", "(heritage)", "(historical)", "(L31)", "(leads)", "(M)", "(MVN)", "(north.extn)", "(North)", "(Old)", "(P)", "(partialy closed for metro)", "(planned)", "(Primary)", "(Private Road)", "(private use)", "(Pvt)", "(rural)", "(ship)", "(South)", "(tv)", "(u.s. season 2)", "(U/C)", "(West)", "3rd", "5th", "a", "ahead", "all", "chopper", "closed", "east", "entire", "free", "frm", "gulf", "helpline", "helplines", "htt", "id", "is", "live", "me", "more", "new", "north", "old", "open", "opened", "our", "ours", "people", "planned", "plans", "plz", "restore", "rt", "service", "south", "stuff", "their", "uptodate", "us", "welcome", "west", "white", "wht", "you"]
 
     # step 2 (Augmentation) ++++++++++++++++++++++++++++++++++++++++++++++++++++
 

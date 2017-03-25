@@ -31,6 +31,12 @@ index_name = ""
 ################################################################################
 
 def set_elasticindex_conn(cs, inn):
+    '''Sets the connection string and index name for the elastic index
+
+    connection_string: (e.g, localhost:9200)
+    index_name: (e.g., photon) '''
+
+
     global connection_string
     global index_name
 
@@ -40,6 +46,9 @@ def set_elasticindex_conn(cs, inn):
 ################################################################################
 
 def search_index(bb):
+    '''Retrieves the location names from the elastic index using the given
+    bounding box'''
+
 
     if connection_string == '' or index_name == '':
 
@@ -92,6 +101,9 @@ def search_index(bb):
 ################################################################################
 
 def extract_text(obj):
+    '''Extracts a location name from the different json fields in order
+    giving the priority to (en) then (default), and so on. '''
+
 
     keys = dir(obj)
 
@@ -122,6 +134,8 @@ def extract_text(obj):
 ################################################################################
 
 def build_bb_gazetteer(bb, augment):
+    '''Builds the gazetteer of a bounding box and agument it in case
+    augmentation is activated. '''
 
     # accepted fields as location names
     location_fields = ["city", "country",

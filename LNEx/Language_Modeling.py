@@ -29,8 +29,13 @@ __all__ = [ 'GazBasedModel']
 ################################################################################
 
 class GazBasedModel:
+    '''The implementation of the language model using NLTK.'''
 
     def _bigram_probability(self, n_gram):
+        '''Returns the probability of bigrams using the following equation:
+
+            p (w_1 w_2) = p (w1) x p(w2 | w_1) '''
+
 
         # p(w_0)
         prob = (self.unigrams["words"][n_gram[0]] /
@@ -49,6 +54,10 @@ class GazBasedModel:
     ############################################################################
 
     def phrase_probability(self, phrase):
+        '''Returns the probability of a phrase using the following equation:
+
+            p (w_1 ... w_n) = p (w1) x p(w2 | w_1) ... x p (w_n | w_n-1) '''
+
 
         n_gram = phrase.split()
         n_gram = [t.strip() for t in n_gram]
@@ -79,6 +88,8 @@ class GazBasedModel:
     ############################################################################
 
     def __init__(self, geo_locations):
+        '''Initializes the language model by creating the ConditionalFreqDist
+        and ConditionalProbDist'''
 
         words_count = 0
 

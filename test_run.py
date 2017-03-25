@@ -44,7 +44,7 @@ def init_using_files():
     with open("_Data/chennai_geo_info.json") as f:
         geo_info = json.load(f)
 
-    with open("_Data/chennai_extended_english_words.json") as f:
+    with open("_Data/chennai_extended_words3.json") as f:
         extended_words3 = json.load(f)
 
     lnex.initialize_using_files(geo_locations, extended_words3)
@@ -66,8 +66,8 @@ def init_using_elasticindex():
 
 if __name__ == "__main__":
 
-    #geo_info = init_using_files()
-    geo_info = init_using_elasticindex()
+    geo_info = init_using_files()
+    #geo_info = init_using_elasticindex()
 
     header = [
         "tweet_mention",
