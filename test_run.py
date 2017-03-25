@@ -22,6 +22,19 @@ def strip_non_ascii(s):
     else:
         return s
 
+################################################################################
+
+def save_to_files(geo_locations, geo_info, extended_words3):
+
+    with open("_Data/chennai_geo_locations.json", "w") as f:
+        json.dump(geo_locations, f)
+    with open("_Data/chennai_geo_info.json", "w") as f:
+        json.dump(geo_info, f)
+    with open("_Data/chennai_extended_words3.json", "w") as f:
+        json.dump(extended_words3, f)
+
+################################################################################
+
 def read_tweets():
 
     tweets_file = "_Data/sample_tweets.txt"
@@ -65,7 +78,11 @@ def init_using_elasticindex():
 if __name__ == "__main__":
 
     #geo_info = init_using_files()
-    geo_info = init_using_elasticindex()
+    geo_locations, geo_info, extended_words3 = init_using_elasticindex()
+
+    save_to_files(geo_locations, geo_info, extended_words3)
+
+    exit()
 
     header = [
         "tweet_mention",
@@ -86,10 +103,13 @@ if __name__ == "__main__":
 
             geo_point = {}
 
-            # if we only have one geo_point then we are 100% certain of its
-            # location and we don't need disambiguation
-            if len(x[3]) == 1:
-                geo_point = geo_info[list(x[3])[0]]['geo_item']['point']
+            try:
+                # if we only have one geo_point then we are 100% certain of its
+                # location and we don't need disambiguation
+                if len(x[3]) == 1:
+                    geo_point = geo_info[list(x[3])[0]]['geo_item']['point']
+            except:
+                pass
 
             row = x[0], x[1], x[2], x[3], geo_point
             rows.append(row)
