@@ -1,3 +1,6 @@
+# Data
+_Data/Brat_Annotations
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
