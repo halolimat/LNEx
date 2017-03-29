@@ -16,7 +16,9 @@ __all__ = [ 'get_distance_between_latlon_points',
 ################################################################################
 
 def get_distance_between_latlon_points(x1, x2):
-    '''     ---------------
+    '''Calculates the distance between two geo points in km.
+
+            ---------------
             |           + |
             |          lat|
             |           - |
@@ -28,6 +30,7 @@ def get_distance_between_latlon_points(x1, x2):
 ################################################################################
 
 def is_bb_acceptable(bb):
+    '''Checks if the bounding box used is at most as big as Texas State'''
 
     # south east point from the two sw and ne points
     sw = (bb[0], bb[1])

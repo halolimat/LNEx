@@ -6,9 +6,6 @@ v3.0 License.
 #############################################################################"""
 
 #!/usr/bin/env python
-"""
-LNEx
-"""
 
 from setuptools import setup, find_packages
 
@@ -16,7 +13,7 @@ with open('README.md') as f:
     readme = f.read()
 
 with open('LICENSE') as f:
-    license = f.read()
+    license_file = f.read()
 
 setup(
     name='LNEx',
@@ -26,7 +23,7 @@ setup(
     author='Hussein S. Al-Olimat',
     author_email='hussein@knoesis.org',
     url='https://github.com/halolimat/LNEx',
-    license=license,
+    license=license_file,
     packages=find_packages(exclude=('_Data')),
     package_data={'LNEx': ['_Dictionaries/*.txt']},
     install_requires=[

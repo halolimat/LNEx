@@ -19,7 +19,7 @@ import gaz_augmentation_and_filtering
 
 __all__ = [ 'set_elasticindex_conn',
             'search_index',
-            'get_text',
+            'extract_text',
             'build_bb_gazetteer']
 
 ################################################################################
@@ -31,6 +31,12 @@ index_name = ""
 ################################################################################
 
 def set_elasticindex_conn(cs, inn):
+    '''Sets the connection string and index name for the elastic index
+
+    connection_string: (e.g, localhost:9200)
+    index_name: (e.g., photon) '''
+
+
     global connection_string
     global index_name
 
@@ -40,6 +46,9 @@ def set_elasticindex_conn(cs, inn):
 ################################################################################
 
 def search_index(bb):
+    '''Retrieves the location names from the elastic index using the given
+    bounding box'''
+
 
     if connection_string == '' or index_name == '':
 
@@ -92,6 +101,9 @@ def search_index(bb):
 ################################################################################
 
 def extract_text(obj):
+    '''Extracts a location name from the different json fields in order
+    giving the priority to (en) then (default), and so on. '''
+
 
     keys = dir(obj)
 
@@ -121,7 +133,9 @@ def extract_text(obj):
 
 ################################################################################
 
-def build_bb_gazetteer(bb, augment):
+def build_bb_gazetteer(bb, augment=True):
+    '''Builds the gazetteer of a bounding box and agument it in case
+    augmentation is activated. '''
 
     # accepted fields as location names
     location_fields = ["city", "country",
@@ -130,11 +144,11 @@ def build_bb_gazetteer(bb, augment):
     geo_info = defaultdict()
     geo_locations = defaultdict(list)
 
-    id = 0
+    _id = 0
 
     for match in search_index(bb):
 
-        id += 1
+        _id += 1
 
         keys = dir(match)
 
@@ -156,13 +170,13 @@ def build_bb_gazetteer(bb, augment):
 
                     if key == "name":
                         # mapping a location name to its geo-info
-                        geo_locations[text].append(id)
+                        geo_locations[text].append(_id)
 
-                        geo_info[id] = {"name": text,
+                        geo_info[_id] = {"name": text,
                                         "geo_item": geo_item}
 
                     else:
-                        geo_locations[text]
+                        geo_locations[text] = list()
 
                 except BaseException:
                     print "exception at record # ", count
@@ -175,7 +189,8 @@ def build_bb_gazetteer(bb, augment):
             gaz_augmentation_and_filtering.augment(geo_locations)
 
     else:
-        new_geo_locations = gaz_augmentation_and_filtering.filter(geo_locations)
+        new_geo_locations = \
+            gaz_augmentation_and_filtering.filter_geo_locations(geo_locations)
         extended_words3 = \
             gaz_augmentation_and_filtering.get_extended_words3(
                 new_geo_locations.keys())

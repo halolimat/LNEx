@@ -5,11 +5,9 @@ This software is released under the GNU Affero General Public License (AGPL)
 v3.0 License.
 #############################################################################"""
 
-'''
-This model was inspired by the following sources:
-> http://www.katrinerk.com/courses/python-worksheets/language-models-in-python
-> http://stackoverflow.com/questions/21891247
-'''
+# This model was inspired by the following sources:
+# > http://www.katrinerk.com/courses/python-worksheets/language-models-in-python
+# > http://stackoverflow.com/questions/21891247
 
 ################################################################################
 
@@ -28,9 +26,14 @@ __all__ = [ 'GazBasedModel']
 
 ################################################################################
 
-class GazBasedModel:
+class GazBasedModel(object):
+    '''The implementation of the language model using NLTK.'''
 
     def _bigram_probability(self, n_gram):
+        '''Returns the probability of bigrams using the following equation:
+
+            p (w_1 w_2) = p (w1) x p(w2 | w_1) '''
+
 
         # p(w_0)
         prob = (self.unigrams["words"][n_gram[0]] /
@@ -49,6 +52,10 @@ class GazBasedModel:
     ############################################################################
 
     def phrase_probability(self, phrase):
+        '''Returns the probability of a phrase using the following equation:
+
+            p (w_1 ... w_n) = p (w1) x p(w2 | w_1) ... x p (w_n | w_n-1) '''
+
 
         n_gram = phrase.split()
         n_gram = [t.strip() for t in n_gram]
@@ -79,6 +86,8 @@ class GazBasedModel:
     ############################################################################
 
     def __init__(self, geo_locations):
+        '''Initializes the language model by creating the ConditionalFreqDist
+        and ConditionalProbDist'''
 
         words_count = 0
 
@@ -114,8 +123,7 @@ class GazBasedModel:
             cfd_bigrams[bg[0]][bg[1]] += 1
 
         # bigrams MLE probabilities
-        self.cpd_bigrams = nltk.ConditionalProbDist(cfd_bigrams,
-                                                    nltk.MLEProbDist)
+        self.cpd_bigrams = ConditionalProbDist(cfd_bigrams, nltk.MLEProbDist)
 
         # trigrams ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         train_trigrams = list(chain(*[trigrams(i) for i in gaz_n_grams]))
@@ -129,8 +137,7 @@ class GazBasedModel:
             cfd_trigrams[bi_gr][bg[2]] += 1
 
         # trigrams MLE probabilities
-        self.cpd_trigrams = nltk.ConditionalProbDist(cfd_trigrams,
-                                                     nltk.MLEProbDist)
+        self.cpd_trigrams = ConditionalProbDist(cfd_trigrams, nltk.MLEProbDist)
 
 ################################################################################
 

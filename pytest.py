@@ -5,7 +5,6 @@ This software is released under the GNU Affero General Public License (AGPL)
 v3.0 License.
 #############################################################################"""
 
-import sys
 import json
 import unicodedata
 from tabulate import tabulate
@@ -16,7 +15,7 @@ import LNEx as lnex
 ################################################################################
 
 def strip_non_ascii(s):
-    if type(s) == unicode:
+    if isinstance(s, unicode):
         nfkd = unicodedata.normalize('NFKD', s)
         return str(nfkd.encode('ASCII', 'ignore').decode('ASCII'))
     else:
@@ -44,7 +43,7 @@ def init_using_files():
     with open("_Data/chennai_geo_info.json") as f:
         geo_info = json.load(f)
 
-    with open("_Data/chennai_extended_english_words.json") as f:
+    with open("_Data/chennai_extended_words3.json") as f:
         extended_words3 = json.load(f)
 
     lnex.initialize_using_files(geo_locations, extended_words3)
@@ -66,15 +65,15 @@ def init_using_elasticindex():
 
 if __name__ == "__main__":
 
-    #geo_info = init_using_files()
-    geo_info = init_using_elasticindex()
+    geo_info = init_using_files()
+    #geo_info = init_using_elasticindex()
 
     header = [
-        "tweet_mention",
-        "mention_offsets",
-        "geo_location",
-        "geo_info_id",
-        "geo_point"]
+        "Spotted_Location",
+        "Location_Offsets",
+        "Geo_Location",
+        "Geo_Info_IDs"
+        "Geo_Point"]
 
     for tweet in read_tweets():
 
@@ -82,6 +81,8 @@ if __name__ == "__main__":
         tweet = strip_non_ascii(tweet)
 
         print tweet
+
+        #tweet = "New avadi rd is closed #ChennaiFloods."
 
         rows = list()
         for x in lnex.extract(tweet):
@@ -93,12 +94,12 @@ if __name__ == "__main__":
                 # location and we don't need disambiguation
                 if len(x[3]) == 1:
                     geo_point = geo_info[list(x[3])[0]]['geo_item']['point']
-            except:
+            except KeyError, e:
                 pass
 
             row = x[0], x[1], x[2], x[3], geo_point
             rows.append(row)
 
-        print "-" * 90
+        print "-" * 120
         print tabulate(rows, headers=header)
-        print "-" * 90
+        print "#" * 120

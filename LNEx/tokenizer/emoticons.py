@@ -30,7 +30,7 @@ Other_RE = mycompile( '('+NormalEyes+'|'+Wink+')'  + NoseArea + OtherMouths )
 
 Emoticon = (
     "("+NormalEyes+"|"+Wink+")" +
-    NoseArea + 
+    NoseArea +
     "("+Tongue+"|"+OtherMouths+"|"+SadMouths+"|"+HappyMouths+")"
 )
 Emoticon_RE = mycompile(Emoticon)
@@ -65,4 +65,3 @@ if __name__=='__main__':
     import sane_re
     sane_re._S(line[:-1]).show_match(Emoticon_RE, numbers=False)
     #print(analyze_tweet(line.strip()), line.strip(), sep="\t")
-
