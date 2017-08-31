@@ -124,16 +124,13 @@ If you do make use of LNEx or any of its components please cite the following pu
 
     @inproceedings{halolimatLNEx17,
       title={ Location Name Extraction from Targeted Text Streams using
-              a Gazetteer-based Statistical Language Model. },
-      author={ Al-Olimat, Hussein S. and Thirunarayan, Krishnaprasad
-               and Shalin, Valerie and Sheth, Amit},
-      booktitle={IJCAI},
-      volume={7},
-      pages={2733--2739},
+              Gazetteer-based Statistical Language Models. },
+      author={ Al-Olimat, Hussein S., Thirunarayan, Krishnaprasad,
+               Shalin, Valerie and Sheth, Amit},
       year={2017}
     }
 
-We would also be very happy if you link to our project page:
+We would also be very happy if you provide a link to our project page:
 
     ... location name extractor tool (LNEx)\footnote{
         \url{https://github.com/halolimat/LNEx}
