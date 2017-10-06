@@ -179,7 +179,7 @@ def preprocess_name(loc_name):
         # then both terms connected will be considered as a
         # unigram which is not true.
         if "-" in item:
-            item = fitem.replace("-", " ")
+            item = item.replace("-", " ")
 
         item = re.sub('\s{2,}', ' ', item)
         item = item.strip()

@@ -28,7 +28,7 @@ setup(
     package_data={'LNEx': ['_Dictionaries/*.txt']},
     install_requires=[
           'elasticsearch',
-          'elasticsearch-dsl',
+          'elasticsearch-dsl<2.0.0',
           'nltk',
           'geopy',
           'texttable',

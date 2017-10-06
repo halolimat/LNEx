@@ -54,19 +54,19 @@ def init_using_files():
 
 def init_using_elasticindex():
 
-    lnex.elasticindex(conn_string='130.108.85.186:9200', index_name="photon_v1")
+    lnex.elasticindex(conn_string='localhost:9200', index_name="photon")
 
     # chennai flood bounding box
-    chennai_bb = [12.74, 80.066986084, 13.2823848224, 80.3464508057]
+    bb = [12.74, 80.066986084, 13.2823848224, 80.3464508057]
 
-    return lnex.initialize(chennai_bb, augment=True)
+    return lnex.initialize(bb, augment=True)
 
 ################################################################################
 
 if __name__ == "__main__":
 
-    geo_info = init_using_files()
-    #geo_info = init_using_elasticindex()
+    #geo_info = init_using_files()
+    geo_info = init_using_elasticindex()
 
     header = [
         "Spotted_Location",

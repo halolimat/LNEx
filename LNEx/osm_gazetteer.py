@@ -23,11 +23,8 @@ __all__ = [ 'set_elasticindex_conn',
             'build_bb_gazetteer']
 
 ################################################################################
-
-Elasticsearch()
 connection_string = ""
 index_name = ""
-
 ################################################################################
 
 def set_elasticindex_conn(cs, inn):
@@ -57,8 +54,7 @@ def search_index(bb):
         print "#############################################################\n"
         exit()
 
-    if not geo_calculations.is_bb_acceptable(
-            bb) or bb[0] > bb[2] or bb[1] > bb[3]:
+    if not geo_calculations.is_bb_acceptable(bb) or bb[0] > bb[2] or bb[1] > bb[3]:
 
         print "\n##########################################################"
         print "Global ERROR: Bounding Box is too big, choose a smaller one!"
@@ -66,6 +62,7 @@ def search_index(bb):
         exit()
 
     connections.create_connection(hosts=[connection_string], timeout=20)
+    client = Elasticsearch(timeout=30)
 
     phrase_search = [Q({"filtered": {
         "filter": {
@@ -88,8 +85,8 @@ def search_index(bb):
     }
     })]
 
-    # to search with a scroll
-    e_search = Search(index=index_name).query(Q('bool', must=phrase_search))
+    #to search with a scroll
+    e_search = Search(using=client, index=index_name).query(Q('bool', must=phrase_search))
 
     try:
         res = e_search.scan()
@@ -97,6 +94,21 @@ def search_index(bb):
         raise
 
     return res
+
+    # Do not work correctly
+    # s = Search(using=client, index=index_name) \
+    #     .filter("geo_bounding_box", location={
+    #         "top_right": {
+    #             "lat": bb[2],
+    #             "lon": bb[3]
+    #         },
+    #         "bottom_left": {
+    #             "lat": bb[0],
+    #             "lon": bb[1]
+    #         }
+    #     })
+    #
+    # return s.execute()
 
 ################################################################################
 
@@ -201,12 +213,16 @@ def build_bb_gazetteer(bb, augment=True):
 
 if __name__ == "__main__":
 
-    chennai_bb = [12.74, 80.066986084,
-                  13.2823848224, 80.3464508057]
+    bb = [41.6187434973, -83.7106928844, 41.6245055116, -83.7017216664]
 
-    connection_string = '130.108.85.186:9200'
-    index_name = "photon_v1"
+    # connection_string = '130.108.85.186:9200'
+    # index_name = "photon_v1"
+
+    connection_string = "localhost:9200"
+    index_name = "photon"
 
     set_elasticindex_conn(connection_string, index_name)
 
-    geo_locations, geo_info, extended_words3 = build_bb_gazetteer(chennai_bb)
+    geo_locations, geo_info, extended_words3 = build_bb_gazetteer(bb)
+
+    print geo_locations
