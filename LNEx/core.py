@@ -12,9 +12,11 @@ import string
 import itertools
 import collections
 from itertools import groupby
-from wordsegment import segment
+from wordsegment import load, segment
 from operator import itemgetter
 from collections import defaultdict
+
+load()
 
 # importing local modules
 import Language_Modeling
