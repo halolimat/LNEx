@@ -399,6 +399,9 @@ def extract(tweet):
         if index == len(query_tokens) - 1:
             query_filtered.append(candidate_location)
 
+    # Remove empty query tokens
+    query_tokens = [qt for qt in query_tokens if qt != tuple()]
+
     ##########################################################################
 
     # start the core extraction procedure using the bottom up trees
@@ -709,6 +712,7 @@ def remove_non_full_mentions(filtered_n_grams, valid_ngrams, query_tokens):
                                 # NOTE: apparently at the time of development
                                 # and testing I had a good reason for having the                                 # first two conditions. They can be removed
                                 # in the future.
+
                                 if ngram_min_range <= query_token[1] and \
                                    ngram_max_range >= query_token[2] and \
                                    candidate_ln == query_token[0]:

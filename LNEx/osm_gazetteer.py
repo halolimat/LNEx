@@ -61,9 +61,8 @@ def search_index(bb):
         print "############################################################\n"
         exit()
 
-    connections.create_connection(hosts=[connection_string], timeout=20)
-    client = Elasticsearch(timeout=30)
-
+    connections.create_connection(hosts=[connection_string], timeout=60)
+    
     phrase_search = [Q({"filtered": {
         "filter": {
             "geo_bounding_box": {
@@ -86,7 +85,7 @@ def search_index(bb):
     })]
 
     #to search with a scroll
-    e_search = Search(using=client, index=index_name).query(Q('bool', must=phrase_search))
+    e_search = Search(index=index_name).query(Q('bool', must=phrase_search))
 
     try:
         res = e_search.scan()
