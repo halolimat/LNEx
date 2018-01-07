@@ -6,21 +6,11 @@ v3.0 License.
 #############################################################################"""
 
 import json
-import unicodedata
 from tabulate import tabulate
 
 import LNEx as lnex
 
 ################################################################################
-################################################################################
-
-def strip_non_ascii(s):
-    if isinstance(s, unicode):
-        nfkd = unicodedata.normalize('NFKD', s)
-        return str(nfkd.encode('ASCII', 'ignore').decode('ASCII'))
-    else:
-        return s
-
 ################################################################################
 
 def read_tweets():
@@ -35,38 +25,46 @@ def read_tweets():
 
 ################################################################################
 
-def init_using_files():
+def init_using_files(dataset, capital_word_shape):
 
-    with open("_Data/chennai_geo_locations.json") as f:
+    with open("_Data/Cached_Gazetteers/"+dataset+"_geo_locations.json") as f:
         geo_locations = json.load(f)
 
-    with open("_Data/chennai_geo_info.json") as f:
-        geo_info = json.load(f)
-
-    with open("_Data/chennai_extended_words3.json") as f:
+    with open("_Data/Cached_Gazetteers/"+dataset+"_extended_words3.json") as f:
         extended_words3 = json.load(f)
 
-    lnex.initialize_using_files(geo_locations, extended_words3)
+    with open("_Data/Cached_Gazetteers/"+dataset+"_geo_info.json") as f:
+        geo_info = json.load(f)
+
+    lnex.initialize_using_files(geo_locations, extended_words3, capital_word_shape=capital_word_shape)
 
     return geo_info
 
 ################################################################################
 
-def init_using_elasticindex():
-
+def init_using_elasticindex(bb, cache, dataset, capital_word_shape):
     lnex.elasticindex(conn_string='localhost:9200', index_name="photon")
 
-    # chennai flood bounding box
-    bb = [12.74, 80.066986084, 13.2823848224, 80.3464508057]
+    geo_info = lnex.initialize( bb, augment=True,
+                                    cache=cache,
+                                    dataset_name=dataset,
+                                    capital_word_shape=capital_word_shape)
 
-    return lnex.initialize(bb, augment=True)
+    return geo_info
 
 ################################################################################
 
 if __name__ == "__main__":
 
-    #geo_info = init_using_files()
-    geo_info = init_using_elasticindex()
+    bbs = {
+        "chennai": [12.74, 80.066986084, 13.2823848224, 80.3464508057],
+        "louisiana": [29.4563, -93.3453, 31.4521, -89.5276],
+        "houston": [29.4778611958, -95.975189209, 30.1463147381, -94.8889160156]}
+
+    dataset = "chennai"
+
+    #geo_info = init_using_files(dataset, capital_word_shape=False)
+    geo_info = init_using_elasticindex(bbs[dataset], cache=True, dataset=dataset, capital_word_shape=False)
 
     header = [
         "Spotted_Location",
@@ -76,13 +74,6 @@ if __name__ == "__main__":
         "Geo_Point"]
 
     for tweet in read_tweets():
-
-        # remove non-ascii characters
-        tweet = strip_non_ascii(tweet)
-
-        print tweet
-
-        #tweet = "New avadi rd is closed #ChennaiFloods."
 
         rows = list()
         for x in lnex.extract(tweet):

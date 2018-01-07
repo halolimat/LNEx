@@ -94,7 +94,7 @@ def search_index(bb):
 
     return res
 
-    # Do not work correctly
+    # Does not work correctly
     # s = Search(using=client, index=index_name) \
     #     .filter("geo_bounding_box", location={
     #         "top_right": {
@@ -166,9 +166,16 @@ def build_bb_gazetteer(bb, augment=True):
         geo_item = defaultdict()
 
         if "coordinate" in keys:
-            geo_item["point"] = match["coordinate"]
+            geo_item["point"] = {str(x): match["coordinate"][x]
+                                 for x in match["coordinate"]}
         if "extent" in keys:
-            geo_item["extent"] = match["extent"]["coordinates"]
+            top_left = match["extent"]["coordinates"][0]
+            bottom_right = match["extent"]["coordinates"][1]
+
+            geo_item["extent"] = {
+                "top_left": {"lat": top_left[1], "lon": top_left[0]},
+                "bottom_right": {"lat": bottom_right[1], "lon": bottom_right[0]}
+            }
 
         #######################################################################
 
@@ -205,6 +212,10 @@ def build_bb_gazetteer(bb, augment=True):
         extended_words3 = \
             gaz_augmentation_and_filtering.get_extended_words3(
                 new_geo_locations.keys())
+
+    # for serialization
+    geo_info = dict(geo_info)
+    new_geo_locations = {x: list(new_geo_locations[x]) for x in new_geo_locations}
 
     return new_geo_locations, geo_info, extended_words3
 

@@ -11,6 +11,7 @@ import json
 import string
 import itertools
 import collections
+import unicodedata
 from itertools import groupby
 from wordsegment import load, segment
 from operator import itemgetter
@@ -57,6 +58,8 @@ def set_global_env(g_env):
     global env
     env = g_env
 
+cap_word_shape = False
+
 ################################################################################
 
 class Stack(object):
@@ -96,6 +99,13 @@ class Tree(object):
         return str(self.cargo)
 
 ################################################################################
+
+def strip_non_ascii(s):
+    if isinstance(s, unicode):
+        nfkd = unicodedata.normalize('NFKD', s)
+        return str(nfkd.encode('ASCII', 'ignore').decode('ASCII'))
+    else:
+        return s
 
 def preprocess_tweet(tweet):
     '''Preprocesses the tweet text and break the hashtags'''
@@ -356,6 +366,8 @@ def extract(tweet):
     #will contain for example: (0, 11): [(u'new avadi road', 3)]
     valid_ngrams = defaultdict(list)
 
+    tweet = strip_non_ascii(tweet)
+
     # we will call a tweet from now onwards a query
     query = str(tweet.lower())
 
@@ -565,11 +577,15 @@ def extract(tweet):
 
         mention_offsets = (ln[0][0], ln[0][1])
 
-        tweet_mention = tweet[mention_offsets[0]:mention_offsets[1]]
+        location_mention = tweet[mention_offsets[0]:mention_offsets[1]]
         geo_location = ln[1]
         geo_info_ids = env.gazetteer_unique_names[ln[1]]
 
-        result.append(( tweet_mention,
+        # ignore location names that are not capitalized
+        if cap_word_shape and location_mention[:1] != location_mention[:1].upper():
+            continue
+
+        result.append(( location_mention,
                         mention_offsets,
                         geo_location,
                         geo_info_ids))
@@ -800,10 +816,15 @@ class init_Env(object):
 
 ################################################################################
 
-def initialize(geo_locations, extended_words3):
+def initialize(geo_locations, extended_words3, capital_word_shape):
     '''Initializing the system here'''
 
     print "Initializing LNEx ..."
     g_env = init_Env(geo_locations, extended_words3)
     set_global_env(g_env)
+
+    # use the capitalization orthographic feature
+    global cap_word_shape
+    cap_word_shape = capital_word_shape
+
     print "Done Initialization ..."
