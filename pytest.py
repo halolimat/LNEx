@@ -10,6 +10,8 @@ from tabulate import tabulate
 
 import LNEx as lnex
 
+from shapely.geometry import MultiPoint
+
 ################################################################################
 ################################################################################
 
@@ -85,23 +87,40 @@ if __name__ == "__main__":
                     4- gaz location geo info id > a mapping to the mention metadata            
             """
 
-            # if we only have one geo_point then we are 100% certain of its location and we don't need disambiguation
             # dict of {'main': [ids], 'meta': [ids]} >
             #   main: is where the LN is the main mention, meta: where the LN appeared in the meta tags
             ids = output[3]
 
+            geo_point = None
+
             if len(ids["main"]) > 0:
+                # if only one geo_point then we are 100% certain of its location and we don't need disambiguation
                 ids = ids["main"]
+
+                # take only one of them (its your choice to choose more until we find a way to filter and disambiguate)
+                geo_point = "main: " + str(geo_info[ids[0]]['geo_item']['point'])
+
             else:
                 ids = ids["meta"]
 
-            # take only one of them
-            geo_point = geo_info.get(ids[0])
-            if geo_point is None:
-                # in case we are using the cached gaz
-                geo_point = geo_info.get(str(ids[0]))
+                points = []
+                for id in ids:
+                    lat = geo_info[id]['geo_item']['point']["lat"]
+                    lon = geo_info[id]['geo_item']['point']["lon"]
+                    points.append((lat, lon))
 
-            row = output[0], output[1], output[2], geo_point['geo_item']['point']
+                # find centroid of all points when the location name was found as the parent of other location names
+                #   this is a default behavior for now, you can choose whatever behavior you would like.
+                points = MultiPoint(points)
+
+                lat = points.centroid.coords.xy[0][0]
+                lon = points.centroid.coords.xy[1][0]
+
+                geo_point = {"lat": lat, "lon": lon}
+
+                geo_point = "meta: " + str(geo_point)
+
+            row = output[0], output[1], output[2], geo_point
             rows.append(row)
 
         print "-" * 120

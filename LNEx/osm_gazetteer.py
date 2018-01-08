@@ -187,15 +187,15 @@ def build_bb_gazetteer(bb, augment=True):
 
                     if key == "name":
                         # mapping a location name to its geo-info
-                        geo_locations[text]["main"].append(_id)
+                        geo_locations[text]["main"].append(str(_id))
 
-                        geo_info[_id] = {"name": text,
+                        geo_info[str(_id)] = {"name": text,
                                          "geo_item": geo_item}
 
                     else:
                         # if the location name is taken from the metadata
                         #geo_locations[text] = list()
-                        geo_locations[text]["meta"].append(_id)
+                        geo_locations[text]["meta"].append(str(_id))
 
                 except BaseException:
                     print extract_text(match[key])
