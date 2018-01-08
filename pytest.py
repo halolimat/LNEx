@@ -7,24 +7,12 @@ v3.0 License.
 
 import json
 from tabulate import tabulate
+from shapely.geometry import MultiPoint
+import pandas as pd
 
 import LNEx as lnex
 
-from shapely.geometry import MultiPoint
-
 ################################################################################
-################################################################################
-
-def read_tweets():
-
-    tweets_file = "_Data/sample_tweets.txt"
-
-    # read tweets from file to list
-    with open(tweets_file) as f:
-        tweets = f.read().splitlines()
-
-    return tweets
-
 ################################################################################
 
 def init_using_files(dataset, capital_word_shape):
@@ -58,16 +46,22 @@ def init_using_elasticindex(bb, cache, dataset, capital_word_shape):
 
 if __name__ == "__main__":
 
-    bbs = {
-        "chennai": [12.74, 80.066986084, 13.2823848224, 80.3464508057],
-        "louisiana": [29.4563, -93.3453, 31.4521, -89.5276],
-        "houston": [29.4778611958, -95.975189209, 30.1463147381, -94.8889160156],
-        "columbus": [39.808631, -83.2102799, 40.1572719, -82.7713781]}
+    # myanmar ------------------------------------------------------------
 
-    dataset = "chennai"
+    # Format: [bottom_left(lat, lon), top_right(lat, lon)]
+    bb = [9.4518,92.171808,28.5478351,101.1702717]
+    annotated_texts = pd.read_csv("_Data/Annotated_texts/Myanmar_data.csv")
+    dataset_name = "myanmar"
 
-    geo_info = init_using_files(dataset, capital_word_shape=False)
-    #geo_info = init_using_elasticindex(bbs[dataset], cache=True, dataset=dataset, capital_word_shape=False)
+    # iraq ---------------------------------------------------------------
+
+    # # Format: [bottom_left(lat, lon), top_right(lat, lon)]
+    # bb = [29.0612079,38.7936029,37.380645,48.6350999]
+    # annotated_texts = pd.read_csv("_Data/Annotated_texts/Iraq_data.csv")
+    # dataset_name = "iraq"
+
+    geo_info = init_using_files(dataset_name, capital_word_shape=True)
+    #geo_info = init_using_elasticindex(bb, cache=True, dataset=dataset_name, capital_word_shape=True)
 
     header = [
         "Spotted_Location",
@@ -75,10 +69,12 @@ if __name__ == "__main__":
         "Geo_Location",
         "Geo_Point"]
 
-    for tweet in read_tweets():
+    for idx, row in annotated_texts.iterrows():
+
+        text = row['Sentence'].decode('utf8')
 
         rows = list()
-        for output in lnex.extract(tweet):
+        for output in lnex.extract(text):
 
             """
                 output is a tuple of the following items:
@@ -106,9 +102,13 @@ if __name__ == "__main__":
 
                 points = []
                 for id in ids:
-                    lat = geo_info[id]['geo_item']['point']["lat"]
-                    lon = geo_info[id]['geo_item']['point']["lon"]
-                    points.append((lat, lon))
+                    # TODO: check why some ids are missing
+                    try:
+                        lat = geo_info[id]['geo_item']['point']["lat"]
+                        lon = geo_info[id]['geo_item']['point']["lon"]
+                        points.append((lat, lon))
+                    except:
+                        pass
 
                 # find centroid of all points when the location name was found as the parent of other location names
                 #   this is a default behavior for now, you can choose whatever behavior you would like.

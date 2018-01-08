@@ -39,7 +39,7 @@ gaz_stopwords = set([line.strip() for line in open(gaz_stopwords, 'r')])
 
 punctuation = set(string.punctuation)
 
-with open("_Dictionaries/long_stopwords.txt") as f:
+with open("LNEx/_Dictionaries/long_stopwords.txt") as f:
     long_stop_list = f.read().splitlines()
 
 gaz_stopwords = set(long_stop_list) | punctuation | gaz_stopwords
@@ -305,9 +305,7 @@ def filter_geo_locations(geo_locations):
 
         for name in names:
 
-            name = unicodedata.normalize(
-                'NFKD', name).encode(
-                'ascii', 'ignore')
+            name = unicodedata.normalize('NFKD', name).encode('ascii', 'ignore')
             name = str(name.strip())
 
             # skip empty names
@@ -387,14 +385,13 @@ def augment(geo_locations):
 
         nospaces = name.replace(" ", "")
 
-        if name not in list_tops_to_remove and len(
-                nospaces) > 2 and not nospaces.isdigit():
+        if name not in list_tops_to_remove and len(nospaces) > 2 and not nospaces.isdigit():
 
             # remove all non-alphaneumeric characters
             alphanumeric_name = re.sub(r'\W+', ' ', name)
             alphanumeric_name = alphanumeric_name.strip()
 
-            if alphanumeric_name != name and alphanumeric_name not in gaz_stopwords:
+            if alphanumeric_name != name and alphanumeric_name not in gaz_stopwords and not alphanumeric_name.isdigit():
 
                 # not in the list of names before augmentation
                 if alphanumeric_name not in lns:
@@ -445,7 +442,7 @@ def augment(geo_locations):
 
         for new_name in set(flexi_grams):
 
-            nospaces = new_name.replace(" ", "")
+            nospaces = new_name.replace(" ", "").strip()
 
             if len(nospaces) > 2 and not nospaces.isdigit():
 

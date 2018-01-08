@@ -43,8 +43,8 @@ def is_bb_acceptable(bb):
 
     area = (width * height) / 1000000
 
-    # larger than the state of Texas
-    if area > 1.6:
+    # larger than myanmar bb
+    if area > 2.1:
         return False
 
     else:
@@ -55,5 +55,6 @@ def is_bb_acceptable(bb):
 if __name__ == "__main__":
 
     texas_bb = [25.8371638, -106.6456461, 36.5007041, -93.5080389]
+    myanmar_bb = [9.4518,92.171808,28.5478351,101.1702717]
 
-    print is_bb_acceptable(texas_bb)
+    print is_bb_acceptable(myanmar_bb)
