@@ -86,8 +86,16 @@ if __name__ == "__main__":
             """
 
             # if we only have one geo_point then we are 100% certain of its location and we don't need disambiguation
+            # dict of {'main': [ids], 'meta': [ids]} >
+            #   main: is where the LN is the main mention, meta: where the LN appeared in the meta tags
             ids = output[3]
 
+            if len(ids["main"]) > 0:
+                ids = ids["main"]
+            else:
+                ids = ids["meta"]
+
+            # take only one of them
             geo_point = geo_info.get(ids[0])
             if geo_point is None:
                 # in case we are using the cached gaz

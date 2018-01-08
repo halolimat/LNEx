@@ -153,7 +153,7 @@ def build_bb_gazetteer(bb, augment=True):
                        "name", "state", "street"]
 
     geo_info = defaultdict()
-    geo_locations = defaultdict(list)
+    geo_locations = defaultdict(lambda: defaultdict(list))
 
     _id = 0
 
@@ -187,7 +187,7 @@ def build_bb_gazetteer(bb, augment=True):
 
                     if key == "name":
                         # mapping a location name to its geo-info
-                        geo_locations[text].append(_id)
+                        geo_locations[text]["main"].append(_id)
 
                         geo_info[_id] = {"name": text,
                                          "geo_item": geo_item}
@@ -195,7 +195,7 @@ def build_bb_gazetteer(bb, augment=True):
                     else:
                         # if the location name is taken from the metadata
                         #geo_locations[text] = list()
-                        geo_locations[text].append(_id)
+                        geo_locations[text]["meta"].append(_id)
 
                 except BaseException:
                     print extract_text(match[key])
@@ -211,7 +211,10 @@ def build_bb_gazetteer(bb, augment=True):
 
     # for serialization
     geo_info = dict(geo_info)
-    new_geo_locations = {x: list(new_geo_locations[x]) for x in new_geo_locations}
+
+    for ln in new_geo_locations:
+        new_geo_locations[ln] = {"main": list(new_geo_locations[ln]["main"]),
+                                 "meta": list(new_geo_locations[ln]["meta"])}
 
     return new_geo_locations, geo_info, extended_words3
 
