@@ -5,7 +5,7 @@ This software is released under the GNU Affero General Public License (AGPL)
 v3.0 License.
 #############################################################################"""
 
-import re, os
+import re, os, string
 import unicodedata
 from itertools import groupby
 from operator import itemgetter
@@ -36,6 +36,13 @@ def get_dicts_dir():
 # will help in filtering out unigram location names
 gaz_stopwords = get_dicts_dir() + "gaz_stopwords.txt"
 gaz_stopwords = set([line.strip() for line in open(gaz_stopwords, 'r')])
+
+punctuation = set(string.punctuation)
+
+with open("_Dictionaries/long_stopwords.txt") as f:
+    long_stop_list = f.read().splitlines()
+
+gaz_stopwords = set(long_stop_list) | punctuation | gaz_stopwords
 
 ################################################################################
 
