@@ -64,10 +64,10 @@ def initialize(bb, augment, cache, dataset_name, capital_word_shape=False):
 
 ################################################################################
 
-def extract(tweet):
-    """Extracts location names from a tweet text and return a list of tuples"""
+def extract(text):
+    """Extracts location names from text and return a list of tuples"""
 
-    return core.extract(tweet)
+    return core.extract(text)
 
 ################################################################################
 
