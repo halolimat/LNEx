@@ -166,8 +166,7 @@ def build_bb_gazetteer(bb, augment=True):
         geo_item = defaultdict()
 
         if "coordinate" in keys:
-            geo_item["point"] = {str(x): match["coordinate"][x]
-                                 for x in match["coordinate"]}
+            geo_item["point"] = {str(x): match["coordinate"][x] for x in match["coordinate"]}
         if "extent" in keys:
             top_left = match["extent"]["coordinates"][0]
             bottom_right = match["extent"]["coordinates"][1]
@@ -191,27 +190,24 @@ def build_bb_gazetteer(bb, augment=True):
                         geo_locations[text].append(_id)
 
                         geo_info[_id] = {"name": text,
-                                        "geo_item": geo_item}
+                                         "geo_item": geo_item}
 
                     else:
-                        geo_locations[text] = list()
+                        # if the location name is taken from the metadata
+                        #geo_locations[text] = list()
+                        geo_locations[text].append(_id)
 
                 except BaseException:
-                    print "exception at record # ", count
                     print extract_text(match[key])
                     raise
 
     if augment:
         # 'pullapuram road': set([493])
-        new_geo_locations, extended_words3 = \
-            gaz_augmentation_and_filtering.augment(geo_locations)
+        new_geo_locations, extended_words3 = gaz_augmentation_and_filtering.augment(geo_locations)
 
     else:
-        new_geo_locations = \
-            gaz_augmentation_and_filtering.filter_geo_locations(geo_locations)
-        extended_words3 = \
-            gaz_augmentation_and_filtering.get_extended_words3(
-                new_geo_locations.keys())
+        new_geo_locations = gaz_augmentation_and_filtering.filter_geo_locations(geo_locations)
+        extended_words3 = gaz_augmentation_and_filtering.get_extended_words3(new_geo_locations.keys())
 
     # for serialization
     geo_info = dict(geo_info)

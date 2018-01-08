@@ -309,13 +309,14 @@ def filter_geo_locations(geo_locations):
 
             # prevents collisions
             if name not in new_geo_locations:
-                new_geo_locations[name] |= set(geo_locations[original_text])
+                new_geo_locations[name] = set(geo_locations[original_text]).union(new_geo_locations[name])
 
     return new_geo_locations
 
 ################################################################################
 
 def augment(geo_locations):
+
     '''Augments the location names using skip grams'''
 
     # augmentation includes filtering
@@ -389,8 +390,7 @@ def augment(geo_locations):
 
                 # not in the list of names before augmentation
                 if alphanumeric_name not in lns:
-                    new_geo_locations[alphanumeric_name] |= set(
-                        new_geo_locations[name])
+                    new_geo_locations[alphanumeric_name] = set(new_geo_locations[name]).union(new_geo_locations[alphanumeric_name])
 
     # step 3 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -441,6 +441,7 @@ def augment(geo_locations):
 
                 # not in the list of names before augmentation
                 if new_name not in lns:
-                    new_geo_locations[new_name] |= set(new_geo_locations[name])
+                    new_geo_locations[new_name] = set(new_geo_locations[name]).union(new_geo_locations[new_name])
+
 
     return new_geo_locations, get_extended_words3(new_geo_locations.keys())

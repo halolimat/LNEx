@@ -579,6 +579,7 @@ def extract(tweet):
 
         location_mention = tweet[mention_offsets[0]:mention_offsets[1]]
         geo_location = ln[1]
+
         geo_info_ids = env.gazetteer_unique_names[ln[1]]
 
         # ignore location names that are not capitalized
@@ -781,8 +782,7 @@ class init_Env(object):
 
         self.gazetteer_unique_names = geo_locations
 
-        self.gazetteer_unique_names_set = \
-                    set(self.gazetteer_unique_names.keys())
+        self.gazetteer_unique_names_set = set(self.gazetteer_unique_names.keys())
 
         # NOTE BLACKLIST CODE GOES HERE
 

@@ -63,32 +63,37 @@ if __name__ == "__main__":
 
     dataset = "chennai"
 
-    #geo_info = init_using_files(dataset, capital_word_shape=False)
-    geo_info = init_using_elasticindex(bbs[dataset], cache=True, dataset=dataset, capital_word_shape=False)
+    geo_info = init_using_files(dataset, capital_word_shape=False)
+    #geo_info = init_using_elasticindex(bbs[dataset], cache=True, dataset=dataset, capital_word_shape=False)
 
     header = [
         "Spotted_Location",
         "Location_Offsets",
         "Geo_Location",
-        "Geo_Info_IDs"
         "Geo_Point"]
 
     for tweet in read_tweets():
 
         rows = list()
-        for x in lnex.extract(tweet):
+        for output in lnex.extract(tweet):
 
-            geo_point = {}
+            """
+                output is a tuple of the following items:
+                    1- location mention
+                    2- mention offsets
+                    3- matched gazetteer location
+                    4- gaz location geo info id > a mapping to the mention metadata            
+            """
 
-            try:
-                # if we only have one geo_point then we are 100% certain of its
-                # location and we don't need disambiguation
-                if len(x[3]) == 1:
-                    geo_point = geo_info[list(x[3])[0]]['geo_item']['point']
-            except KeyError, e:
-                pass
+            # if we only have one geo_point then we are 100% certain of its location and we don't need disambiguation
+            ids = output[3]
 
-            row = x[0], x[1], x[2], x[3], geo_point
+            geo_point = geo_info.get(ids[0])
+            if geo_point is None:
+                # in case we are using the cached gaz
+                geo_point = geo_info.get(str(ids[0]))
+
+            row = output[0], output[1], output[2], geo_point['geo_item']['point']
             rows.append(row)
 
         print "-" * 120
