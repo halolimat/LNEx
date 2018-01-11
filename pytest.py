@@ -56,12 +56,12 @@ if __name__ == "__main__":
     # iraq ---------------------------------------------------------------
 
     # # Format: [bottom_left(lat, lon), top_right(lat, lon)]
-    # bb = [29.0612079,38.7936029,37.380645,48.6350999]
-    # annotated_texts = pd.read_csv("_Data/Annotated_texts/Iraq_data.csv")
-    # dataset_name = "iraq"
+    bb = [29.0612079,38.7936029,37.380645,48.6350999]
+    annotated_texts = pd.read_csv("_Data/Annotated_texts/Iraq_data.csv")
+    dataset_name = "iraq"
 
-    geo_info = init_using_files(dataset_name, capital_word_shape=True)
-    #geo_info = init_using_elasticindex(bb, cache=True, dataset=dataset_name, capital_word_shape=True)
+    #geo_info = init_using_files(dataset_name, capital_word_shape=True)
+    geo_info = init_using_elasticindex(bb, cache=True, dataset=dataset_name, capital_word_shape=True)
 
     header = [
         "Spotted_Location",
@@ -71,7 +71,7 @@ if __name__ == "__main__":
 
     for idx, row in annotated_texts.iterrows():
 
-        text = row['Sentence'].decode('utf8')
+        text = row['Sentence'].decode('utf8').replace("\n", " ")
 
         rows = list()
         for output in lnex.extract(text):
@@ -95,7 +95,8 @@ if __name__ == "__main__":
                 ids = ids["main"]
 
                 # take only one of them (its your choice to choose more until we find a way to filter and disambiguate)
-                geo_point = "main: " + str(geo_info[ids[0]]['geo_item']['point'])
+                #geo_point = "main: " + str(geo_info[ids[0]]['geo_item']['point'])
+                geo_point = str(geo_info[ids[0]]['geo_item']['point'])
 
             else:
                 ids = ids["meta"]
@@ -119,12 +120,18 @@ if __name__ == "__main__":
 
                 geo_point = {"lat": lat, "lon": lon}
 
-                geo_point = "meta: " + str(geo_point)
+                #geo_point = "meta: " + str(geo_point)
+                geo_point = str(geo_point)
 
             row = output[0], output[1], output[2], geo_point
             rows.append(row)
 
-        print "-" * 120
-        print tabulate(rows, headers=header)
-        print "#" * 120
-        break
+            #print str(output[0]) + "\t" + str(output[1]) + "\t" + str(output[2]) + "\t" + geo_point
+
+        print text,
+        for row in rows:
+            print "\t" + str(row[0]) + "\t" + str(row[1]) + "\t" + str(row[2]) + "\t" + str(row[3])
+
+        #print "-" * 120
+        #print tabulate(rows, headers=header)
+        #print "#" * 120
