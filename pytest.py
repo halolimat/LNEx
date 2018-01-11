@@ -61,7 +61,8 @@ if __name__ == "__main__":
     bbs = {
         "chennai": [12.74, 80.066986084, 13.2823848224, 80.3464508057],
         "louisiana": [29.4563, -93.3453, 31.4521, -89.5276],
-        "houston": [29.4778611958, -95.975189209, 30.1463147381, -94.8889160156]}
+        "houston": [29.4778611958, -95.975189209, 30.1463147381, -94.8889160156],
+        "columbus": [39.808631, -83.2102799, 40.1572719, -82.7713781]}
 
     dataset = "chennai"
 
@@ -84,7 +85,7 @@ if __name__ == "__main__":
                     1- location mention
                     2- mention offsets
                     3- matched gazetteer location
-                    4- gaz location geo info id > a mapping to the mention metadata            
+                    4- gaz location geo info id > a mapping to the mention metadata
             """
 
             # dict of {'main': [ids], 'meta': [ids]} >
@@ -126,3 +127,4 @@ if __name__ == "__main__":
         print "-" * 120
         print tabulate(rows, headers=header)
         print "#" * 120
+        break

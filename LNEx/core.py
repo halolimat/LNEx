@@ -175,6 +175,10 @@ def preprocess_tweet(tweet):
     # shrink blank spaces in preprocessed tweet text to only one space
     tweet = re.sub('\s{2,}', ' ', tweet)
 
+    # # remove consecutive duplicate tokens which causes an explosion in tree
+    # while re.search(r'\b(.+)(\s+\1\b)+', tweet):
+    #     tweet = re.sub(r'\b(.+)(\s+\1\b)+', r'\1', tweet)
+
     # remove trailing spaces
     tweet = tweet.strip()
 
@@ -422,6 +426,9 @@ def extract(tweet):
         sub_query_tokens = sub_query["tokens"]
         sub_query_offsets = sub_query["offsets"]
 
+        if len(sub_query_tokens) == 0:
+            continue
+
         # expand tokens in sub_query_tokens to vectors
         for idx, token in enumerate(sub_query_tokens): # ---------------- for II
 
@@ -468,6 +475,12 @@ def extract(tweet):
         # ----------------------------------------------------------- End for II
 
         valid_n_grams = defaultdict(float)
+
+        # skip if the time complexity is large due to tree construction
+        #   O(|v|^s): where v is the longest synonyms vector and s is the number
+        #             of tokens in the subquery.
+        if len(max(sub_query_tokens,key=len)) ** len(sub_query_tokens) > 400000:
+            continue
 
         # this would build the bottom up tree of valid n-grams
         # if the query contains more than one vector then build the tree
