@@ -10,7 +10,7 @@ statistical learning with in-the-loop human evaluation :)
 __author__="brendan o'connor (anyall.org)"
 
 import re
-import emoticons
+from . import emoticons
 mycompile = lambda pat:  re.compile(pat,  re.UNICODE)
 def regex_or(*items):
   r = '|'.join(items)
@@ -116,9 +116,11 @@ def align(toks, orig):
 class AlignmentFailed(Exception): pass
 
 def unicodify(s, encoding='utf8', *args):
-  if isinstance(s,unicode): return s
-  if isinstance(s,str): return s.decode(encoding, *args)
-  return unicode(s)
+  if isinstance(s,str): return s
+  else:
+      raise Exception('"{}" is not a \'str\''.format(s))
+  #if isinstance(s,str): return s.decode(encoding, *args)
+  #return unicode(s)
 
 def tokenize(tweet):
   text = unicodify(tweet)

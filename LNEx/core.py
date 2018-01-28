@@ -20,8 +20,8 @@ from collections import defaultdict
 load()
 
 # importing local modules
-import Language_Modeling
-from tokenizer import Twokenize
+from . import Language_Modeling
+from LNEx.tokenizer import Twokenize
 
 ################################################################################
 ################################################################################
@@ -360,9 +360,9 @@ def extract(tweet):
     # --------------------------------------------------------------------------
     # check if environment was correctly initialized
     if env == None:
-        print "\n##################################################"
-        print "Global ERROR: LNEx environment must be initialized"
-        print "##################################################\n"
+        print("\n##################################################")
+        print("Global ERROR: LNEx environment must be initialized")
+        print("##################################################\n")
         exit()
 
     # --------------------------------------------------------------------------
@@ -832,7 +832,7 @@ class init_Env(object):
 def initialize(geo_locations, extended_words3, capital_word_shape):
     '''Initializing the system here'''
 
-    print "Initializing LNEx ..."
+    print("Initializing LNEx ...")
     g_env = init_Env(geo_locations, extended_words3)
     set_global_env(g_env)
 
@@ -840,4 +840,4 @@ def initialize(geo_locations, extended_words3, capital_word_shape):
     global cap_word_shape
     cap_word_shape = capital_word_shape
 
-    print "Done Initialization ..."
+    print("Done Initialization ...")

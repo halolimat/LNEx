@@ -11,8 +11,8 @@ from elasticsearch import Elasticsearch
 from elasticsearch_dsl import Search, Q
 from elasticsearch_dsl.connections import connections
 
-import geo_calculations
-import gaz_augmentation_and_filtering
+from . import geo_calculations
+from . import gaz_augmentation_and_filtering
 
 ################################################################################
 ################################################################################
@@ -49,16 +49,16 @@ def search_index(bb):
 
     if connection_string == '' or index_name == '':
 
-        print "\n###########################################################"
-        print "Global ERROR: Elastic host and port or index name not defined"
-        print "#############################################################\n"
+        print("\n###########################################################")
+        print("Global ERROR: Elastic host and port or index name not defined")
+        print("#############################################################\n")
         exit()
 
     if not geo_calculations.is_bb_acceptable(bb) or bb[0] > bb[2] or bb[1] > bb[3]:
 
-        print "\n##########################################################"
-        print "Global ERROR: Bounding Box is too big, choose a smaller one!"
-        print "############################################################\n"
+        print("\n##########################################################")
+        print("Global ERROR: Bounding Box is too big, choose a smaller one!")
+        print("############################################################\n")
         exit()
 
     connections.create_connection(hosts=[connection_string], timeout=60)
@@ -198,7 +198,7 @@ def build_bb_gazetteer(bb, augment=True):
                         geo_locations[text]["meta"].append(str(_id))
 
                 except BaseException:
-                    print extract_text(match[key])
+                    print(extract_text(match[key]))
                     raise
 
     if augment:
@@ -234,4 +234,4 @@ if __name__ == "__main__":
 
     geo_locations, geo_info, extended_words3 = build_bb_gazetteer(bb)
 
-    print geo_locations
+    print(geo_locations)
