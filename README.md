@@ -5,9 +5,14 @@ This software is released under the GNU Affero General Public License (AGPL)
 v3.0 License.
 #############################################################################-->
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](http://www.gnu.org/licenses/agpl-3.0) [![GitHub release](https://img.shields.io/badge/release-V1.1-orange.svg)]() [![Build Status](https://travis-ci.com/halolimat/LNEx.svg?token=Gg8N5fqoMjLGd4ehzd72&branch=master)](https://travis-ci.com/halolimat/LNEx)
-# LNEx: Location Name Extractor #
 
-LNEx extracts location names from targeted text streams.
+<img src="LNEx_logo.png" align="left" alt="LNEx Logo" width="90"/>
+
+<img src="http://knoesis.org/resources/images/hazardssees_logo_final.png" align="right" alt="Knoesis Hazards SEES Project Logo" width="90"/>
+
+# Location Name Extractor
+
+Extracts location names from targeted text streams.
 
 ---
 
