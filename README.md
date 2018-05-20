@@ -127,15 +127,16 @@ Using Photon might be a good idea for some users if they have enough space (~ 72
 
 If you do make use of LNEx or any of its components please cite the following publication:
 
-    @inproceedings{halolimatLNEx17,
+    @inproceedings{halolimatLNEx18,
       title={ Location Name Extraction from Targeted Text Streams using
               Gazetteer-based Statistical Language Models. },
       author={ Al-Olimat, Hussein S., Thirunarayan, Krishnaprasad,
                Shalin, Valerie and Sheth, Amit},
-      year={2017}
+      booktitle={The 27th International Conference on Computational Linguistics (COLING 2018)},
+      year={2018}
     }
 
-We would also be very happy if you provide a link to our project page:
+We would also be very happy if you provide a link to the github repository:
 
     ... location name extractor tool (LNEx)\footnote{
         \url{https://github.com/halolimat/LNEx}
