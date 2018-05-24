@@ -127,6 +127,10 @@ Using Photon might be a good idea for some users if they have enough space (~ 72
 
 If you do make use of LNEx or any of its components please cite the following publication:
 
+    Al-Olimat, Hussein S., Thirunarayan, Krishnaprasad, Shalin, Valerie and Sheth, Amit. 
+    Location Name Extraction from Targeted Text Streams using Gazetteer-based Statistical 
+    Language Models. The 27th International Conference on Computational Linguistics (COLING 2018)
+
     @inproceedings{halolimatLNEx18,
       title={ Location Name Extraction from Targeted Text Streams using
               Gazetteer-based Statistical Language Models. },
