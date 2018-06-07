@@ -16,6 +16,11 @@ Extracts location names from targeted text streams.
 
 ---
 
+## How do you pronounce LNEx?
+Le-N-x
+
+---
+
 Following are the steps which allows you to setup and start using LNEx.
 
 ## Querying OpenStreetMap Gazetteers  ##
