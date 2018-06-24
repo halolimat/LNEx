@@ -142,14 +142,16 @@ If you do make use of LNEx or any of its components please cite the following pu
 
     Al-Olimat, Hussein S., Thirunarayan, Krishnaprasad, Shalin, Valerie and Sheth, Amit. 
     Location Name Extraction from Targeted Text Streams using Gazetteer-based Statistical 
-    Language Models. The 27th International Conference on Computational Linguistics (COLING 2018)
+    Language Models. Proceedings of COLING 2018, the 27th International Conference on 
+    Computational Linguistics: Technical Papers.
 
     @inproceedings{halolimatLNEx18,
       title={ Location Name Extraction from Targeted Text Streams using
               Gazetteer-based Statistical Language Models. },
       author={ Al-Olimat, Hussein S. and Thirunarayan, Krishnaprasad and
                Shalin, Valerie and Sheth, Amit},
-      booktitle={The 27th International Conference on Computational Linguistics (COLING 2018)},
+      booktitle={Proceedings of COLING 2018, the 27th International Conference on 
+                 Computational Linguistics: Technical Papers.},
       year={2018}
     }
 
