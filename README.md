@@ -134,7 +134,7 @@ Using Photon might be a good idea for some users if they have enough space (~ 72
 
 This dataset contains 4500 annotated tweets 1500 tweets from each of three Twitter streams (i.e., Chennai 2015, Louisiana 2016, and Houston 2016 floods). They were tagged using Brat tool recording the start and end character offsets of each mention with a given location category, i.e., inLoc, outLoc, and ambLoc, as mentioned in the LNEx paper.
 
-You can fill out the following [Form](https://docs.google.com/forms/d/e/1FAIpQLScf6-DNwkgJXPS5e28Mj18hIW3Ap_Ym7Kna-SO7oSmiC72qGw/viewform) to the get the full dataset. Alternatively, you can get a subset of the dataset from [this folder](https://drive.google.com/open?id=1g_We4a17x3OkcE8CTSF8_MtvPouZ6CMz), which only contains 150 tweets.
+You can fill out the following [Form](https://link.hussein.space/LNEx-Form) to the get the full dataset. Alternatively, you can get a subset of the dataset from [this folder](https://link.hussein.space/LNEx-Data), which only contains 150 tweets.
 
 ## Citing ##
 
