@@ -140,20 +140,25 @@ You can fill out the following [Form](https://link.hussein.space/LNEx-Form) to t
 
 If you do make use of LNEx or any of its components please cite the following publication:
 
-    Al-Olimat, Hussein S., Thirunarayan, Krishnaprasad, Shalin, Valerie and Sheth, Amit. 
-    Location Name Extraction from Targeted Text Streams using Gazetteer-based Statistical 
-    Language Models. Proceedings of COLING 2018, the 27th International Conference on 
-    Computational Linguistics: Technical Papers.
+    Hussein S. Al-Olimat, Krishnaprasad Thirunarayan, Valerie Shalin, and Amit Sheth. 2018. 
+    Location Name Extraction from Targeted Text Streams using Gazetteer-based Statistical Language Models. 
+    In Proceedings of the 27th Internationl Conference on Computational Linguistics (COLING 2018), 
+    pages 700–710. Association for Computational Linguistics.
 
-    @inproceedings{halolimatLNEx18,
-      title={ Location Name Extraction from Targeted Text Streams using
-              Gazetteer-based Statistical Language Models. },
-      author={ Al-Olimat, Hussein S. and Thirunarayan, Krishnaprasad and
-               Shalin, Valerie and Sheth, Amit},
-      booktitle={Proceedings of COLING 2018, the 27th International Conference on 
-                 Computational Linguistics: Technical Papers.},
-      year={2018}
+    @InProceedings{C18-1169,
+      author = "Al-Olimat, Hussein S.
+               and Thirunarayan, Krishnaprasad
+               and Shalin, Valerie
+               and Sheth, Amit",
+      title = "Location Name Extraction from Targeted Text Streams using Gazetteer-based Statistical Language Models",
+      booktitle = "Proceedings of the 27th International Conference on Computational Linguistics",
+      year = "2018",
+      publisher = "Association for Computational Linguistics",
+      pages = "1986--1997",
+      location = "Santa Fe, New Mexico, USA",
+      url = "http://aclweb.org/anthology/C18-1169"
     }
+
 
 We would also be very happy if you provide a link to the github repository:
 
