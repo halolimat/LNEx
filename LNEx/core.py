@@ -101,11 +101,8 @@ class Tree(object):
 ################################################################################
 
 def strip_non_ascii(s):
-    if isinstance(s, unicode):
-        nfkd = unicodedata.normalize('NFKD', s)
-        return str(nfkd.encode('ASCII', 'ignore').decode('ASCII'))
-    else:
-        return s
+    nfkd = unicodedata.normalize('NFKD', s)
+    return str(nfkd.encode('ASCII', 'ignore').decode('ASCII'))
 
 def preprocess_tweet(tweet):
     '''Preprocesses the tweet text and break the hashtags'''
