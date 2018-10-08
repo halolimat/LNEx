@@ -14,6 +14,8 @@ from elasticsearch_dsl.connections import connections
 import geo_calculations
 import gaz_augmentation_and_filtering
 
+import json
+
 ################################################################################
 ################################################################################
 
@@ -49,40 +51,43 @@ def search_index(bb):
 
     if connection_string == '' or index_name == '':
 
-        print "\n###########################################################"
-        print "Global ERROR: Elastic host and port or index name not defined"
-        print "#############################################################\n"
+        print ("\n###########################################################")
+        print ("Global ERROR: Elastic host and port or index name not defined")
+        print ("#############################################################\n")
         exit()
 
     if not geo_calculations.is_bb_acceptable(bb) or bb[0] > bb[2] or bb[1] > bb[3]:
 
-        print "\n##########################################################"
-        print "Global ERROR: Bounding Box is too big, choose a smaller one!"
-        print "############################################################\n"
+        print ("\n##########################################################")
+        print ("Global ERROR: Bounding Box is too big, choose a smaller one!")
+        print ("############################################################\n")
         exit()
 
     connections.create_connection(hosts=[connection_string], timeout=60)
     
-    phrase_search = [Q({"filtered": {
-        "filter": {
-            "geo_bounding_box": {
-                        "coordinate": {
-                            "bottom_left": {
-                                "lat": bb[0],
-                                "lon": bb[1]
-                            },
-                            "top_right": {
-                                "lat": bb[2],
-                                "lon": bb[3]
-                            }
-                        }
-                        }
-        },
-        "query": {
-            "match_all": {}
-        }
-    }
-    })]
+    query = { "bool": {
+                "must": {
+                  "match_all": {}
+                },
+                "filter": {
+                  "geo_bounding_box": {
+                    "coordinate": {
+                      "bottom_left": {
+                        "lat": bb[0],
+                        "lon": bb[1]
+                      },
+                      "top_right": {
+                        "lat": bb[2],
+                        "lon": bb[3]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+            
+    
+    phrase_search = [Q(query)]
 
     #to search with a scroll
     e_search = Search(index=index_name).query(Q('bool', must=phrase_search))
@@ -198,7 +203,7 @@ def build_bb_gazetteer(bb, augment=True):
                         geo_locations[text]["meta"].append(str(_id))
 
                 except BaseException:
-                    print extract_text(match[key])
+                    print (extract_text(match[key]))
                     raise
 
     if augment:
@@ -234,4 +239,4 @@ if __name__ == "__main__":
 
     geo_locations, geo_info, extended_words3 = build_bb_gazetteer(bb)
 
-    print geo_locations
+    print (json.dumps(dict(geo_locations), indent=2))
