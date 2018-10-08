@@ -265,7 +265,8 @@ def filter_geo_locations(geo_locations):
                            "(ship)",
                            "(u.s. season 2)",
                            "(boat)",
-                           "(abandoned)"])
+                           "(abandoned)",
+                           "(part)"])
 
     names_to_remove = set([x.lower() for x in names_to_remove])
 
