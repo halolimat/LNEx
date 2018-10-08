@@ -64,7 +64,7 @@ def search_index(bb):
         exit()
 
     connections.create_connection(hosts=[connection_string], timeout=60)
-    
+
     query = { "bool": {
                 "must": {
                   "match_all": {}
@@ -85,8 +85,8 @@ def search_index(bb):
                 }
               }
             }
-            
-    
+
+
     phrase_search = [Q(query)]
 
     #to search with a scroll
@@ -98,21 +98,6 @@ def search_index(bb):
         raise
 
     return res
-
-    # Does not work correctly
-    # s = Search(using=client, index=index_name) \
-    #     .filter("geo_bounding_box", location={
-    #         "top_right": {
-    #             "lat": bb[2],
-    #             "lon": bb[3]
-    #         },
-    #         "bottom_left": {
-    #             "lat": bb[0],
-    #             "lon": bb[1]
-    #         }
-    #     })
-    #
-    # return s.execute()
 
 ################################################################################
 
@@ -149,9 +134,11 @@ def extract_text(obj):
 
 ################################################################################
 
-def build_bb_gazetteer(bb, augment=True):
+def build_bb_gazetteer(bb, augmentType):
     '''Builds the gazetteer of a bounding box and agument it in case
     augmentation is activated. '''
+
+    assert augmentType in ["FULL", "NA", "HP"]
 
     # accepted fields as location names
     location_fields = ["city", "country",
@@ -206,12 +193,16 @@ def build_bb_gazetteer(bb, augment=True):
                     print (extract_text(match[key]))
                     raise
 
-    if augment:
+    if augmentType=="FULL": # Full augmentation and filtering as in COLING 2018 publication
         # 'pullapuram road': set([493])
         new_geo_locations, extended_words3 = gaz_augmentation_and_filtering.augment(geo_locations)
 
-    else:
+    elif augmentType == "NA": # None
         new_geo_locations = gaz_augmentation_and_filtering.filter_geo_locations(geo_locations)
+        extended_words3 = gaz_augmentation_and_filtering.get_extended_words3(new_geo_locations.keys())
+
+    elif augmentType == "HP": # High Precision Filtering
+        new_geo_locations = gaz_augmentation_and_filtering.high_precision_filtering(geo_locations)
         extended_words3 = gaz_augmentation_and_filtering.get_extended_words3(new_geo_locations.keys())
 
     # for serialization
