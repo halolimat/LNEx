@@ -144,7 +144,7 @@ def preprocess_tweet(tweet):
 
         # remove any punctuations from the hashtag and mention
         # ex: Troll_Cinema => TrollCinema
-        _h = _h.translate(None, ''.join(string.punctuation))
+        _h = _h.translate(str.maketrans('','',''.join(string.punctuation)))
 
         # breaks the hashtag
         segments = segment(_h)
@@ -188,10 +188,8 @@ def flatten(l):
     Based on Cristian answer @ http://stackoverflow.com/questions/2158395'''
 
     for el in l:
-        if isinstance(el, collections.Iterable) and not \
-           isinstance(el, basestring):
-            for sub in flatten(el):
-                yield sub
+        if isinstance(el, collections.Iterable) and not isinstance(el, (str, bytes)):
+            yield from flatten(el)
         else:
             yield el
 
