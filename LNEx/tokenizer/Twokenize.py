@@ -10,7 +10,7 @@ statistical learning with in-the-loop human evaluation :)
 __author__="brendan o'connor (anyall.org)"
 
 import re
-import emoticons
+from .emoticons import Emoticon
 mycompile = lambda pat:  re.compile(pat,  re.UNICODE)
 def regex_or(*items):
   r = '|'.join(items)
@@ -68,7 +68,7 @@ Decorations = r' [  ♫   ]+ '.replace(' ','')
 EmbeddedApostrophe = r"\S+'\S+"
 
 ProtectThese = [
-    emoticons.Emoticon,
+    Emoticon,
     Url,
     Entity,
     Timelike,

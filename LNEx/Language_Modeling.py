@@ -157,7 +157,7 @@ if __name__ == "__main__":
 
     lm = GazBasedModel(geo_locations)
 
-    print lm.phrase_probability("new")
+    print (lm.phrase_probability("new"))
 
     lm.phrase_probability("new avadi")
     lm.phrase_probability("new avadi road")
