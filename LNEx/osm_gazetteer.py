@@ -5,16 +5,14 @@ This software is released under the GNU Affero General Public License (AGPL)
 v3.0 License.
 #############################################################################"""
 
+import json
 from collections import defaultdict
 
-from elasticsearch import Elasticsearch
 from elasticsearch_dsl import Search, Q
 from elasticsearch_dsl.connections import connections
 
 import geo_calculations
 import gaz_augmentation_and_filtering
-
-import json
 
 ################################################################################
 ################################################################################
@@ -51,16 +49,16 @@ def search_index(bb):
 
     if connection_string == '' or index_name == '':
 
-        print ("\n###########################################################")
-        print ("Global ERROR: Elastic host and port or index name not defined")
-        print ("#############################################################\n")
+        print("\n###########################################################")
+        print("Global ERROR: Elastic host and port or index name not defined")
+        print("#############################################################\n")
         exit()
 
     if not geo_calculations.is_bb_acceptable(bb) or bb[0] > bb[2] or bb[1] > bb[3]:
 
-        print ("\n##########################################################")
-        print ("Global ERROR: Bounding Box is too big, choose a smaller one!")
-        print ("############################################################\n")
+        print("\n##########################################################")
+        print("Global ERROR: Bounding Box is too big, choose a smaller one!")
+        print("############################################################\n")
         exit()
 
     connections.create_connection(hosts=[connection_string], timeout=60)
@@ -199,11 +197,11 @@ def build_bb_gazetteer(bb, augmentType):
 
     elif augmentType == "NA": # None
         new_geo_locations = gaz_augmentation_and_filtering.filter_geo_locations(geo_locations)
-        extended_words3 = gaz_augmentation_and_filtering.get_extended_words3(new_geo_locations.keys())
+        extended_words3 = gaz_augmentation_and_filtering.get_extended_words3(list(new_geo_locations.keys()))
 
     elif augmentType == "HP": # High Precision Filtering
         new_geo_locations = gaz_augmentation_and_filtering.high_precision_filtering(geo_locations)
-        extended_words3 = gaz_augmentation_and_filtering.get_extended_words3(new_geo_locations.keys())
+        extended_words3 = gaz_augmentation_and_filtering.get_extended_words3(list(new_geo_locations.keys()))
 
     # for serialization
     geo_info = dict(geo_info)
@@ -230,4 +228,4 @@ if __name__ == "__main__":
 
     geo_locations, geo_info, extended_words3 = build_bb_gazetteer(bb)
 
-    print (json.dumps(dict(geo_locations), indent=2))
+    print(json.dumps(dict(geo_locations), indent=2))

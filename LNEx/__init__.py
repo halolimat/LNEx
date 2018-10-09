@@ -5,11 +5,11 @@ This software is released under the GNU Affero General Public License (AGPL)
 v3.0 License.
 #############################################################################"""
 
-import core
-import osm_gazetteer
 import os, json
-
 import elasticsearch
+
+from . import core
+from . import osm_gazetteer
 
 ################################################################################
 ################################################################################

@@ -193,7 +193,7 @@ def preprocess_name(loc_name):
 def find_ngrams(unigrams, n):
     '''Created ngrams of length n from the unigrams list'''
 
-    return zip(*[unigrams[i:] for i in range(n)])
+    return list(zip(*[unigrams[i:] for i in range(n)]))
 
 ################################################################################
 
@@ -231,7 +231,7 @@ def high_precision_filtering(geo_locations):
     new_geo_locations = defaultdict(lambda: defaultdict(set))
 
     for text in geo_locations:
-
+        
         original_text = text
 
         text = text.replace("( ", "(").replace(" )", ")").lower()
@@ -252,7 +252,7 @@ def high_precision_filtering(geo_locations):
 
         text = re.sub('\s{2,}', ' ', text).strip()
 
-        text = unicodedata.normalize('NFKD', text).encode('ascii', 'ignore')
+        text = unicodedata.normalize('NFKD', text).encode('ascii', 'ignore').decode('UTF-8')
         text = str(text.strip())
 
         # skip few names
@@ -481,7 +481,7 @@ def augment(geo_locations):
                     base_name[1:1] = f_name
 
                     # remove consecutive duplicate tokens
-                    base_name = map(itemgetter(0), groupby(base_name))
+                    base_name = list(map(itemgetter(0), groupby(base_name)))
 
                     flexi_grams.append(" ".join(base_name))
 
@@ -504,4 +504,4 @@ def augment(geo_locations):
                     new_geo_locations[new_name]["meta"] = \
                         set(new_geo_locations[name]["meta"]).union(new_geo_locations[new_name]["meta"])
 
-    return new_geo_locations, get_extended_words3(new_geo_locations.keys())
+    return new_geo_locations, get_extended_words3(list(new_geo_locations.keys()))

@@ -20,8 +20,8 @@ from collections import defaultdict
 load()
 
 # importing local modules
-import Language_Modeling
-from tokenizer import Twokenize
+from . import Language_Modeling
+from .tokenizer import Twokenize
 
 ################################################################################
 ################################################################################
@@ -245,7 +245,7 @@ def build_tree(glm, ts):
                 flattened = list(flatten(i))
 
                 # remove consecutive duplicates
-                final_list = map(itemgetter(0), groupby(flattened))
+                final_list = list(map(itemgetter(0), groupby(flattened)))
 
                 # prune based on the probability from the language model
                 p = " ".join(final_list)
@@ -684,7 +684,7 @@ def filterout_overlaps(valid_ngrams):
 def find_ngrams(input_list, n):
     '''Generates grams of length (n) from the list of unigrams (input_list)'''
 
-    return zip(*[input_list[i:] for i in range(n)])
+    return list(zip(*[input_list[i:] for i in range(n)]))
 
 ################################################################################
 
@@ -817,7 +817,7 @@ class init_Env(object):
         ########################################################################
 
         # list of unigrams
-        unigrams = self.glm.unigrams["words"].keys()
+        unigrams = list(self.glm.unigrams["words"].keys())
 
         self.stopwords_notin_gazetteer = set(
             self.extended_words3) - set(unigrams)

@@ -195,7 +195,7 @@ def unprotected_tokenize(s):
   return s.split()
 
 if __name__=='__main__':
-    print (tokenize("RT @im_ursbro: #ChennaiFloods #'Saidapet', food available for 700-people;no.4,pilliyarkoil street,Jones road subway.call Dinesh Thomas @ 04"))
+    print(tokenize("RT @im_ursbro: #ChennaiFloods #'Saidapet', food available for 700-people;no.4,pilliyarkoil street,Jones road subway.call Dinesh Thomas @ 04"))
 
 #for line in sys.stdin:
   #  print u" ".join(tokenize(line[:-1])).encode('utf-8')

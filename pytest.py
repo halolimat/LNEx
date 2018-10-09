@@ -123,8 +123,8 @@ if __name__ == "__main__":
 
             row = output[0], output[1], output[2], geo_point
             rows.append(row)
-
-        print "-" * 120
-        print tabulate(rows, headers=header)
-        print "#" * 120
+            
+        print("-" * 120)
+        print(tabulate(rows, headers=header))
+        print("#" * 120)
         break
