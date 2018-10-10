@@ -136,6 +136,13 @@ This dataset contains 4500 annotated tweets 1500 tweets from each of three Twitt
 
 You can fill out the following [Form](https://link.hussein.space/LNEx-Form) to the get the full dataset. Alternatively, you can get a subset of the dataset from [this folder](https://link.hussein.space/LNEx-Data), which only contains 150 tweets.
 
+## Notes ##
+
+Since LNEx relies on OSM gazetteers for extraction, the performance of the tool will be affacted by the version of the data. The performance of the tool reported in the paper used the Photon index with the following properties:
+   - "number" : "1.7.0",
+   - "build_hash" : "929b9739cae115e73c346cb5f9a6f24ba735a743",
+   - "build_timestamp" : "2015-07-16T14:31:07Z"
+
 ## Citing ##
 
 If you do make use of LNEx or any of its components please cite the following publication:
