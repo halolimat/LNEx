@@ -48,6 +48,9 @@ __all__ = [ 'set_global_env',
 printable = set(string.printable)
 exclude = set(string.punctuation)
 
+url_re = r'\w+:\/{2}[\d\w-]+(\.[\d\w-]+)*(?:(?:\/[^\s/]*))*' # urls regular expression
+mentions_re = r"@\w+" # mentions regular expression
+
 # LNEx global environment
 env = None
 
@@ -104,6 +107,17 @@ def strip_non_ascii(s):
     nfkd = unicodedata.normalize('NFKD', s)
     return str(nfkd.encode('ASCII', 'ignore').decode('ASCII'))
 
+def get_removed_indices(tweet):
+    # Contains the indices of characters that were removed from the oringial text
+    removedIndices = set()
+
+    for r in [url_re, mentions_re]:
+        for m in [(m.start(),m.end()) for m in re.finditer(r, tweet)]:
+            # add all character offsets to the set of removed indices
+            removedIndices.update(set(range(m[0],m[1])))
+
+    return removedIndices
+
 def preprocess_tweet(tweet):
     '''Preprocesses the tweet text and break the hashtags'''
 
@@ -116,10 +130,7 @@ def preprocess_tweet(tweet):
             pass
 
     # remove url from tweet
-    tweet = re.sub(
-        r'\w+:\/{2}[\d\w-]+(\.[\d\w-]+)*(?:(?:\/[^\s/]*))*',
-        '',
-        tweet)
+    utweet = re.sub(url_re, '', tweet)
 
     # remove non-ascii characters
     tweet = "".join([x for x in tweet if x in printable])
@@ -128,7 +139,7 @@ def preprocess_tweet(tweet):
     tweet = tweet.replace("\n", " ").replace(" https", "").replace("http", "")
 
     # remove all mentions
-    tweet = re.sub(r"@\w+", "", tweet)
+    tweet = re.sub(mentions_re, "", tweet)
 
     # extract hashtags to break them -------------------------------------------
     hashtags = re.findall(r"#\w+", tweet)
@@ -315,6 +326,8 @@ def align_and_split(raw_string, preprocessed_string):
     '''Aligns the offsets of the preprocessed tweet with the raw tweet to retain
     original offsets when outputing spotted location names'''
 
+    removedIndices = get_removed_indices(raw_string)
+
     tokens = list()
 
     last_index = 0
@@ -325,7 +338,7 @@ def align_and_split(raw_string, preprocessed_string):
                    for i in findall(token[0], raw_string)]
 
         for match in matches:
-            if match[1] >= last_index:
+            if match[1] >= last_index and match[1] not in removedIndices:
                 last_index = match[1]
                 tokens.append(match)
                 break
