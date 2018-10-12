@@ -231,7 +231,7 @@ def high_precision_filtering(geo_locations):
     new_geo_locations = defaultdict(lambda: defaultdict(set))
 
     for text in geo_locations:
-        
+
         original_text = text
 
         text = text.replace("( ", "(").replace(" )", ")").lower()
@@ -347,9 +347,7 @@ def filter_geo_locations(geo_locations):
 
         for name in names:
 
-            name = unicodedata.normalize(
-                'NFKD', name).encode(
-                'ascii', 'ignore')
+            name = unicodedata.normalize('NFKD', name).encode('ascii', 'ignore').decode('UTF-8')
             name = str(name.strip())
 
             # skip empty names

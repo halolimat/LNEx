@@ -136,7 +136,7 @@ def build_bb_gazetteer(bb, augmentType):
     '''Builds the gazetteer of a bounding box and agument it in case
     augmentation is activated. '''
 
-    assert augmentType in ["FULL", "NA", "HP"]
+    assert augmentType in ["FULL", "FILTER", "HP", "NA"]
 
     # accepted fields as location names
     location_fields = ["city", "country",
@@ -195,12 +195,18 @@ def build_bb_gazetteer(bb, augmentType):
         # 'pullapuram road': set([493])
         new_geo_locations, extended_words3 = gaz_augmentation_and_filtering.augment(geo_locations)
 
-    elif augmentType == "NA": # None
+    elif augmentType=="FILTER": # None
         new_geo_locations = gaz_augmentation_and_filtering.filter_geo_locations(geo_locations)
         extended_words3 = gaz_augmentation_and_filtering.get_extended_words3(list(new_geo_locations.keys()))
 
-    elif augmentType == "HP": # High Precision Filtering
+    elif augmentType=="HP": # High Precision Filtering
         new_geo_locations = gaz_augmentation_and_filtering.high_precision_filtering(geo_locations)
+        extended_words3 = gaz_augmentation_and_filtering.get_extended_words3(list(new_geo_locations.keys()))
+
+    elif augmentType=="NA":
+        new_geo_locations = dict()
+        for x in geo_locations:
+            new_geo_locations[x.lower()] = geo_locations[x]
         extended_words3 = gaz_augmentation_and_filtering.get_extended_words3(list(new_geo_locations.keys()))
 
     # for serialization

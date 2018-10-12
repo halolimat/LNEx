@@ -474,8 +474,8 @@ def extract(tweet):
         # skip if the time complexity is large due to tree construction
         #   O(|v|^s): where v is the longest synonyms vector and s is the number
         #             of tokens in the subquery.
-        if len(max(sub_query_tokens,key=len)) ** len(sub_query_tokens) > 400000:
-            continue
+        # if len(max(sub_query_tokens,key=len)) ** len(sub_query_tokens) > 1000000:
+        #     continue
 
         # this would build the bottom up tree of valid n-grams
         # if the query contains more than one vector then build the tree
