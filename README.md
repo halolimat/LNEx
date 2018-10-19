@@ -149,7 +149,7 @@ If you do make use of LNEx or any of its components please cite the following pu
 
     Hussein S. Al-Olimat, Krishnaprasad Thirunarayan, Valerie Shalin, and Amit Sheth. 2018. 
     Location Name Extraction from Targeted Text Streams using Gazetteer-based Statistical Language Models. 
-    In Proceedings of the 27th Internationl Conference on Computational Linguistics (COLING 2018), 
+    In Proceedings of the 27th International Conference on Computational Linguistics (COLING 2018), 
     pages 700–710. Association for Computational Linguistics.
 
     @InProceedings{C18-1169,
