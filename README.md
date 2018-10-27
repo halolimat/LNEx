@@ -40,20 +40,9 @@ We will be using a ready to go elastic index of the whole [OpenStreetMap](http:/
    java -jar photon-0.3.0.jar
    ```
 
- - You should get the Port number information from the log of running the jar, similar to the following:
-
-   ```
-   ... bound_address {inet[/127.0.0.1:9201]} ... publish_address {inet[/127.0.0.1:9201]}
-   ```
-
-   - this means that elasticsearch is running correctly and listening on:
-
-   ```
-   localhost:9201
-   ```
-   - You can test the index by running the following command:
+ - You can now test the running index by running the following command (9200 is the default port number, might be different in your system if the port is occupied by another application):
    ```sh
-       curl -XGET 'http://localhost:9201/photon/'
+   curl -XGET 'http://localhost:9200/photon/'
    ```
 
 ## Using LNEx ##
