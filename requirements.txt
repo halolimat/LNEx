@@ -1,7 +1,6 @@
-elasticsearch
-"elasticsearch-dsl<2.0.0"
-nltk
-geopy
-texttable
 wordsegment
-tabulate
+shapely
+nltk
+elasticsearch
+elasticsearch_dsl
+geopy
