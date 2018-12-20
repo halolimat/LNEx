@@ -20,8 +20,8 @@ from collections import defaultdict
 load()
 
 # importing local modules
-import Language_Modeling
-from tokenizer import Twokenize
+from . import Language_Modeling
+from .tokenizer import Twokenize
 
 ################################################################################
 ################################################################################
@@ -47,6 +47,9 @@ __all__ = [ 'set_global_env',
 
 printable = set(string.printable)
 exclude = set(string.punctuation)
+
+url_re = r'\w+:\/{2}[\d\w-]+(\.[\d\w-]+)*(?:(?:\/[^\s/]*))*' # urls regular expression
+mentions_re = r"@\w+" # mentions regular expression
 
 # LNEx global environment
 env = None
@@ -101,11 +104,19 @@ class Tree(object):
 ################################################################################
 
 def strip_non_ascii(s):
-    if isinstance(s, unicode):
-        nfkd = unicodedata.normalize('NFKD', s)
-        return str(nfkd.encode('ASCII', 'ignore').decode('ASCII'))
-    else:
-        return s
+    nfkd = unicodedata.normalize('NFKD', s)
+    return str(nfkd.encode('ASCII', 'ignore').decode('ASCII'))
+
+def get_removed_indices(tweet):
+    # Contains the indices of characters that were removed from the oringial text
+    removedIndices = set()
+
+    for r in [url_re, mentions_re]:
+        for m in [(m.start(),m.end()) for m in re.finditer(r, tweet)]:
+            # add all character offsets to the set of removed indices
+            removedIndices.update(set(range(m[0],m[1])))
+
+    return removedIndices
 
 def preprocess_tweet(tweet):
     '''Preprocesses the tweet text and break the hashtags'''
@@ -119,10 +130,7 @@ def preprocess_tweet(tweet):
             pass
 
     # remove url from tweet
-    tweet = re.sub(
-        r'\w+:\/{2}[\d\w-]+(\.[\d\w-]+)*(?:(?:\/[^\s/]*))*',
-        '',
-        tweet)
+    utweet = re.sub(url_re, '', tweet)
 
     # remove non-ascii characters
     tweet = "".join([x for x in tweet if x in printable])
@@ -131,7 +139,7 @@ def preprocess_tweet(tweet):
     tweet = tweet.replace("\n", " ").replace(" https", "").replace("http", "")
 
     # remove all mentions
-    tweet = re.sub(r"@\w+", "", tweet)
+    tweet = re.sub(mentions_re, "", tweet)
 
     # extract hashtags to break them -------------------------------------------
     hashtags = re.findall(r"#\w+", tweet)
@@ -147,7 +155,7 @@ def preprocess_tweet(tweet):
 
         # remove any punctuations from the hashtag and mention
         # ex: Troll_Cinema => TrollCinema
-        _h = _h.translate(None, ''.join(string.punctuation))
+        _h = _h.translate(str.maketrans('','',''.join(string.punctuation)))
 
         # breaks the hashtag
         segments = segment(_h)
@@ -191,10 +199,8 @@ def flatten(l):
     Based on Cristian answer @ http://stackoverflow.com/questions/2158395'''
 
     for el in l:
-        if isinstance(el, collections.Iterable) and not \
-           isinstance(el, basestring):
-            for sub in flatten(el):
-                yield sub
+        if isinstance(el, collections.Iterable) and not isinstance(el, (str, bytes)):
+            yield from flatten(el)
         else:
             yield el
 
@@ -250,7 +256,7 @@ def build_tree(glm, ts):
                 flattened = list(flatten(i))
 
                 # remove consecutive duplicates
-                final_list = map(itemgetter(0), groupby(flattened))
+                final_list = list(map(itemgetter(0), groupby(flattened)))
 
                 # prune based on the probability from the language model
                 p = " ".join(final_list)
@@ -320,6 +326,8 @@ def align_and_split(raw_string, preprocessed_string):
     '''Aligns the offsets of the preprocessed tweet with the raw tweet to retain
     original offsets when outputing spotted location names'''
 
+    removedIndices = get_removed_indices(raw_string)
+
     tokens = list()
 
     last_index = 0
@@ -330,7 +338,7 @@ def align_and_split(raw_string, preprocessed_string):
                    for i in findall(token[0], raw_string)]
 
         for match in matches:
-            if match[1] >= last_index:
+            if match[1] >= last_index and match[1] not in removedIndices:
                 last_index = match[1]
                 tokens.append(match)
                 break
@@ -360,9 +368,9 @@ def extract(tweet):
     # --------------------------------------------------------------------------
     # check if environment was correctly initialized
     if env == None:
-        print "\n##################################################"
-        print "Global ERROR: LNEx environment must be initialized"
-        print "##################################################\n"
+        print ("\n##################################################")
+        print ("Global ERROR: LNEx environment must be initialized")
+        print ("##################################################\n")
         exit()
 
     # --------------------------------------------------------------------------
@@ -479,8 +487,8 @@ def extract(tweet):
         # skip if the time complexity is large due to tree construction
         #   O(|v|^s): where v is the longest synonyms vector and s is the number
         #             of tokens in the subquery.
-        if len(max(sub_query_tokens,key=len)) ** len(sub_query_tokens) > 400000:
-            continue
+        # if len(max(sub_query_tokens,key=len)) ** len(sub_query_tokens) > 1000000:
+        #     continue
 
         # this would build the bottom up tree of valid n-grams
         # if the query contains more than one vector then build the tree
@@ -689,7 +697,7 @@ def filterout_overlaps(valid_ngrams):
 def find_ngrams(input_list, n):
     '''Generates grams of length (n) from the list of unigrams (input_list)'''
 
-    return zip(*[input_list[i:] for i in range(n)])
+    return list(zip(*[input_list[i:] for i in range(n)]))
 
 ################################################################################
 
@@ -822,7 +830,7 @@ class init_Env(object):
         ########################################################################
 
         # list of unigrams
-        unigrams = self.glm.unigrams["words"].keys()
+        unigrams = list(self.glm.unigrams["words"].keys())
 
         self.stopwords_notin_gazetteer = set(
             self.extended_words3) - set(unigrams)
@@ -832,7 +840,7 @@ class init_Env(object):
 def initialize(geo_locations, extended_words3, capital_word_shape):
     '''Initializing the system here'''
 
-    print "Initializing LNEx ..."
+    print ("Initializing LNEx ...")
     g_env = init_Env(geo_locations, extended_words3)
     set_global_env(g_env)
 
@@ -840,4 +848,4 @@ def initialize(geo_locations, extended_words3, capital_word_shape):
     global cap_word_shape
     cap_word_shape = capital_word_shape
 
-    print "Done Initialization ..."
+    print ("Done Initialization ...")

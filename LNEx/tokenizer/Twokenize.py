@@ -5,12 +5,14 @@ development philosophy: every time you change a rule, do a diff of this
 program's output on ~100k tweets.  if you iterate through many possible rules
 and only accept the ones that seeem to result in good diffs, it's a sort of
 statistical learning with in-the-loop human evaluation :)
+
+Modified by: Hussein S. Al-Olimat hussein@knoesis.org
 """
 
 __author__="brendan o'connor (anyall.org)"
 
 import re
-import emoticons
+from .emoticons import Emoticon
 mycompile = lambda pat:  re.compile(pat,  re.UNICODE)
 def regex_or(*items):
   r = '|'.join(items)
@@ -68,7 +70,7 @@ Decorations = r' [  ♫   ]+ '.replace(' ','')
 EmbeddedApostrophe = r"\S+'\S+"
 
 ProtectThese = [
-    emoticons.Emoticon,
+    Emoticon,
     Url,
     Entity,
     Timelike,
@@ -115,13 +117,8 @@ def align(toks, orig):
 
 class AlignmentFailed(Exception): pass
 
-def unicodify(s, encoding='utf8', *args):
-  if isinstance(s,unicode): return s
-  if isinstance(s,str): return s.decode(encoding, *args)
-  return unicode(s)
-
 def tokenize(tweet):
-  text = unicodify(tweet)
+  text = tweet
   text = squeeze_whitespace(text)
   t = Tokenization()
   t += simple_tokenize(text)
@@ -198,7 +195,7 @@ def unprotected_tokenize(s):
   return s.split()
 
 if __name__=='__main__':
-    print (tokenize("RT @im_ursbro: #ChennaiFloods #'Saidapet', food available for 700-people;no.4,pilliyarkoil street,Jones road subway.call Dinesh Thomas @ 04"))
+    print(tokenize("RT @im_ursbro: #ChennaiFloods #'Saidapet', food available for 700-people;no.4,pilliyarkoil street,Jones road subway.call Dinesh Thomas @ 04"))
 
 #for line in sys.stdin:
   #  print u" ".join(tokenize(line[:-1])).encode('utf-8')

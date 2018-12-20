@@ -56,4 +56,4 @@ if __name__ == "__main__":
 
     texas_bb = [25.8371638, -106.6456461, 36.5007041, -93.5080389]
 
-    print is_bb_acceptable(texas_bb)
+    print(is_bb_acceptable(texas_bb))

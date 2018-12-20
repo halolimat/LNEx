@@ -5,11 +5,11 @@ This software is released under the GNU Affero General Public License (AGPL)
 v3.0 License.
 #############################################################################"""
 
-import core
-import osm_gazetteer
 import os, json
-
 import elasticsearch
+
+from . import core
+from . import osm_gazetteer
 
 ################################################################################
 ################################################################################
@@ -28,7 +28,7 @@ def initialize_using_files(geo_locations, extended_words3, capital_word_shape=Fa
 
 ################################################################################
 
-def initialize(bb, augment, cache, dataset_name, capital_word_shape=False):
+def initialize(bb, augmentType, cache, dataset_name, capital_word_shape=False):
     """Initialize LNEx using the elastic index"""
 
     geo_locations = None
@@ -38,7 +38,7 @@ def initialize(bb, augment, cache, dataset_name, capital_word_shape=False):
     while geo_info is None:
         try:
             # retrieve the records from OSM based on the passed bb
-            geo_locations, geo_info, extended_words3 =  osm_gazetteer.build_bb_gazetteer(bb, augment)
+            geo_locations, geo_info, extended_words3 =  osm_gazetteer.build_bb_gazetteer(bb, augmentType)
         except elasticsearch.exceptions.ConnectionTimeout:
             pass
 

@@ -5,9 +5,9 @@ This software is released under the GNU Affero General Public License (AGPL)
 v3.0 License.
 #############################################################################"""
 
+import json
 from collections import defaultdict
 
-from elasticsearch import Elasticsearch
 from elasticsearch_dsl import Search, Q
 from elasticsearch_dsl.connections import connections
 
@@ -49,40 +49,43 @@ def search_index(bb):
 
     if connection_string == '' or index_name == '':
 
-        print "\n###########################################################"
-        print "Global ERROR: Elastic host and port or index name not defined"
-        print "#############################################################\n"
+        print("\n###########################################################")
+        print("Global ERROR: Elastic host and port or index name not defined")
+        print("#############################################################\n")
         exit()
 
     if not geo_calculations.is_bb_acceptable(bb) or bb[0] > bb[2] or bb[1] > bb[3]:
 
-        print "\n##########################################################"
-        print "Global ERROR: Bounding Box is too big, choose a smaller one!"
-        print "############################################################\n"
+        print("\n##########################################################")
+        print("Global ERROR: Bounding Box is too big, choose a smaller one!")
+        print("############################################################\n")
         exit()
 
     connections.create_connection(hosts=[connection_string], timeout=60)
-    
-    phrase_search = [Q({"filtered": {
-        "filter": {
-            "geo_bounding_box": {
-                        "coordinate": {
-                            "bottom_left": {
-                                "lat": bb[0],
-                                "lon": bb[1]
-                            },
-                            "top_right": {
-                                "lat": bb[2],
-                                "lon": bb[3]
-                            }
-                        }
-                        }
-        },
-        "query": {
-            "match_all": {}
-        }
-    }
-    })]
+
+    query = { "bool": {
+                "must": {
+                  "match_all": {}
+                },
+                "filter": {
+                  "geo_bounding_box": {
+                    "coordinate": {
+                      "bottom_left": {
+                        "lat": bb[0],
+                        "lon": bb[1]
+                      },
+                      "top_right": {
+                        "lat": bb[2],
+                        "lon": bb[3]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+
+
+    phrase_search = [Q(query)]
 
     #to search with a scroll
     e_search = Search(index=index_name).query(Q('bool', must=phrase_search))
@@ -93,21 +96,6 @@ def search_index(bb):
         raise
 
     return res
-
-    # Does not work correctly
-    # s = Search(using=client, index=index_name) \
-    #     .filter("geo_bounding_box", location={
-    #         "top_right": {
-    #             "lat": bb[2],
-    #             "lon": bb[3]
-    #         },
-    #         "bottom_left": {
-    #             "lat": bb[0],
-    #             "lon": bb[1]
-    #         }
-    #     })
-    #
-    # return s.execute()
 
 ################################################################################
 
@@ -144,9 +132,11 @@ def extract_text(obj):
 
 ################################################################################
 
-def build_bb_gazetteer(bb, augment=True):
+def build_bb_gazetteer(bb, augmentType):
     '''Builds the gazetteer of a bounding box and agument it in case
     augmentation is activated. '''
+
+    assert augmentType in ["FULL", "FILTER", "HP", "NA"]
 
     # accepted fields as location names
     location_fields = ["city", "country",
@@ -198,16 +188,26 @@ def build_bb_gazetteer(bb, augment=True):
                         geo_locations[text]["meta"].append(str(_id))
 
                 except BaseException:
-                    print extract_text(match[key])
+                    print (extract_text(match[key]))
                     raise
 
-    if augment:
+    if augmentType=="FULL": # Full augmentation and filtering as in COLING 2018 publication
         # 'pullapuram road': set([493])
         new_geo_locations, extended_words3 = gaz_augmentation_and_filtering.augment(geo_locations)
 
-    else:
+    elif augmentType=="FILTER": # None
         new_geo_locations = gaz_augmentation_and_filtering.filter_geo_locations(geo_locations)
-        extended_words3 = gaz_augmentation_and_filtering.get_extended_words3(new_geo_locations.keys())
+        extended_words3 = gaz_augmentation_and_filtering.get_extended_words3(list(new_geo_locations.keys()))
+
+    elif augmentType=="HP": # High Precision Filtering
+        new_geo_locations = gaz_augmentation_and_filtering.high_precision_filtering(geo_locations)
+        extended_words3 = gaz_augmentation_and_filtering.get_extended_words3(list(new_geo_locations.keys()))
+
+    elif augmentType=="NA":
+        new_geo_locations = dict()
+        for x in geo_locations:
+            new_geo_locations[x.lower()] = geo_locations[x]
+        extended_words3 = gaz_augmentation_and_filtering.get_extended_words3(list(new_geo_locations.keys()))
 
     # for serialization
     geo_info = dict(geo_info)
@@ -234,4 +234,4 @@ if __name__ == "__main__":
 
     geo_locations, geo_info, extended_words3 = build_bb_gazetteer(bb)
 
-    print geo_locations
+    print(json.dumps(dict(geo_locations), indent=2))

@@ -193,7 +193,7 @@ def preprocess_name(loc_name):
 def find_ngrams(unigrams, n):
     '''Created ngrams of length n from the unigrams list'''
 
-    return zip(*[unigrams[i:] for i in range(n)])
+    return list(zip(*[unigrams[i:] for i in range(n)]))
 
 ################################################################################
 
@@ -217,6 +217,54 @@ def get_extended_words3(unique_names):
                 words3.add(y)
 
     return list(words3)
+
+################################################################################
+
+def high_precision_filtering(geo_locations):
+    ''' High Precision Filtering of location names.
+
+    input>  type(geo_locations): defaultdict
+            "LocationName": [geo_info_ids]
+
+    output> type(unique_names): dict , type(all_names): list'''
+
+    new_geo_locations = defaultdict(lambda: defaultdict(set))
+
+    for text in geo_locations:
+
+        original_text = text
+
+        text = text.replace("( ", "(").replace(" )", ")").lower()
+
+        # punctuation padding
+        text = re.sub('([,;])', r'\1 ', text)
+        text = re.sub('\s{2,}', ' ', text)
+
+        # remove the names in brackets
+        start_idx = text.find("(") + 1
+        end_idx = text.rfind(")")
+        if start_idx > 0: text = text[:start_idx]+text[end_idx:]
+
+        #break on seperators, keep only the first part
+        text = text.split(",")[0]
+        text = text.split("/")[0]
+        text = text.split(";")[0]
+
+        text = re.sub('\s{2,}', ' ', text).strip()
+
+        text = unicodedata.normalize('NFKD', text).encode('ascii', 'ignore').decode('UTF-8')
+        text = str(text.strip())
+
+        # skip few names
+        if text == "" or text.isdigit() or text in gaz_stopwords or len(text) < 3:
+            continue
+
+        # prevents collisions
+        if text not in new_geo_locations:
+            new_geo_locations[text]["main"] = set(geo_locations[original_text]["main"]).union(new_geo_locations[text]["main"])
+            new_geo_locations[text]["meta"] = set(geo_locations[original_text]["meta"]).union(new_geo_locations[text]["meta"])
+
+    return new_geo_locations
 
 ################################################################################
 
@@ -299,9 +347,7 @@ def filter_geo_locations(geo_locations):
 
         for name in names:
 
-            name = unicodedata.normalize(
-                'NFKD', name).encode(
-                'ascii', 'ignore')
+            name = unicodedata.normalize('NFKD', name).encode('ascii', 'ignore').decode('UTF-8')
             name = str(name.strip())
 
             # skip empty names
@@ -433,7 +479,7 @@ def augment(geo_locations):
                     base_name[1:1] = f_name
 
                     # remove consecutive duplicate tokens
-                    base_name = map(itemgetter(0), groupby(base_name))
+                    base_name = list(map(itemgetter(0), groupby(base_name)))
 
                     flexi_grams.append(" ".join(base_name))
 
@@ -456,4 +502,4 @@ def augment(geo_locations):
                     new_geo_locations[new_name]["meta"] = \
                         set(new_geo_locations[name]["meta"]).union(new_geo_locations[new_name]["meta"])
 
-    return new_geo_locations, get_extended_words3(new_geo_locations.keys())
+    return new_geo_locations, get_extended_words3(list(new_geo_locations.keys()))
