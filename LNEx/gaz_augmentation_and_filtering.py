@@ -197,29 +197,6 @@ def find_ngrams(unigrams, n):
 
 ################################################################################
 
-def get_extended_words3(unique_names):
-    '''Reads the list of english words (words3).
-    words3 source: https://github.com/dwyl/english-words
-    '''
-
-    with open(get_dicts_dir() + "words3.txt") as f:
-
-        words3 = f.read().splitlines()
-        words3 = [x.lower() for x in words3]
-        words3 = set(words3)
-
-    # extend the list of words
-    for x in unique_names:
-
-        for y in x.split():
-            if y not in words3:
-
-                words3.add(y)
-
-    return list(words3)
-
-################################################################################
-
 def high_precision_filtering(geo_locations):
     ''' High Precision Filtering of location names.
 
@@ -502,4 +479,4 @@ def augment(geo_locations):
                     new_geo_locations[new_name]["meta"] = \
                         set(new_geo_locations[name]["meta"]).union(new_geo_locations[new_name]["meta"])
 
-    return new_geo_locations, get_extended_words3(list(new_geo_locations.keys()))
+    return new_geo_locations

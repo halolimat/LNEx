@@ -193,21 +193,18 @@ def build_bb_gazetteer(bb, augmentType):
 
     if augmentType=="FULL": # Full augmentation and filtering as in COLING 2018 publication
         # 'pullapuram road': set([493])
-        new_geo_locations, extended_words3 = gaz_augmentation_and_filtering.augment(geo_locations)
+        new_geo_locations = gaz_augmentation_and_filtering.augment(geo_locations)
 
     elif augmentType=="FILTER": # None
         new_geo_locations = gaz_augmentation_and_filtering.filter_geo_locations(geo_locations)
-        extended_words3 = gaz_augmentation_and_filtering.get_extended_words3(list(new_geo_locations.keys()))
 
     elif augmentType=="HP": # High Precision Filtering
         new_geo_locations = gaz_augmentation_and_filtering.high_precision_filtering(geo_locations)
-        extended_words3 = gaz_augmentation_and_filtering.get_extended_words3(list(new_geo_locations.keys()))
 
     elif augmentType=="NA":
         new_geo_locations = dict()
         for x in geo_locations:
             new_geo_locations[x.lower()] = geo_locations[x]
-        extended_words3 = gaz_augmentation_and_filtering.get_extended_words3(list(new_geo_locations.keys()))
 
     # for serialization
     geo_info = dict(geo_info)
@@ -216,7 +213,7 @@ def build_bb_gazetteer(bb, augmentType):
         new_geo_locations[ln] = {"main": list(new_geo_locations[ln]["main"]),
                                  "meta": list(new_geo_locations[ln]["meta"])}
 
-    return new_geo_locations, geo_info, extended_words3
+    return new_geo_locations, geo_info
 
 ################################################################################
 

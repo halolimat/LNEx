@@ -388,15 +388,10 @@ def extract(tweet):
     query_tokens = align_and_split(query, preprocessed_query)
 
     # --------------------------------------------------------------------------
-    # prune the tree of locations based on the exisitence of stop words
-    # by splitting the query into multiple queries
-    query_splits = Twokenize.tokenize(query)
-    stop_in_query = env.stopwords_notin_gazetteer & set(query_splits)
 
     # if tweet contains the following then remove them from the tweet and
     # split based on their presence:
-    stop_in_query = stop_in_query | set(
-        ["[", "]", ".", ",", "(", ")", "!", "?", ":", "<", ">", "newline"])
+    stop_in_query = set(["[", "]", ".", ",", "(", ")", "!", "?", ":", "<", ">", "newline"])
 
     # remove stops from query
     for index, token in enumerate(query_tokens):
@@ -440,35 +435,17 @@ def extract(tweet):
         # expand tokens in sub_query_tokens to vectors
         for idx, token in enumerate(sub_query_tokens): # ---------------- for II
 
-            token_edited = ''.join(ch for ch in token if ch not in exclude)
+            loc_name = sub_query_tokens[idx]
 
-            # if the token is for sure misspilled
-            if  token not in env.extended_words3 and \
-                token_edited not in env.extended_words3:
+            sub_query_tokens[idx] = [sub_query_tokens[idx]]
 
-                sub_query_tokens[idx] = [token]
+            # expand the token into the full name without abbreviations.
+            # Ex=> rd to road
+            token_exp = env.streets_suffixes_dict.get(loc_name)
+            if token_exp and token_exp not in sub_query_tokens[idx]:
+                sub_query_tokens[idx].append(token_exp)
 
-                # expand the token into the full name without abbreviations.
-                # Ex=> rd to road
-                token_exp = env.streets_suffixes_dict.get(token)
-                if token_exp and token_exp not in sub_query_tokens[idx]:
-                    sub_query_tokens[idx].append(token_exp)
-
-            # do not expand the word if it is not misspilled
-            else:
-
-                loc_name = sub_query_tokens[idx]
-
-                sub_query_tokens[idx] = [sub_query_tokens[idx]]
-
-                # expand the token into the full name without abbreviations.
-                # Ex=> rd to road
-                token_exp = env.streets_suffixes_dict.get(loc_name)
-                if token_exp and token_exp not in sub_query_tokens[idx]:
-                    sub_query_tokens[idx].append(token_exp)
-
-                sub_query_tokens[idx] = list(set(sub_query_tokens[idx]))
-
+            sub_query_tokens[idx] = list(set(sub_query_tokens[idx]))
 
             # ------------------------------------------------------------------
 
@@ -767,7 +744,7 @@ def remove_non_full_mentions(filtered_n_grams, valid_ngrams, query_tokens):
 class init_Env(object):
     '''Where all the gazetteer data, dictionaries and language model resides'''
 
-    def __init__(self, geo_locations, extended_words3):
+    def __init__(self, geo_locations):
         '''Initialized the system using the location names and list of english
         words (words3)'''
 
@@ -805,15 +782,6 @@ class init_Env(object):
 
         self.gazetteer_unique_names_set = set(self.gazetteer_unique_names.keys())
 
-        # NOTE BLACKLIST CODE GOES HERE
-
-        # this list has all the english words in addition to the names
-        # from the combined gazetteer, any word not in the list is
-        # considered misspilled.
-
-        self.extended_words3 = extended_words3
-        self.extended_words3 = set(self.extended_words3)
-
         ########################################################################
 
         streets_suffixes_dict_file = dicts_dir + "streets_suffixes_dict.json"
@@ -832,16 +800,13 @@ class init_Env(object):
         # list of unigrams
         unigrams = list(self.glm.unigrams["words"].keys())
 
-        self.stopwords_notin_gazetteer = set(
-            self.extended_words3) - set(unigrams)
-
 ################################################################################
 
-def initialize(geo_locations, extended_words3, capital_word_shape):
+def initialize(geo_locations, capital_word_shape):
     '''Initializing the system here'''
 
     print ("Initializing LNEx ...")
-    g_env = init_Env(geo_locations, extended_words3)
+    g_env = init_Env(geo_locations)
     set_global_env(g_env)
 
     # use the capitalization orthographic feature

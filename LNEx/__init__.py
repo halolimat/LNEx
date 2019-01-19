@@ -21,10 +21,10 @@ __all__ = [ 'initialize_using_files',
 
 ################################################################################
 
-def initialize_using_files(geo_locations, extended_words3, capital_word_shape=False):
+def initialize_using_files(geo_locations, capital_word_shape=False):
     """Initialize LNEx using files in _Data without using the elastic index"""
 
-    core.initialize(geo_locations, extended_words3, capital_word_shape)
+    core.initialize(geo_locations, capital_word_shape)
 
 ################################################################################
 
@@ -33,12 +33,11 @@ def initialize(bb, augmentType, cache, dataset_name, capital_word_shape=False):
 
     geo_locations = None
     geo_info = None
-    extended_words3 = None
 
     while geo_info is None:
         try:
             # retrieve the records from OSM based on the passed bb
-            geo_locations, geo_info, extended_words3 =  osm_gazetteer.build_bb_gazetteer(bb, augmentType)
+            geo_locations, geo_info =  osm_gazetteer.build_bb_gazetteer(bb, augmentType)
         except elasticsearch.exceptions.ConnectionTimeout:
             pass
 
