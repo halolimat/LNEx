@@ -531,11 +531,12 @@ def extract(tweet):
                 for y in value: # ----------------------------------------------
 
                     # if the unigram is an actual full location name
-                    if y in env.gazetteer_unique_names_set:
-                        if max_prob_reco[1] < len(
-                                env.gazetteer_unique_names[y]):
-                            max_prob_reco = (
-                                y, len(env.gazetteer_unique_names[y]))
+                    if y in env.gazetteer_unique_names_set and \
+                       max_prob_reco[1] < len(env.gazetteer_unique_names[y]):
+                       max_prob_reco = (y, len(env.gazetteer_unique_names[y]))
+
+                       print(len(env.gazetteer_unique_names[y]))
+                       exit()
 
                 # --------------------------------------------------------------
 
@@ -578,16 +579,13 @@ def extract(tweet):
         location_mention = tweet[mention_offsets[0]:mention_offsets[1]]
         geo_location = ln[1]
 
-        geo_info_ids = env.gazetteer_unique_names[ln[1]]
-
         # ignore location names that are not capitalized
         if cap_word_shape and location_mention[:1] != location_mention[:1].upper():
             continue
 
         result.append(( location_mention,
                         mention_offsets,
-                        geo_location,
-                        geo_info_ids))
+                        geo_location))
 
     return result
 

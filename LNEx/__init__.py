@@ -42,7 +42,7 @@ def initialize(bb, augmentType, cache, dataset_name, capital_word_shape=False):
             pass
 
     # initialize LNEx using the retrieved (possible augmented) location names
-    core.initialize(geo_locations, extended_words3, capital_word_shape)
+    core.initialize(geo_locations, capital_word_shape)
 
     if cache:
 
@@ -56,8 +56,6 @@ def initialize(bb, augmentType, cache, dataset_name, capital_word_shape=False):
             json.dump(geo_locations, f)
         with open(folder_abs_path+"/"+dataset_name+"_geo_info.json", "w") as f:
             json.dump(geo_info, f)
-        with open(folder_abs_path+"/"+dataset_name+"_extended_words3.json", "w") as f:
-            json.dump(extended_words3, f)
 
     return geo_info
 

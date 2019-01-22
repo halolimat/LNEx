@@ -99,15 +99,10 @@ class GazBasedModel(object):
         self.unigrams = defaultdict(int)
 
         for ln in geo_locations:
-
-            number_of_mentions = len(geo_locations[ln])
-
             n_gram = ln.split()
+            gaz_n_grams.extend([n_gram])
 
-            new_list = [n_gram] * number_of_mentions
-
-            gaz_n_grams.extend(new_list)
-
+            # TODO: see if the for loop is needed since we don't have frequences anymore
             for token in n_gram:
                 words_count += 1
                 self.unigrams[token] += 1
