@@ -383,7 +383,9 @@ def extract(tweet):
     # we will call a tweet from now onwards a query
     query = str(tweet.lower())
 
-    preprocessed_query = preprocess_tweet(query)
+    # TODO: pass this as parameter in order to avoid for grammatical texts!
+    # preprocessed_query = preprocess_tweet(query)
+    preprocessed_query = query
 
     query_tokens = align_and_split(query, preprocessed_query)
 
