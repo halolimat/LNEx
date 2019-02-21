@@ -135,6 +135,14 @@ $ vagrant destroy
 
 Note: If you need to start over you can simply use `vagrant destroy --force` to delete the containers and then use `vagrant up` to recreate them.
 
+Note: You may need to change your group_vars/all file to reflect correct IPs or ports. You can make these changes take effect after you execute the playbook.
+
+```sh
+$ . ./lnex-env
+$ cd ../ansible
+$ ansible-playbook codebase.yml
+```
+
 ### What's Next?
 
 * [LNExAPI Server Guide](LNExAPIServer.md)

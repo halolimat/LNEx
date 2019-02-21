@@ -39,6 +39,16 @@ Example Request
 }
 ```
 
+Actual curl examples of init zone, extracting data, and destroying zone
+
+```sh
+curl -g "http://192.168.113.2/apiv1/LNEx/initZone?key=16911b06722f6c9682&bb=[-84.5852,40.4366,-83.6201,40.9412]&zone=Lima"
+curl "http://192.168.113.2/apiv1/LNEx/zoneReady?key=16911b06722f6c9682&zone=Lima"
+curl -XPOST "http://192.168.113.2/apiv1/LNEx/fullBulkExtract?key=16911b06722f6c9682&zone=Lima" -H 'Content-Type: application/json' -d'{"data":["2nd street"]}'
+curl "http://192.168.113.2/apiv1/LNEx/results?key=16911b06722f6c9682&token=16911b7f8ff830a8d9"
+curl "http://192.168.113.2/apiv1/LNEx/destroyZone?key=16911b06722f6c9682&zone=Lima"
+```
+
 ### Logs 
 
 Logs for the LNExAPI Server can be found within the LNEx-api container under /var/log/LNEx.log.
