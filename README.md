@@ -101,7 +101,7 @@ $ cd LNEx/local
 Create a docker network for the deployment:
 
 ```sh
-$ docker network create --subnet 192.168.67.0/24 dr
+$ docker network create --subnet 192.168.67.0/24 lnex
 ```
 
 Create the Base Image:

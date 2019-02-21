@@ -74,7 +74,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
           d.force_host_vm = false
         end
         d.create_args = vm[:create_args] || []
-        d.create_args += ['--net=dr']
+        d.create_args += ['--net=lnex']
         d.create_args += vm[:memlimit]
       end
 
