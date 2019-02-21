@@ -4,7 +4,7 @@ FROM phusion/baseimage
 # Enable SSH
 RUN rm -f /etc/service/sshd/down
 
-ADD DisasterRecord.pub /root/.ssh/authorized_keys
+ADD LNEx.pub /root/.ssh/authorized_keys
 RUN chmod 0600 /root/.ssh/authorized_keys
 
 # Install oracle java 8
