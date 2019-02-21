@@ -1,0 +1,4 @@
+---
+
+- name: restart redis
+  runit: service_dir=/etc/service/ service_src=/etc/sv/ name=redis-server state=restarted

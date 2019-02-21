@@ -1,0 +1,74 @@
+---
+
+- name: Check if LNEx Exists
+  stat:
+    path: ~/workspace/LNEx/README.md
+  register: LNEx_init
+
+- name: Check if LNEx VE Exists
+  stat:
+    path: ~/workspace/LNEx/bin/activate
+  register: LNExVE_init
+
+- name: Clone LNEx
+  git:
+    repo: https://github.com/halolimat/LNEx.git
+    dest: ~/workspace/LNEx
+    version: LNExAPI-Core
+  when: LNEx_init.stat.exists == False
+
+- name: Create LNEx virtualenv
+  command: virtualenv ~/workspace/LNEx -p python3
+  when: LNExVE_init.stat.exists == False
+
+- name: Copy fixed requirements.txt file to ~/workspace/LNEx
+  copy: src=LNEx/requirements.txt dest=~/workspace/LNEx/requirements.txt owner=root group=root mode=0644
+  when: LNEx_init.stat.exists == False
+
+- name: Install LNEx dependencies
+  pip: 
+    requirements: ~/workspace/LNEx/requirements.txt
+    virtualenv: ~/workspace/LNEx
+  when: LNEx_init.stat.exists == False
+
+- name: Copy LNExEnv wrapper to ~/workspace/LNEx
+  copy: src=LNExEnv dest=~/workspace/LNEx/LNExEnv owner=root group=root mode=0755
+
+
+- name: Install Requests
+  pip: 
+    name: requests
+    virtualenv: ~/workspace/LNEx
+
+
+# COPY LNEx REPLACEMENT CODE
+
+- name: Copy fixed setup.py file to ~/workspace/LNEx
+  copy: src=LNEx/setup.py dest=~/workspace/LNEx/setup.py owner=root group=root mode=0644
+
+- name: Copy fixed pytest.py file to ~/workspace/LNEx
+  copy: src=LNEx/pytest.py dest=~/workspace/LNEx/pytest.py owner=root group=root mode=0644
+
+- name: Copy fixed initLoader.py file to ~/workspace/LNEx
+  copy: src=LNEx/initLoader.py dest=~/workspace/LNEx/initLoader.py owner=root group=root mode=0644
+
+- name: Copy fixed query.py file to ~/workspace/LNEx
+  copy: src=LNEx/query.py dest=~/workspace/LNEx/query.py owner=root group=root mode=0644
+
+- name: Copy fixed osm_gazetteer.py file to ~/workspace/LNEx/LNEx
+  copy: src=LNEx/osm_gazetteer.py dest=~/workspace/LNEx/LNEx/osm_gazetteer.py owner=root group=root mode=0644
+
+- name: Copy fixed __init__.py file to ~/workspace/LNEx/LNEx
+  copy: src=LNEx/__init__.py dest=~/workspace/LNEx/LNEx/__init__.py owner=root group=root mode=0644
+
+- name: Copy cli.py file to ~workspace/LNEx
+  copy: src=LNEx/cli.py dest=~/workspace/LNEx/cli.py owner=root group=root mode=0644
+
+- name: Copy geoInfo.py file to ~workspace/LNEx
+  copy: src=LNEx/geoInfo.py dest=~/workspace/LNEx/geoInfo.py owner=root group=root mode=0644
+
+- name: Copy queryBulk.py file to ~workspace/LNEx
+  copy: src=LNEx/queryBulk.py dest=~/workspace/LNEx/queryBulk.py owner=root group=root mode=0644
+
+- name: Copy fullQueryBulk.py file to ~workspace/LNEx
+  copy: src=LNEx/fullQueryBulk.py dest=~/workspace/LNEx/fullQueryBulk.py owner=root group=root mode=0644

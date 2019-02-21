@@ -1,0 +1,7 @@
+---
+
+- debug:
+    msg: "Hello World"
+
+- debug:
+    msg: "{{ hostvars }}"

@@ -1,0 +1,29 @@
+#! /bin/sh
+
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+DAEMON=/usr/bin/redis-server
+DAEMON_ARGS=/etc/redis/redis.conf
+NAME=redis-server
+DESC=redis-server
+
+RUNDIR=/var/run/redis
+
+if [ -r /etc/default/$NAME ]
+then
+	. /etc/default/$NAME
+fi
+
+set -e
+
+echo -n "Starting $DESC: "
+mkdir -p $RUNDIR
+chown redis:redis $RUNDIR
+chmod 755 $RUNDIR
+
+if [ -n "$ULIMIT" ]
+then
+	ulimit -n $ULIMIT
+fi
+
+exec 2>&1
+exec chpst -uredis $DAEMON $DAEMON_ARGS

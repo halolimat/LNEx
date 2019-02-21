@@ -1,0 +1,14 @@
+---
+
+#- hosts: all
+#  gather_facts: False
+#  
+#  tasks:
+#  - name: install python 2
+#    raw: sudo bash -c "test -e /usr/bin/python || (apt -qqy update && apt install -qy python-minimal)"
+#    become: true
+
+- import_playbook: facts.yml
+- import_playbook: hosts.yml
+- import_playbook: provision.yml
+#- include: deploy.yml

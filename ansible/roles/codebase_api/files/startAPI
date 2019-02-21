@@ -1,0 +1,5 @@
+#!/bin/bash
+cd /root/workspace/api/api
+/root/workspace/api/apiEnv python -u manage.py runserver 0:80 >> /var/log/LNEx.log 2>&1 &
+FOO_PID=$!
+echo $FOO_PID > /root/lnexService.pid

@@ -1,0 +1,36 @@
+---
+
+- name: Install redis
+  apt: name=redis-server state=present update_cache=yes
+  register: installed
+
+- name: Stop the default redis-server service
+  service: name=redis-server state=stopped
+  when: installed is changed
+  notify: restart redis
+
+- name: Remove default redis-server init scripts
+  file: path={{ item }} state=absent
+  when: installed is changed
+  notify: restart redis
+  with_items:
+    - /etc/systemd/system/redis.service
+    - /etc/init.d/redis-server
+
+- name: Generate Redis config file
+  template: src=redis.conf.j2 dest=/etc/redis/redis.conf owner=redis group=redis mode=0644
+  notify: restart redis
+
+- name: Create redis-server runit directory
+  file: path=/etc/sv/redis-server owner=root group=root mode=0755 state=directory
+
+- name: Copy redis-server run script to /etc/sv
+  copy: src=run dest=/etc/sv/redis-server owner=root group=root mode=0755
+
+- name: Link redis-server to /etc/service
+  file: src=/etc/sv/redis-server path=/etc/service/redis-server state=link
+  register: service
+
+- name: Pause to let runit pick up the new service
+  pause: seconds=5
+  when: service is changed

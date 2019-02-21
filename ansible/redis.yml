@@ -1,0 +1,12 @@
+---
+
+- hosts: all
+  tasks: []
+
+- name: Install and configure Redis
+  hosts: redis
+  become: yes
+  roles:
+    - redis
+  tags:
+    - redis

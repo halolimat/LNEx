@@ -1,0 +1,12 @@
+#!/bin/bash
+pid=$(cat /root/lnexService.pid)
+while true; do
+  cpid=$(pgrep -P $pid)
+  if [[ $cpid ]]; then
+    pid=$cpid
+  else
+    break
+  fi
+done
+echo $pid
+kill $pid

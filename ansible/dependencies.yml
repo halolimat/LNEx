@@ -1,0 +1,20 @@
+---
+
+- hosts: all
+  tasks: []
+
+- name: Install common dependencies
+  hosts: all
+  become: yes
+  roles:
+    - all-dependencies
+  tags:
+    - all-dependencies
+
+- name: Install api dependencies
+  hosts: api
+  become: yes
+  roles:
+    - api-dependencies
+  tags:
+    - api-dependencies

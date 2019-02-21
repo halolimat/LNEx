@@ -1,0 +1,36 @@
+---
+
+- hosts: all
+  tasks: []
+
+- name: Create workspace
+  hosts: api
+  become: yes
+  roles:
+    - codebase_common
+  tags:
+    - codebase_common
+
+- name: Setup LNEx
+  hosts: api
+  become: yes
+  roles:
+    - codebase_lnex
+  tags:
+    - codebase_lnex
+
+#- name: Setup DisasterRecord
+#  hosts: api
+#  become: yes
+#  roles:
+#    - codebase_dr
+#  tags:
+#    - codebase_dr
+
+- name: Setup API
+  hosts: api
+  become: yes
+  roles:
+    - codebase_api
+  tags:
+    - codebase_api

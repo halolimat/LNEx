@@ -1,0 +1,4 @@
+#!/bin/bash
+
+cd /root/workspace/LNEx
+/root/workspace/LNEx/LNExEnv python /root/workspace/LNEx/cli.py $@

@@ -1,0 +1,11 @@
+---
+
+- name: Install dependencies
+  apt:
+    name: "{{ packages }}"
+    state: present
+    update_cache: yes
+  vars:
+    packages:
+      - iputils-ping
+      - git

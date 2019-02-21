@@ -1,0 +1,6 @@
+---
+
+- name: Create workspace directory
+  file:
+    path: ~/workspace
+    state: directory

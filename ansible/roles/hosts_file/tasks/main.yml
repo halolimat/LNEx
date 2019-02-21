@@ -1,0 +1,7 @@
+---
+
+#- name: Generate /etc/hosts file with all hostnames in inventory
+#  template: src=hosts.j2 dest=/etc/hosts owner=root group=root mode=0644
+
+- debug:
+    msg: "Hello World"

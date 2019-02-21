@@ -1,0 +1,4 @@
+---
+
+- name: Install runit
+  apt: name=runit state=latest update_cache=yes

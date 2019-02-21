@@ -1,0 +1,10 @@
+---
+environment_name: local
+
+# relative to playbook
+build_root: ../../
+
+hostip: 192.168.0.8
+
+photonip: 130.108.86.153
+photonport: 9201

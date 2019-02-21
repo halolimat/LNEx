@@ -1,0 +1,10 @@
+---
+
+- name: Gather facts about all hosts
+  hosts: all
+  tasks:
+    - name: No-op
+      action: setup
+      when: False
+  tags:
+    - facts

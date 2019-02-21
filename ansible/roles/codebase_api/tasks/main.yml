@@ -1,0 +1,137 @@
+---
+
+- name: Check if api Exists
+  stat:
+    path: ~/workspace/api/apiEnv
+  register: api_init
+
+- name: Check if api VE Exists
+  stat:
+    path: ~/workspace/api/bin/activate
+  register: apiVE_init
+
+- name: Create api directory
+  file:
+    path: ~/workspace/api
+    state: directory
+  when: api_init.stat.exists == False
+
+- name: Create api virtualenv
+  command: virtualenv ~/workspace/api
+  when: apiVE_init.stat.exists == False
+
+- name: Install Django
+  pip: 
+    name: Django
+    virtualenv: ~/workspace/api
+
+- name: Install Redis
+  pip: 
+    name: redis
+    virtualenv: ~/workspace/api
+
+- name: Install Requests
+  pip:
+    name: requests
+    virtualenv: ~/workspace/api
+
+- name: Copy apiEnv wrapper to ~/workspace/api
+  copy: src=apiEnv dest=~/workspace/api/apiEnv owner=root group=root mode=0755
+
+# Django setup
+
+- name: Check if api Django project exists
+  stat:
+    path: ~/workspace/api/api/manage.py
+  register: django_init
+
+- name: Create new project
+  command: ~/workspace/api/apiEnv django-admin startproject api chdir=~/workspace/api
+  when: django_init.stat.exists == False
+
+- name: Create new apiv1 app
+  command: ~/workspace/api/apiEnv python manage.py startapp apiv1 chdir=~/workspace/api/api
+  when: django_init.stat.exists == False
+
+- name: Generate settings.py
+  template: src=settings.py.j2 dest=~/workspace/api/api/api/settings.py owner=root group=root mode=0644
+
+- name: Init Migrate
+  command: ~/workspace/api/apiEnv python manage.py migrate chdir=~/workspace/api/api
+  when: django_init.stat.exists == False
+
+- name: Copy api/api/urls.py file to ~workspace/api/api/api
+  copy: src=api/api/urls.py dest=~/workspace/api/api/api/urls.py owner=root group=root mode=0644
+
+- name: Copy api/apiv1/urls.py file to ~workspace/api/api/apiv1
+  copy: src=api/apiv1/urls.py dest=~/workspace/api/api/apiv1/urls.py owner=root group=root mode=0644
+
+#- name: Copy api/apiv1/views.py file to ~workspace/api/api/apiv1
+#  copy: src=api/apiv1/views.py dest=~/workspace/api/api/apiv1/views.py owner=root group=root mode=0644
+- name: Generate views.py
+  template: src=api/apiv1/views.py.j2 dest=~/workspace/api/api/apiv1/views.py owner=root group=root mode=0644
+
+- name: Copy DRDB.py file to ~workspace/api/api/apiv1
+  copy: src=DRDB.py dest=~/workspace/api/api/apiv1/DRDB.py owner=root group=root mode=0644
+
+- name: Copy JobQueue.py file to ~workspace/api/api/apiv1
+  copy: src=JobQueue.py dest=~/workspace/api/api/apiv1/JobQueue.py owner=root group=root mode=0644
+
+# DB
+
+- name: Copy initDB.py file to ~workspace/api/api/apiv1
+  copy: src=initDB.py dest=~/workspace/api/api/apiv1/initDB.py owner=root group=root mode=0644
+
+- name: init DB
+  command: ~/workspace/api/apiEnv python initDB.py chdir=~/workspace/api/api/apiv1
+
+- name: Copy startAPI file to ~
+  copy: src=startAPI dest=~ owner=root group=root mode=755
+
+- name: Copy killAPI file to ~
+  copy: src=killAPI dest=~ owner=root group=root mode=755
+
+- name: Copy LNExHC file to /etc/cron.hourly
+  copy: src=LNExHC dest=/etc/cron.hourly/LNExHC owner=root group=root mode=755
+
+- name: Copy LNExDB.py file to ~/workspace/LNEx
+  copy: src=LNExDB.py dest=~/workspace/LNEx/LNExDB.py owner=root group=root mode=0755
+
+- name: Copy LNEx/LNExLocal file to ~/workspace/LNEx
+  copy: src=LNEx/LNExLocal dest=~/workspace/LNEx/LNExLocal owner=root group=root mode=0755
+
+- name: Copy LNExCLI file to ~
+  copy: src=LNExCLI dest=~ owner=root group=root mode=0755
+
+- name: Copy safetyChecker.py file to ~/workspace/LNEx
+  copy: src=safetyChecker.py dest=~/workspace/LNEx/safetyChecker.py owner=root group=root mode=0644
+
+- name: Copy startSafetyCheck file to ~
+  copy: src=startSafetyCheck dest=~/startSafetyCheck owner=root group=root mode=0755
+
+- name: Copy killSafetyCheck file to ~
+  copy: src=killSafetyCheck dest=~/killSafetyCheck owner=root group=root mode=0755
+
+- name: Create symbolic link for DRDB in LNEx
+  file:
+    src: "/root/workspace/api/api/apiv1/DRDB.py"
+    dest: "/root/workspace/LNEx/DRDB.py"
+    state: link
+
+- name: Create symbolic link for DRDB in LNEx/LNEx
+  file:
+    src: "/root/workspace/api/api/apiv1/DRDB.py"
+    dest: "/root/workspace/LNEx/LNEx/DRDB.py"
+    state: link
+
+- name: Create symbolic link for JobQueue in LNEx/LNEx
+  file:
+    src: "/root/workspace/api/api/apiv1/JobQueue.py"
+    dest: "/root/workspace/LNEx/JobQueue.py"
+    state: link
+
+#- name: Create symbolic link for DRDB in DisasterRecord
+#  file:
+#    src: "/root/workspace/api/api/apiv1/DRDB.py"
+#    dest: "/root/workspace/DisasterRecord/DRDB.py"
+#    state: link

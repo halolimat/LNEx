@@ -1,0 +1,3 @@
+#!/bin/bash
+
+/root/workspace/LNEx/LNExEnv python /root/workspace/LNEx/LNExDB.py $@

@@ -1,0 +1,3 @@
+#!/bin/bash
+source /root/workspace/api/bin/activate
+$@

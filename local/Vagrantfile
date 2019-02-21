@@ -1,0 +1,107 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+module OS
+  def OS.windows?
+    (/cygwin|mswin|mingw|bccwin|wince|emx/ =~ RUBY_PLATFORM) != nil
+  end
+  def OS.mac?
+    (/darwin/ =~ RUBY_PLATFORM) != nil
+  end
+  def OS.unix?
+    !OS.windows?
+  end
+  def OS.linux?
+    OS.unix? and not OS.mac?
+  end
+end
+
+ANSIBLE_VERBOSE = false
+ANSIBLE_PLAYBOOK_PATH = ENV['ANSIBLE_PLAYBOOK_PATH'] || "../ansible/site.yml"
+
+ROOT_DIR = "../.."
+
+# Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
+VAGRANTFILE_API_VERSION = "2"
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+
+  config.ssh.private_key_path = "./LNEx.pem"
+  config.ssh.username = "root"
+  # disable Vagrant's default synced folder
+  config.vm.synced_folder '.', '/vagrant', disabled: true
+
+  vms = [{
+    :name => "LNEx-api",
+    :groups => ["api"],
+    :expose => [80, 8000],
+    :ports => ["80:80", "8000:8000"],
+    :memlimit => ['--memory=4g']
+  }, {
+    :name => "LNEx-redis",
+    :groups => ["redis"],
+    :expose => [6379],
+    :memlimit => ['--memory=3g']
+  }]
+
+  groups = {}
+
+  vms.each_with_index do |vm, i|
+
+    name = vm[:name]
+    # add to group -> machines map
+    vm[:groups].each do |group|
+      groups[group] ||= []
+      groups[group] << name
+    end
+    config.vm.define name do |m|
+      m.vm.hostname = name
+      # m.ssh.host = name
+      if OS.mac?
+        m.vm.network "forwarded_port", guest: 22, host: 2200 + i, id: 'ssh'
+        m.ssh.host = "localhost"
+        m.ssh.port = 2200 + i
+      end 
+
+      m.vm.provider "docker" do |d|
+        d.name = name
+        # d.build_dir = "."
+        d.image = "lnex/lnex_base"
+        d.expose = vm[:expose] || []
+        d.ports = vm[:ports] || []
+        d.has_ssh = true
+        if OS.mac?
+          d.force_host_vm = false
+        end
+        d.create_args = vm[:create_args] || []
+        d.create_args += ['--net=dr']
+        d.create_args += vm[:memlimit]
+      end
+
+      vm[:synced_folders].each do |folder|
+        m.vm.synced_folder folder[:host], folder[:container], owner: folder[:owner], group: folder[:group]
+      end unless vm[:synced_folders].nil?
+
+      # only provision after last container is created since our playbook covers all hosts
+      if i == vms.size - 1
+
+        # always run hosts playbook so all hosts have correct DNS
+        m.vm.provision "ansible", run: "always" do |ansible|
+          ansible.playbook = "../ansible/site.yml"
+          ansible.tags = "hosts_file"
+          ansible.limit = "all"
+          ansible.groups = groups
+        end
+
+        m.vm.provision "ansible" do |ansible|
+          ansible.playbook = ANSIBLE_PLAYBOOK_PATH
+          ansible.tags = ANSIBLE_TAGS if defined? ANSIBLE_TAGS
+          ansible.groups = groups
+          ansible.limit = "all"
+          ansible.verbose = "vvvv" if ANSIBLE_VERBOSE
+          ansible.extra_vars = ANSIBLE_EXTRA_VARS if defined? ANSIBLE_EXTRA_VARS
+        end
+      end
+    end
+  end
+end

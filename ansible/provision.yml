@@ -1,0 +1,5 @@
+---
+
+- import_playbook: dependencies.yml
+- import_playbook: redis.yml
+- import_playbook: codebase.yml

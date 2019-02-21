@@ -1,0 +1,8 @@
+wordsegment
+shapely
+nltk
+elasticsearch
+elasticsearch_dsl
+geopy
+redis
+dill

@@ -1,0 +1,5 @@
+#!/bin/bash
+cd /root/workspace/LNEx
+/root/workspace/api/apiEnv python safetyChecker.py >> /var/log/LNEx.log 2>&1 &
+FOO_PID=$!
+echo $FOO_PID > /root/safetyChecker.pid
