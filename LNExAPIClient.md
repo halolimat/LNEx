@@ -9,25 +9,35 @@ LNExAPI Client is a Python 3 package that includes functions to interact with th
 
 ### Example Use 
 
-Open a Python3 interpreter and issue the following commands.
+Example below shows how to create a zone and extract locations.
 
-```
->>> from LNExAPI import LNExAPI
->>> lnex = LNExAPI("168ba4d297a8c64a03")  #REPLACE WITH YOUR USER KEY
->>> lnex.initZone([-84.6447033333,39.1912856591,-83.2384533333,40.0880515857],"dayton")
->>> lnex.zoneReady("dayton")
->>> text=[
+```python
+from LNExAPI import LNExAPI
+
+def displayResults(results):
+  for result in results:
+    print("Matches for:",result['text'])
+    for entity in result['entities']:
+      print("[ ]-->",entity['match'])
+      for location in entity['locations']:
+        print("   [ ]-->",str(location['coordinate']['lat'])+","+str(location['coordinate']['lon']))
+
+lnex = LNExAPI("168ba4d297a8c64a03", host="http://127.0.0.1/") #REPLACE WITH YOUR USER KEY
+lnex.initZone([-84.6447033333,39.1912856591,-83.2384533333,40.0880515857],"dayton")
+print("Zone Dayton is being initialized...")
+lnex.pollZoneReady("dayton") #WAITS UNTIL ZONE IS INIT/READY
+
+text=[
   "Your text goes here:",
   "A list of text in which locations will be searched for...",
   "A list of the same size will be returned once you execute a doBulkExtract on the text list",
-  "Each item in the returned list will be a list of the entities that matched",
-]
->>> o=lnex.doBulkExtract("dayton",text)
->>> for r in o:
-...   print(r)
->>> exit()
+  "Each item in the returned list will be a list of the entities that matched",]
+
+print("Extracting locations from Dayton Zone...")
+result_token,results=lnex.pollFullBulkExtract("dayton",text)
+displayResults(results)
 ```
 Other functions that can be useful are documented in the [LNExAPI.py](client/LNExAPI/LNExAPI/LNExAPI.py) class file.
-### DisasterRecord-Deployment
+### LNEx-Deployment
 
 [Back to main Readme](README.md)

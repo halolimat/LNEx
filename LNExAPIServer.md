@@ -20,6 +20,6 @@ To create a user and activate them please issue the following commands:
 
 Logs for the LNExAPI Server can be found within the DR-api container under /var/log/LNEx.log.
 
-### DisasterRecord-Deployment
+### LNExAPI-Deployment
 
 [Back to main Readme](README.md)
