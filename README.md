@@ -4,7 +4,7 @@ LNExAPI is a tool used to extract location names from text. This branch offers a
 
 The installation process requires 3 stages: Provision, Configuration, Launch.
 
-Once the installation is complete you can create a LNExAPI user and utilze the LNExAPI client Python package to interact with the API.
+Once the installation is complete you can create a LNExAPI user and utilize the LNExAPI client Python package to interact with the API.
 
 ### Technology
 
@@ -76,25 +76,23 @@ __RECOMMENDED: [RESTART FOR DESKTOP ] OR [LOG OUT / LOG IN FOR OPENSTACK]__
 __NOTE: YOUR USER WON'T JOIN THE DOCKER GROUP UNTIL DOING ONE OF THESE__  
 
 [Ansible Install Guides For Ubuntu](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html#latest-releases-via-apt-ubuntu)
-### Launch
+### Configure Installation
 
 Now it's time to clone this repo and begin setting up the environment
-
-##### Configuration
-
-There are a couple of variables specific to your deployment of LNExAPI that will need to be set. These variables are found in the [group_vars/all](ansible/environments/dev-local/group_vars/all) file. The variables are explained as follows:
-
-* hostip - This is the IP of the host where the docker containers will be hosted. This is used in the configuration file for the [LNExAPI Server Django application](ansible/roles/codebase_api/templates/settings.py.j2). Setups may vary as to how HTTP requests are handled and passed to the container. If you have a web server such as Apache or Nginx handle the connections and ProxyPass them the IP will be a host where the ProxyPass is being directed. Check the /var/log/LNEx.log file for errors if you can not connect to the LNExAPI after deployment and start.
-* photonip - This is the IP address where your [Photon OSM](https://github.com/komoot/photon) deployment is located.
-* photonport - This is the port that your [Photon OSM](https://github.com/komoot/photon) deployment uses.
-
-##### Init Setup:
 
 Clone
 
 ```sh
 $ git clone --single-branch --branch LNExAPI-Deployment https://github.com/halolimat/LNEx.git
 ```
+
+##### group_vars/all
+
+There are a couple of variables specific to your deployment of LNExAPI that will need to be set. These variables are found in the [group_vars/all](ansible/environments/dev-local/group_vars/all) file. The variables are explained as follows:
+
+* hostip - This is the IP of the host where the docker containers will be hosted. This is used in the configuration file for the [LNExAPI Server Django application](ansible/roles/codebase_api/templates/settings.py.j2). Setups may vary as to how HTTP requests are handled and passed to the container. If you have a web server such as Apache or Nginx handle the connections and ProxyPass them the IP will be a host where the ProxyPass is being directed. Check the /var/log/LNEx.log file for errors if you can not connect to the LNExAPI after deployment and start.
+* photonip - This is the IP address where your [Photon OSM](https://github.com/komoot/photon) deployment is located.
+* photonport - This is the port that your [Photon OSM](https://github.com/komoot/photon) deployment uses.
 
 Once you have cloned the repo and set the variables please navigate to "local" directory
 
@@ -113,6 +111,8 @@ Create the Base Image:
 ```sh
 $ docker build -t lnex/lnex_base .
 ```
+
+### Launch Installation
 
 Bring up the environment (this may take around 5 minutes or more):
 
@@ -143,7 +143,7 @@ $ cd ../ansible
 $ ansible-playbook codebase.yml
 ```
 
-### What's Next?
+### How To Use LNExAPI
 
 * [LNExAPI Server Guide](LNExAPIServer.md)
 * [LNExAPI Client Guide](LNExAPIClient.md)
