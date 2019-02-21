@@ -15,8 +15,8 @@ import sys
 import random
 import time
 
-r=redis.Redis(host='DR-redis')
-jq=JobQueue("jobqueue",host='DR-redis')
+r=redis.Redis(host='LNEx-redis')
+jq=JobQueue("jobqueue",host='LNEx-redis')
 
 def genRandKey():
   millis = int(round(time.time() * 1000))

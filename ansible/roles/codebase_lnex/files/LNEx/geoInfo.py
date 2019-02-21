@@ -3,12 +3,12 @@ import sys
 import redis
 from DRDB import DRDB
 import dill
-r = redis.Redis(host='DR-redis')
+r = redis.Redis(host='LNEx-redis')
 
 from subprocess import Popen, PIPE
 import os
 from JobQueue import JobQueue
-jq=JobQueue("jobqueue",host='DR-redis')
+jq=JobQueue("jobqueue",host='LNEx-redis')
 
 db=DRDB("/var/local/LNEx.db")
 args=sys.argv
@@ -19,7 +19,7 @@ geoIDs=geoIDs.split(",")
 resultKey=args[3]
 
 def HKRset(key,val,db):
-  r=redis.Redis(host='DR-redis')
+  r=redis.Redis(host='LNEx-redis')
   _pre="LNEx_"
   _key=str(_pre)+str(key)
   r.set(_key, val)
@@ -70,7 +70,7 @@ try:
 except:
   pass
 
-r=redis.Redis(host='DR-redis')
+r=redis.Redis(host='LNEx-redis')
 r.set("LNEx_ZONEINIT_ACTIVE", 0)
 
 if not jq.empty():

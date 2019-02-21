@@ -62,7 +62,7 @@ A=(PI/180.0)*math.pow(R,2)*X1*X2
 print("KM:",A)
 
 #import redis
-#r = redis.Redis(host='DR-redis')
+#r = redis.Redis(host='LNEx-redis')
 
 geo_info = init_using_elasticindex(bbs[dataset], cache=False, augmentType="HP", 
                                    dataset=dataset, capital_word_shape=False)

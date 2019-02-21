@@ -55,7 +55,7 @@ class DRDB:
     return f
 
   def create_zone_table(self):
-    r = redis.Redis(host='DR-redis')
+    r = redis.Redis(host='LNEx-redis')
     r.set("LNEx_ZONEINIT_ACTIVE", 0)
     cmd="CREATE TABLE IF NOT EXISTS zone (\
           id integer PRIMARY KEY,\
@@ -155,7 +155,7 @@ class DRDB:
         return False
 
   def delKey(self, key):
-    r = redis.Redis(host='DR-redis')
+    r = redis.Redis(host='LNEx-redis')
     r.delete(key)
 
 
@@ -244,7 +244,7 @@ class DRDB:
 
   def suspend_zone(self, zone):
     o = True
-    r = redis.Redis(host='DR-redis')
+    r = redis.Redis(host='LNEx-redis')
     try:
       r.delete("LNEx_"+str(name)+"_ready")
       r.delete("LNEx_"+str(name)+"_new_geo_locations")

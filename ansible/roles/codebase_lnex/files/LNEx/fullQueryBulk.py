@@ -5,13 +5,13 @@ sys.path.append("LNEx")
 import LNEx as lnex
 import redis
 from DRDB import DRDB
-r = redis.Redis(host='DR-redis')
+r = redis.Redis(host='LNEx-redis')
 print("query init")
 
 from subprocess import Popen, PIPE
 import os
 from JobQueue import JobQueue
-jq=JobQueue("jobqueue",host='DR-redis')
+jq=JobQueue("jobqueue",host='LNEx-redis')
 
 import traceback as tb
 
@@ -38,7 +38,7 @@ requests=json.loads(text)
 #print(user,name,text)
 
 def HKRset(key,val,db):
-  r=redis.Redis(host='DR-redis')
+  r=redis.Redis(host='LNEx-redis')
   _pre="LNEx_"
   _key=str(_pre)+str(key)
   r.set(_key, val)
@@ -145,7 +145,7 @@ else:
     HKRset(str(resultKey)+"_resultReady",1,db)
     print("...done")
 
-    r=redis.Redis(host='DR-redis')
+    r=redis.Redis(host='LNEx-redis')
     r.set("LNEx_ZONEINIT_ACTIVE", 0)
   except:
     var = tb.format_exc()

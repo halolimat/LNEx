@@ -104,14 +104,14 @@ try:
     help()
   elif args[1] == "reset":
     if args[2] == "system":
-      r = redis.Redis(host='DR-redis')
+      r = redis.Redis(host='LNEx-redis')
       r.flushdb()
       r.set("LNEx_ZONEINIT_ACTIVE", 0)
       db.clear_zone_table()
       db.clear_user_table()
       db.clear_housekeeping_table()
     if args[2] == "active":
-      r = redis.Redis(host='DR-redis')
+      r = redis.Redis(host='LNEx-redis')
       r.set("LNEx_ZONEINIT_ACTIVE", 0)
   else:
     print("unknown command: " + str(args[1]))

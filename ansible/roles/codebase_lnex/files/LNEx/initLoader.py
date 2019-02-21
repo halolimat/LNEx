@@ -9,7 +9,7 @@ from DRDB import DRDB
 from subprocess import Popen, PIPE
 import os
 from JobQueue import JobQueue
-jq=JobQueue("jobqueue",host='DR-redis')
+jq=JobQueue("jobqueue",host='LNEx-redis')
 
 def logit(text):
   with open("/var/log/LNEx.log", "a") as fp:
@@ -31,7 +31,7 @@ if zoneInfo:
 text=args[2]
 
 def HKRset(key,val,db):
-  r=redis.Redis(host='DR-redis')
+  r=redis.Redis(host='LNEx-redis')
   _pre="LNEx_"
   _key=str(_pre)+str(key)
   r.set(_key, val)
@@ -69,7 +69,7 @@ except:
   pass
 print("...done")
 
-r=redis.Redis(host='DR-redis')
+r=redis.Redis(host='LNEx-redis')
 r.set("LNEx_ZONEINIT_ACTIVE", 0)
 
 if not jq.empty():

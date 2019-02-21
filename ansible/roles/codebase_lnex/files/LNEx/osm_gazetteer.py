@@ -42,7 +42,7 @@ index_name = ""
 db=DRDB("/var/local/LNEx.db")
 
 def HKRset(key,val,db):
-  r=redis.Redis(host='DR-redis')
+  r=redis.Redis(host='LNEx-redis')
   _pre="LNEx_"
   _key=str(_pre)+str(key)
   r.set(_key, val)
@@ -213,7 +213,7 @@ def extract_text(obj):
 ################################################################################
 
 def is_cached(dataset_name):
-    r = redis.Redis(host='DR-redis')
+    r = redis.Redis(host='LNEx-redis')
     keys=[
         "LNEx_"+str(dataset_name)+"_new_geo_locations",
         "LNEx_"+str(dataset_name)+"_geo_info",
@@ -231,7 +231,7 @@ def build_bb_gazetteer(bb, augmentType, dataset_name, forceReload=False):
     '''Builds the gazetteer of a bounding box and agument it in case
     augmentation is activated. '''
 
-    r = redis.Redis(host='DR-redis')
+    r = redis.Redis(host='LNEx-redis')
     keys=[
         "LNEx_"+str(dataset_name)+"_new_geo_locations",
         "LNEx_"+str(dataset_name)+"_geo_info",

@@ -2,7 +2,7 @@ import subprocess
 import time
 import redis
 
-r=redis.Redis(host='DR-redis')
+r=redis.Redis(host='LNEx-redis')
 
 def isRunning(what):
 

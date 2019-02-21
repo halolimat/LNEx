@@ -6,7 +6,7 @@ sys.path.append("LNEx")
 import LNEx as lnex
 import redis
 from DRDB import DRDB
-r = redis.Redis(host='DR-redis')
+r = redis.Redis(host='LNEx-redis')
 print("query init")
 
 db=DRDB("/var/local/LNEx.db")
@@ -27,7 +27,7 @@ text=r.get("LNEx_"+str(resultKey)+"_queryText").decode('utf-8')
 #print(user,name,text)
 
 def HKRset(key,val,db):
-  r=redis.Redis(host='DR-redis')
+  r=redis.Redis(host='LNEx-redis')
   _pre="LNEx_"
   _key=str(_pre)+str(key)
   r.set(_key, val)
@@ -67,7 +67,7 @@ A=(PI/180.0)*math.pow(R,2)*X1*X2
 print("KM:",A)
 
 #import redis
-#r = redis.Redis(host='DR-redis')
+#r = redis.Redis(host='LNEx-redis')
 
 geo_info = init_using_elasticindex(bbs[dataset], cache=False, augmentType="HP", 
                                    dataset=dataset, capital_word_shape=False)
