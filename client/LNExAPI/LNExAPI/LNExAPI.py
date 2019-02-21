@@ -4,7 +4,7 @@ import json
 
 class LNExAPI:
 
-  def __init__(self,key,host="http://130.108.86.152/apiv1/LNEx/"):
+  def __init__(self,key,host):
     self.key=key
     self.host=host
 

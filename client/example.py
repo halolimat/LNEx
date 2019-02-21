@@ -10,7 +10,7 @@ def displayResults(results):
         print("   [ ]-->",str(location['coordinate']['lat'])+","+str(location['coordinate']['lon']))
 
 #give your key to init
-lnex = LNExAPI("168e8944cc2d86d7f7")
+lnex = LNExAPI(key="168e8944cc2d86d7f7",host="http://130.108.86.152/apiv1/LNEx/")
 
 #init a zone
 lnex.initZone([-84.6447033333,39.1912856591,-83.2384533333,40.0880515857],"dayton")
