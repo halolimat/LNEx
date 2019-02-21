@@ -6,7 +6,7 @@ class LNExAPI:
 
   def __init__(self,key,host):
     self.key=key
-    self.host=host
+    self.host=host+"apiv1/LNEx/"
 
   def initZone(self,bb,name):
     uri="initZone?key={}&bb=[{},{},{},{}]&zone={}".format(
