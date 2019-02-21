@@ -18,6 +18,27 @@ To create a user and activate them please issue the following commands:
 ./LNExCLI activate user <name>
 ```
 
+### Endpoint Examples
+
+* /apiv1/LNEx/initZone?key=xx&bb=[lon1,lat1,lon2,lat2]&zone=ZoneName
+* /apiv1/LNEx/destroyZone?key=xx&zone=ZoneName
+* /apiv1/LNEx/bulkExtract?key=xx&zone=ZoneName (Requires POST of JSON, example below)
+* /apiv1/LNEx/fullBulkExtract?key=xx&zone=ZoneName (Requires POST of JSON, example below)
+* /apiv1/LNEx/results?key=xx&token=yy
+* /apiv1/LNEx/geoInfo?key=xx&zone=ZoneName&geoIDs=[1,2,3]
+* /apiv1/LNEx/photonID?key=xx&osm_id=1
+* /apiv1/LNEx/zoneReady?key=xx&zone=ZoneName
+
+Example Request
+```json
+{
+	"data": [
+		"This is an example text",
+		"This is another example of text"
+	]
+}
+```
+
 ### Logs 
 
 Logs for the LNExAPI Server can be found within the LNEx-api container under /var/log/LNEx.log.

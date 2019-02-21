@@ -1,6 +1,10 @@
 # LNExAPI - Deployment
 
-LNExAPI is a tool used to extract location names from text. LNEx utilizes [Photon OSM](https://github.com/komoot/photon). Please ensure you have installed or have access to a deployment of Photon OSM.
+LNExAPI is a tool used to extract location names from text. This branch offers a way to deploy LNExAPI on your own host machine or VM. LNEx utilizes [Photon OSM](https://github.com/komoot/photon). Please ensure you have installed or have access to a deployment of Photon OSM. Configuration of IPs and ports will be required to ensure connection between these services. These configurations are explained below.
+
+The installation process requires 3 stages: Provision, Configuration, Launch.
+
+Once the installation is complete you can create a LNExAPI user and utilze the LNExAPI client Python package to interact with the API.
 
 ### Technology
 
