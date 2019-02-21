@@ -22,7 +22,7 @@ def displayResults(results):
       for location in entity['locations']:
         print("   [ ]-->",str(location['coordinate']['lat'])+","+str(location['coordinate']['lon']))
 
-lnex = LNExAPI(key="168ba4d297a8c64a03", host="http://127.0.0.1/") #REPLACE WITH YOUR USER KEY AND HOST
+lnex = LNExAPI(key="168ba4d297a8c64a03",host="http://127.0.0.1/") #REPLACE WITH YOUR USER KEY AND HOST
 lnex.initZone([-84.6447033333,39.1912856591,-83.2384533333,40.0880515857],"dayton")
 print("Zone Dayton is being initialized...")
 lnex.pollZoneReady("dayton") #WAITS UNTIL ZONE IS INIT/READY

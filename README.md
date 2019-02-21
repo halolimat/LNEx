@@ -78,7 +78,7 @@ Now it's time to clone this repo and begin setting up the environment
 
 ##### Configuration
 
-There are a couple of variables specific to your deployment of DisasterRecord that will need to be set. These variables are found in the [group_vars/all](ansible/environments/dev-local/group_vars/all) file. The variables are explained as follows:
+There are a couple of variables specific to your deployment of LNExAPI that will need to be set. These variables are found in the [group_vars/all](ansible/environments/dev-local/group_vars/all) file. The variables are explained as follows:
 
 * hostip - This is the IP of the host where the docker containers will be hosted. This is used in the configuration file for the [LNExAPI Server Django application](ansible/roles/codebase_api/templates/settings.py.j2). Setups may vary as to how HTTP requests are handled and passed to the container. If you have a web server such as Apache or Nginx handle the connections and ProxyPass them the IP will be a host where the ProxyPass is being directed. Check the /var/log/LNEx.log file for errors if you can not connect to the LNExAPI after deployment and start.
 * photonip - This is the IP address where your [Photon OSM](https://github.com/komoot/photon) deployment is located.
@@ -113,7 +113,7 @@ $ docker build -t lnex/lnex_base .
 Bring up the environment (this may take around 5 minutes or more):
 
 ```sh
-$ . dr-env.sh   # source the environment variables 
+$ . lnex-env.sh   # source the environment variables 
 $ vagrant up    # bring up the environment
 ```
 
