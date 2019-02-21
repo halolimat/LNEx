@@ -1,6 +1,6 @@
-# DisasterRecord - Deployment
+# LNExAPI - Deployment
 
-DisasterRecord is a platform for disaster relief, coordination and response. DisasterRecord utilzes LNEx (which requires [Photon OSM](https://github.com/komoot/photon)). Please ensure you have installed or have access to a deployment of Photon OSM.
+LNExAPI is a tool used to extract location names from text. LNEx utilizes [Photon OSM](https://github.com/komoot/photon). Please ensure you have installed or have access to a deployment of Photon OSM.
 
 ### Technology
 
@@ -86,10 +86,16 @@ There are a couple of variables specific to your deployment of DisasterRecord th
 
 ##### Init Setup:
 
+Clone
+
+```sh
+$ git clone --single-branch --branch LNExAPI-Deployment https://github.com/halolimat/LNEx.git
+```
+
 Once you have cloned the repo and set the variables please navigate to "local" directory
 
 ```sh
-$ cd DisasterRecord-deployment/local
+$ cd LNEx/local
 ```
 
 Create a docker network for the deployment:
@@ -101,7 +107,7 @@ $ docker network create --subnet 192.168.67.0/24 dr
 Create the Base Image:
 
 ```sh
-$ docker build -t disasterrecord/disasterrecord_base .
+$ docker build -t lnex/lnex_base .
 ```
 
 Bring up the environment (this may take around 5 minutes or more):

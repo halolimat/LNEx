@@ -1,5 +1,0 @@
-#!/bin/bash
-cd /root/workspace/DisasterRecord
-/root/workspace/DisasterRecord/drEnv /root/workspace/DisasterRecord/make.sh >> /var/log/DR.log 2>&1 &
-FOO_PID=$!
-echo $FOO_PID > /root/drService_Backend.pid

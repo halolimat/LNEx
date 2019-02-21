@@ -1,5 +1,0 @@
-#!/bin/bash
-cd /root/workspace/DisasterRecord
-/root/workspace/DisasterRecord/drEnv python server.py >> /var/log/DR.log 2>&1 &
-FOO_PID=$!
-echo $FOO_PID > /root/drService_Frontend.pid

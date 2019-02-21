@@ -1,4 +1,0 @@
-#!/bin/bash
-. workspace/api/bin/activate
-cd workspace/api/api
-python manage.py runserver 0:80
