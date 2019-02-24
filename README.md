@@ -83,6 +83,15 @@ Since LNEx relies on OSM gazetteers for extraction, the performance of the tool 
    - "build_hash" : "929b9739cae115e73c346cb5f9a6f24ba735a743",
    - "build_timestamp" : "2015-07-16T14:31:07Z"
 
+## Licenses ##
+
+This work is licensed under AGPL-3.0 and CreativesForGood licenses. A copy of the first license can be found in this repository. The other license can be found over this link [C4G License](https://github.com/halolimat/CreativesForGoodLicense).
+
+<p float="left">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/0/06/AGPLv3_Logo.svg" alt="GPLv3 Logo" width="70" />
+  <img src="https://github.com/halolimat/CreativesForGoodLicense/raw/master/CreativesForGoodLogo2.png" alt="CreativesForGood Logo" width="120" style="margin-left: 10px;" /> 
+</p>
+
 ## Citing ##
 
 If you do make use of LNEx or any of its components please cite the following publication:
