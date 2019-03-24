@@ -375,7 +375,8 @@ def extract(tweet):
 
     # --------------------------------------------------------------------------
 
-    #will contain for example: (0, 11): [(u'new avadi road', 3)]
+    # Contain => surface form, #tokens, tokens offsets,
+    # e.g., (0, 11): [(u'new avadi road', 3, [0,1,2])]
     valid_ngrams = defaultdict(list)
 
     tweet = strip_non_ascii(tweet)
@@ -518,8 +519,9 @@ def extract(tweet):
 
             number_of_tokens = len(valid_n_gram[:-1])
 
-            valid_ngrams[index_tub].append(
-                (mached_ln, number_of_tokens))
+            tokens_indexes=[token_idx for token_idx in valid_n_gram[-1]]
+            tokens_indexes.sort()
+            valid_ngrams[index_tub].append((mached_ln, number_of_tokens, tokens_indexes))
 
         # ----------------------------------------------------------------------
 
@@ -558,10 +560,10 @@ def extract(tweet):
 
                     number_of_tokens = mached_ln.count(" ") + 1
 
-                    valid_ngrams[tub].append(
-                        (mached_ln, number_of_tokens))
+                    valid_ngrams[tub].append((mached_ln, number_of_tokens, [index]))
 
     # ---------------------------------------------------------------- end for I
+
 
     filtered_n_grams = filterout_overlaps(valid_ngrams)
 
@@ -577,6 +579,7 @@ def extract(tweet):
     for ln in location_names_in_query:
 
         mention_offsets = (ln[0][0], ln[0][1])
+        token_offsets = valid_ngrams.get(ln[0])[0][-1]
 
         location_mention = tweet[mention_offsets[0]:mention_offsets[1]]
         geo_location = ln[1]
@@ -587,6 +590,7 @@ def extract(tweet):
 
         result.append(( location_mention,
                         mention_offsets,
+                        token_offsets,
                         geo_location))
 
     return result
