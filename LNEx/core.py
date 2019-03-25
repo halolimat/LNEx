@@ -571,9 +571,7 @@ def extract(tweet):
     location_names_in_query = remove_non_full_mentions( filtered_n_grams,
                                                         valid_ngrams,
                                                         query_tokens)
-
-    print(query_tokens)
-
+                                                        
     # --------------------------------------------------------------------------
 
     result = list()
