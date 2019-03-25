@@ -572,6 +572,8 @@ def extract(tweet):
                                                         valid_ngrams,
                                                         query_tokens)
 
+    print(query_tokens)
+
     # --------------------------------------------------------------------------
 
     result = list()
@@ -579,7 +581,15 @@ def extract(tweet):
     for ln in location_names_in_query:
 
         mention_offsets = (ln[0][0], ln[0][1])
-        token_offsets = valid_ngrams.get(ln[0])[0][-1]
+        token_offsets = valid_ngrams.get(ln[0])
+
+        # TODO: check why some of these are None, e.g., genia4_protein
+        #       ln = ((6, 19), 'interleukin-2')
+        #       valid_ngrams = {(6, 28): [('interleukin-2 receptor', 2, [1, 2])],
+        #                       (20, 34): [('receptor alpha', 2, [2, 3])]})
+        if not token_offsets: continue
+
+        token_offsets=token_offsets[0][-1]
 
         location_mention = tweet[mention_offsets[0]:mention_offsets[1]]
         geo_location = ln[1]
