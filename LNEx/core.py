@@ -375,8 +375,7 @@ def extract(tweet):
 
     # --------------------------------------------------------------------------
 
-    # Contain => surface form, #tokens, tokens offsets,
-    # e.g., (0, 11): [(u'new avadi road', 3, [0,1,2])]
+    #will contain for example: (0, 11): [(u'new avadi road', 3)]
     valid_ngrams = defaultdict(list)
 
     tweet = strip_non_ascii(tweet)
@@ -519,9 +518,8 @@ def extract(tweet):
 
             number_of_tokens = len(valid_n_gram[:-1])
 
-            tokens_indexes=[token_idx for token_idx in valid_n_gram[-1]]
-            tokens_indexes.sort()
-            valid_ngrams[index_tub].append((mached_ln, number_of_tokens, tokens_indexes))
+            valid_ngrams[index_tub].append(
+                (mached_ln, number_of_tokens))
 
         # ----------------------------------------------------------------------
 
@@ -560,10 +558,10 @@ def extract(tweet):
 
                     number_of_tokens = mached_ln.count(" ") + 1
 
-                    valid_ngrams[tub].append((mached_ln, number_of_tokens, [index]))
+                    valid_ngrams[tub].append(
+                        (mached_ln, number_of_tokens))
 
     # ---------------------------------------------------------------- end for I
-
 
     filtered_n_grams = filterout_overlaps(valid_ngrams)
 
@@ -571,7 +569,7 @@ def extract(tweet):
     location_names_in_query = remove_non_full_mentions( filtered_n_grams,
                                                         valid_ngrams,
                                                         query_tokens)
-                                                        
+
     # --------------------------------------------------------------------------
 
     result = list()
@@ -579,15 +577,6 @@ def extract(tweet):
     for ln in location_names_in_query:
 
         mention_offsets = (ln[0][0], ln[0][1])
-        token_offsets = valid_ngrams.get(ln[0])
-
-        # TODO: check why some of these are None, e.g., genia4_protein
-        #       ln = ((6, 19), 'interleukin-2')
-        #       valid_ngrams = {(6, 28): [('interleukin-2 receptor', 2, [1, 2])],
-        #                       (20, 34): [('receptor alpha', 2, [2, 3])]})
-        if not token_offsets: continue
-
-        token_offsets=token_offsets[0][-1]
 
         location_mention = tweet[mention_offsets[0]:mention_offsets[1]]
         geo_location = ln[1]
@@ -598,7 +587,6 @@ def extract(tweet):
 
         result.append(( location_mention,
                         mention_offsets,
-                        token_offsets,
                         geo_location))
 
     return result
