@@ -74,7 +74,7 @@ We will be using a ready to go elastic index of the whole [OpenStreetMap](http:/
 
 This dataset contains 4500 annotated tweets 1500 tweets from each of three Twitter streams (i.e., Chennai 2015, Louisiana 2016, and Houston 2016 floods). They were tagged using Brat tool recording the start and end character offsets of each mention with a given location category, i.e., inLoc, outLoc, and ambLoc, as mentioned in the LNEx paper.
 
-You can fill out the following [Form](https://link.hussein.space/LNEx-Form) to the get the full dataset. Alternatively, you can get a subset of the dataset from [this folder](https://link.hussein.space/LNEx-Data), which only contains 150 tweets.
+You can fill out the following [Form](https://link.hussein.space/LNEx-Form) to get the full dataset. Alternatively, you can get a subset of the dataset from [this folder](https://link.hussein.space/LNEx-Data), which only contains 150 tweets.
 
 ## Notes ##
 
