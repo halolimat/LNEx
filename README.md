@@ -12,7 +12,7 @@ v3.0 License.
 
 # Location Name Extractor
 
-Extracts location names from targeted text streams. [[Paper](https://arxiv.org/pdf/1708.03105.pdf), [Poster](https://link.hussein.space/LNEx-Poster)]
+Extracts location names from targeted text streams. [[Paper](https://www.aclweb.org/anthology/C18-1169), [Poster](https://link.hussein.space/LNEx-Poster)]
 
 ---
 
