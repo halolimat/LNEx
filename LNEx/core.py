@@ -130,7 +130,7 @@ def preprocess_tweet(tweet):
             pass
 
     # remove url from tweet
-    utweet = re.sub(url_re, '', tweet)
+    tweet = re.sub(url_re, '', tweet)
 
     # remove non-ascii characters
     tweet = "".join([x for x in tweet if x in printable])
