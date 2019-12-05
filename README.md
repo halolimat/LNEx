@@ -90,6 +90,10 @@ There are a few things you need to make sure of before you get Photon to work we
 - Your elasticsearch-dsl in python should be compatible with the Photon version you downloaded. You should first check the version of elasticsearch by running `curl -XGET 'http://localhost:9200'`, you will find the version number under `version/number`.
 - The current version of elasticsearch using by Photon is `5.5.0`, so we should get the compatible elasticsearch-dsl to use it in our Python code. You can do that by visiting [this page](https://elasticsearch-dsl.readthedocs.io/en/latest/). You will find the compatible version under `The recommended way to set your requirements ...`. In the case of `5.5.0`, the compatible version is `elasticsearch-dsl-5.4.0`, so we install it as so `pip install "elasticsearch-dsl>=5.0.0,<6.0.0"`.
 
+**Photon Index Issue**
+
+There is an issue with the elasticsearch index of Photon 0.3.2, so you need to do delete all files in the following directory `/photon_data/elasticsearch/modules/lang-painless/` in order to get it running before you execute `java -jar photon-0.3.2.jar`. For more info, see the following: https://github.com/komoot/photon/issues/427
+
 ## Licenses ##
 
 This work is licensed under AGPL-3.0 and CreativesForGood licenses. A copy of the first license can be found in this repository. The other license can be found over this link [C4G License](https://github.com/halolimat/CreativesForGoodLicense).
