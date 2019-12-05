@@ -33,11 +33,11 @@ We will be using a ready to go elastic index of the whole [OpenStreetMap](http:/
    wget -O - http://download1.graphhopper.com/public/photon-db-latest.tar.bz2 | pbzip2 -cd | tar x
    ```
 
- - Now, start photon which starts the elastic index in the background as a service
+ - Now, start photon which starts the elastic index in the background as a service. You need to get the latest jar file from the releases at https://github.com/komoot/photon/releases. For example, the current latest version is 0.3.2, you can get the latest jar and run it as follows:
 
    ```sh
-   wget https://github.com/komoot/photon/releases/download/0.3.0/photon-0.3.0.jar
-   java -jar photon-0.3.0.jar
+   wget https://github.com/komoot/photon/releases/download/0.3.2/photon-0.3.2.jar
+   java -jar photon-0.3.2.jar
    ```
 
  - You can now test the running index by running the following command (9200 is the default port number, might be different in your system if the port is occupied by another application):
