@@ -8,7 +8,7 @@ v3.0 License.
 
 <img src="LNEx_logo.png" align="left" alt="LNEx Logo" width="120"/>
 
-<img src="http://knoesis.org/resources/images/hazardssees_logo_final.png" align="right" alt="Knoesis Hazards SEES Project Logo" width="90"/>
+<!-- <img src="http://knoesis.org/resources/images/hazardssees_logo_final.png" align="right" alt="Knoesis Hazards SEES Project Logo" width="90"/>-->
 
 # Location Name Extractor
 
@@ -51,6 +51,7 @@ We will be using a ready to go elastic index of the whole [OpenStreetMap](http:/
     ```sh
     git clone https://github.com/halolimat/LNEx.git
     ```
+ - Make sure to use Python 3.6+.
 
  - Follow the example in pytest.py or pytest.ipy in order to use LNEx. You can use LNEx by initializing it using the cached files in the '\_Data' folder or you can initialize it using the photon index after running it in the background as shown before.
 
